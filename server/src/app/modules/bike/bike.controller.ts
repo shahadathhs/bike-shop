@@ -1,45 +1,57 @@
 import { NextFunction, Request, Response } from 'express'
 
-import errorResponse from '../../res/error.res'
-import successResponse from '../../res/success.res'
+import { httpStatusCode } from '../../enum/statusCode'
+import sendError from '../../errorHandling/sendError'
+import simplifyError from '../../errorHandling/simplifyError'
+import sendResponse from '../../utils/sendResponse'
 
-import { bikeServices } from './bike.services'
+import { BikeServices } from './bike.services'
 
 const createBike = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const result = await bikeServices.createBikeService(req.body)
-    successResponse(res, result, 'Bike created successfully.')
+    const result = await BikeServices.createBikeService(req.body)
+    sendResponse(res, {
+      statusCode: httpStatusCode.CREATED,
+      success: true,
+      message: 'Bike created successfully.',
+      data: result
+    })
   } catch (error) {
-    errorResponse(res, error as Error, 'Failed to create bike.')
+    const errorResponse = simplifyError(error)
+    sendError(res, errorResponse)
     next(error)
   }
 }
 
 const getAllBikes = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const searchTerm = req.query.searchTerm as string
-    const result = await bikeServices.getAllBikesService(searchTerm)
-    if (result.length === 0) {
-      errorResponse(res, new Error('No bikes found.'), 'Bikes not found.', 404)
-      return
-    }
-    successResponse(res, result, 'Bikes retrieved successfully.')
+    const result = await BikeServices.getAllBikesService(req.query.searchTerm as string)
+    sendResponse(res, {
+      statusCode: httpStatusCode.OK,
+      success: true,
+      message: 'Bikes retrieved successfully.',
+      data: result
+    })
   } catch (error) {
-    errorResponse(res, error as Error, 'Failed to retrieve bikes.')
+    const errorResponse = simplifyError(error)
+    sendError(res, errorResponse)
     next(error)
   }
 }
 
 const getBikeById = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const result = await bikeServices.getBikeByIdService(req.params.id)
-    if (!result) {
-      errorResponse(res, new Error('Bike not found.'), 'Bike not found.', 404)
-      return
-    }
-    successResponse(res, result, 'Bike retrieved successfully.')
+    const { id } = req.params
+    const result = await BikeServices.getBikeByIdService(id)
+    sendResponse(res, {
+      statusCode: httpStatusCode.OK,
+      success: true,
+      message: 'Bike retrieved successfully.',
+      data: result
+    })
   } catch (error) {
-    errorResponse(res, error as Error, 'Failed to retrieve bike.')
+    const errorResponse = simplifyError(error)
+    sendError(res, errorResponse)
     next(error)
   }
 }
@@ -47,32 +59,16 @@ const getBikeById = async (req: Request, res: Response, next: NextFunction) => {
 const updateBike = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params
-    const payload = req.body
-
-    // * Validate bike existence
-    const bike = await bikeServices.getBikeByIdService(id)
-    if (!bike) {
-      errorResponse(res, new Error('Bike not found.'), 'Bike not found.', 404)
-      return
-    }
-
-    // * Handle case where payload is empty
-    if (Object.keys(payload).length === 0) {
-      errorResponse(res, new Error('No fields to update.'), 'No fields to update.', 400)
-      return
-    }
-
-    // * Update bike if payload is valid
-    const updatedBike = await bikeServices.updateBikeService(id, payload)
-
-    if (!updatedBike) {
-      errorResponse(res, new Error('Failed to update bike.'), 'Failed to update bike.', 500)
-      return
-    }
-
-    successResponse(res, updatedBike, 'Bike updated successfully.')
+    const result = await BikeServices.updateBikeService(id, req.body)
+    sendResponse(res, {
+      statusCode: httpStatusCode.OK,
+      success: true,
+      message: 'Bike updated successfully.',
+      data: result
+    })
   } catch (error) {
-    errorResponse(res, error as Error, 'Failed to update bike.')
+    const errorResponse = simplifyError(error)
+    sendError(res, errorResponse)
     next(error)
   }
 }
@@ -80,24 +76,36 @@ const updateBike = async (req: Request, res: Response, next: NextFunction) => {
 const deleteBike = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params
-
-    // * Validate bike existence
-    const bike = await bikeServices.getBikeByIdService(id)
-    if (!bike) {
-      errorResponse(res, new Error('Bike not found.'), 'Bike not found.', 404)
-      return
-    }
-
-    // * Delete bike
-    const deletedBike = await bikeServices.deleteBikeService(id)
-    if (!deletedBike) {
-      errorResponse(res, new Error('Failed to delete bike.'), 'Failed to delete bike.', 500)
-      return
-    }
-
-    successResponse(res, {}, 'Bike deleted successfully.')
+    const result = await BikeServices.deleteBikeService(id)
+    sendResponse(res, {
+      statusCode: httpStatusCode.OK,
+      success: true,
+      message: 'Bike deleted successfully.',
+      data: result
+    })
   } catch (error) {
-    errorResponse(res, error as Error, 'Failed to delete bike.')
+    const errorResponse = simplifyError(error)
+    sendError(res, errorResponse)
+    next(error)
+  }
+}
+
+const restockBike = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params
+    const { quantity } = req.body
+
+    const result = await BikeServices.restockBikeService(id, quantity)
+
+    sendResponse(res, {
+      statusCode: httpStatusCode.OK,
+      success: true,
+      message: 'User deactivated successfully.',
+      data: result
+    })
+  } catch (error) {
+    const errorResponse = simplifyError(error)
+    sendError(res, errorResponse)
     next(error)
   }
 }
@@ -107,5 +115,6 @@ export const bikeController = {
   getAllBikes,
   getBikeById,
   updateBike,
-  deleteBike
+  deleteBike,
+  restockBike
 }
