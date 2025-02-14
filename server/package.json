@@ -1,20 +1,23 @@
 {
-  "name": "bike-store",
-  "version": "1.0.0",
-  "main": "server.js",
+  "name": "bike-shop-server",
+  "version": "0.0.1",
+  "main": "src/server.ts",
   "scripts": {
-    "start": "node ./dist/server.js",
-    "start:prod": "nodemon ./dist/server.js",
-    "start:dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "build": "tsc",
+    "start": "npm install && tsc && node ./dist/server.js",
+    "start:prod": "npm install && tsc && nodemon ./dist/server.js",
+    "start:dev": "npm install && ts-node-dev --respawn --transpile-only src/server.ts",
+    "clean": "rm -rf dist && rm -rf node_modules && rm -rf package-lock.json && npm install",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
-    "format": "prettier --ignore-path .gitignore --write \"**/*.+(js|ts|json)\""
+    "format": "prettier --ignore-path .gitignore --write \"**/*.+(js|ts|json)\"",
+    "re:deploy": "tsc && vercel --prod",
+    "jwtSecret": "node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\""
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "This is a  bike shop project.",
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",

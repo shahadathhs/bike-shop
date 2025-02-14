@@ -42,10 +42,10 @@ app.get('/api', (req: Request, res: Response) => {
 app.use('/api/products', bikeRoutes)
 app.use('/api/orders', orderRoutes)
 
+// ** API Endpoint Not Found **
+app.use('*', notFound)
+
 // ** Error Handler **
 app.use(errorHandler)
-
-// ** API Endpoint Not Found **
-app.use(notFound)
 
 export default app

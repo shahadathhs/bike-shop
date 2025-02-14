@@ -1,10 +1,10 @@
 import { Server } from 'http'
 import app from './app'
 import mongoose from 'mongoose'
-import { config } from './app/config/config'
+import { configuration } from './app/config/config'
 
-const port: number = config.port as number
-const DATABASE_URL: string = config.mongo.url as string
+const port: number = configuration.port as number
+const DATABASE_URL: string = configuration.mongo.url as string
 
 let server: Server
 
