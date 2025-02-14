@@ -1,6 +1,6 @@
 import { Router } from 'express'
 
-import { validateRequest } from '../../middlewares/validate.middleware'
+import { validateRequest } from '../../middlewares/validateRequest'
 
 import { bikeController } from './bike.controller'
 import { bikeSchema, bikeUpdateSchema } from './bike.schema'

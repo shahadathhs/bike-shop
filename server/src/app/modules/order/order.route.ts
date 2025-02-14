@@ -1,6 +1,6 @@
 import express from 'express'
 
-import { validateRequest } from '../../middlewares/validate.middleware'
+import { validateRequest } from '../../middlewares/validateRequest'
 
 import { orderController } from './order.controller'
 import { orderSchema } from './order.schema'
