@@ -25,7 +25,7 @@ const createBike = async (req: Request, res: Response, next: NextFunction) => {
 
 const getAllBikes = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const result = await BikeServices.getAllBikesService(req.query.searchTerm as string)
+    const result = await BikeServices.getAllBikesService(req.query)
     sendResponse(res, {
       statusCode: httpStatusCode.OK,
       success: true,

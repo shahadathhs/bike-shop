@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { bikeCategoryEnum, bikeModelEnum } from './bike.helper'
+import { bikeBrandEnum, bikeCategoryEnum, bikeModelEnum } from './bike.helper'
 
 export const bikeSchema = z.object({
   name: z
@@ -13,11 +13,11 @@ export const bikeSchema = z.object({
       message: `Invalid bike model. Allowed values are ${bikeModelEnum.join(', ')}.`
     })
   }),
-  brand: z
-    .string()
-    .trim()
-    .min(3, 'Brand must be at least 3 characters long')
-    .max(30, 'Brand cannot exceed 30 characters'),
+  brand: z.enum(bikeBrandEnum, {
+    errorMap: () => ({
+      message: `Invalid bike brand. Allowed values are ${bikeBrandEnum.join(', ')}.`
+    })
+  }),
   price: z
     .number()
     .min(0, 'Price must be a non-negative number')
@@ -35,8 +35,7 @@ export const bikeSchema = z.object({
   quantity: z
     .number()
     .int('Quantity must be an integer')
-    .min(0, 'Quantity must be a non-negative integer')
-    .max(1000, 'Quantity cannot exceed 1000'),
+    .min(0, 'Quantity must be a non-negative integer'),
   inStock: z.boolean()
 })
 
