@@ -27,7 +27,7 @@ const loginUser = async (payload: {
   }
 
   if (user.isActive === false) {
-    throw new AppError(httpStatusCode.FORBIDDEN, 'User is blocked')
+    throw new AppError(httpStatusCode.FORBIDDEN, 'Your account is deactivated')
   }
   // * Compare password
   const isPasswordMatched = await user.matchPassword(password)
@@ -47,7 +47,16 @@ const loginUser = async (payload: {
   return { token }
 }
 
+const deactivateUser = async (id: string): Promise<IUser> => {
+  const updatedUser = await User.findByIdAndUpdate(id, { isActive: false }, { new: true })
+  if (!updatedUser) {
+    throw new AppError(httpStatusCode.NOT_FOUND, 'User not found')
+  }
+  return updatedUser
+}
+
 export const AuthService = {
   registerUser,
-  loginUser
+  loginUser,
+  deactivateUser
 }

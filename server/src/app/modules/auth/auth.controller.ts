@@ -44,7 +44,27 @@ const loginUser = async (req: Request, res: Response, next: NextFunction) => {
   }
 }
 
+const deactivateUser = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params
+    const result = await AuthService.deactivateUser(id)
+
+    sendResponse(res, {
+      statusCode: httpStatusCode.OK,
+      success: true,
+      message: 'User deactivated successfully.',
+      data: result
+    
+    })
+  } catch (error) {
+    const errorResponse = simplifyError(error)
+    sendError(res, errorResponse)
+    next(error)
+  }
+}
+
 export const AuthController = {
   registerUser,
-  loginUser
+  loginUser,
+  deactivateUser
 }

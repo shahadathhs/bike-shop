@@ -57,13 +57,13 @@ export default function Authentication(...requiredRoles: TRole[]) {
 
       // * Check if the user is blocked
       if (user.isActive === false) {
-        throw new AppError(httpStatusCode.UNAUTHORIZED, 'Your account is deactivated!')
+        throw new AppError(httpStatusCode.FORBIDDEN, 'Your account is deactivated!')
       }
 
       // * Check if the user has the required role
       if (requiredRoles.length && !requiredRoles.includes(role)) {
         throw new AppError(
-          httpStatusCode.UNAUTHORIZED,
+          httpStatusCode.FORBIDDEN,
           'You are not authorized to perform this action!'
         )
       }
@@ -75,7 +75,10 @@ export default function Authentication(...requiredRoles: TRole[]) {
       next()
     } catch (error) {
       if (error instanceof jwt.JsonWebTokenError) {
-        next(new AppError(httpStatusCode.UNAUTHORIZED, 'Invalid token!'))
+        const error = new AppError(httpStatusCode.UNAUTHORIZED, 'Invalid token pls login again!')
+        const errorResponse = simplifyError(error)
+        sendError(res, errorResponse)
+        next(error)
       } else {
         const errorResponse = simplifyError(error)
         sendError(res, errorResponse)
