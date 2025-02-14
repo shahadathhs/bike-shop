@@ -1,6 +1,8 @@
 import express from 'express'
-import { orderController } from './order.controller'
+
 import { validateRequest } from '../../middlewares/validate.middleware'
+
+import { orderController } from './order.controller'
 import { orderSchema } from './order.schema'
 
 const router = express.Router()

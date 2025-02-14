@@ -1,6 +1,7 @@
 import mongoose, { Schema } from 'mongoose'
-import { IBike } from './bike.interface'
+
 import { bikeCategoryEnum } from './bike.helper'
+import { IBike } from './bike.interface'
 
 const BikeSchema: Schema<IBike> = new Schema(
   {

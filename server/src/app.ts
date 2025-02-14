@@ -1,8 +1,9 @@
-import express, { Application, Request, Response } from 'express'
 import cors from 'cors'
-import notFound from './app/middlewares/notFound'
-import errorHandler from './app/middlewares/errorHandler'
+import express, { Application, Request, Response } from 'express'
+
 import apiInfoLogger from './app/middlewares/apiInfoLogger'
+import errorHandler from './app/middlewares/errorHandler'
+import notFound from './app/middlewares/notFound'
 import { bikeRoutes } from './app/modules/bike/bike.route'
 import { orderRoutes } from './app/modules/order/order.route'
 

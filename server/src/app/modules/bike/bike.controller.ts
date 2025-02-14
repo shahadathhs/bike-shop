@@ -1,7 +1,9 @@
 import { NextFunction, Request, Response } from 'express'
-import { bikeServices } from './bike.services'
+
 import errorResponse from '../../res/error.res'
 import successResponse from '../../res/success.res'
+
+import { bikeServices } from './bike.services'
 
 /**
  * Handles the creation of a new bike.

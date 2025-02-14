@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'
-import errorResponse from '../res/error.res'
+
 import { configuration } from '../config/config'
+import errorResponse from '../res/error.res'
 
 const errorHandler = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

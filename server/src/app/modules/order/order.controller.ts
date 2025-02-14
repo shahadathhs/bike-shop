@@ -1,9 +1,11 @@
 import { Request, Response, NextFunction } from 'express'
+
 import errorResponse from '../../res/error.res'
 import successResponse from '../../res/success.res'
+import { bikeServices } from '../bike/bike.services'
+
 import { IOrder } from './order.interface'
 import { orderServices } from './order.services'
-import { bikeServices } from '../bike/bike.services'
 
 /**
  * Handles POST requests for creating a new order.

@@ -1,6 +1,7 @@
+import { IBike } from '../bike/bike.interface'
+
 import { IOrder } from './order.interface'
 import { Order } from './order.model'
-import { IBike } from '../bike/bike.interface'
 
 /**
  * Creates a new order and updates bike inventory.

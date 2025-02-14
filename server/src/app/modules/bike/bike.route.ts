@@ -1,6 +1,8 @@
 import { Router } from 'express'
-import { bikeController } from './bike.controller'
+
 import { validateRequest } from '../../middlewares/validate.middleware'
+
+import { bikeController } from './bike.controller'
 import { bikeSchema, bikeUpdateSchema } from './bike.schema'
 
 const router = Router()
