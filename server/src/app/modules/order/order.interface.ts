@@ -1,6 +1,6 @@
 import mongoose, { Document } from 'mongoose'
 
-export type TOrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered'
+import { TOrderStatus } from './order.helper'
 
 export interface IOrder extends Document {
   email: string

@@ -1,5 +1,6 @@
 import mongoose, { Schema } from 'mongoose'
 
+import { orderStatusEnum } from './order.helper'
 import { IOrder } from './order.interface'
 
 const orderSchema = new Schema<IOrder>(
@@ -26,7 +27,7 @@ const orderSchema = new Schema<IOrder>(
     },
     status: {
       type: String,
-      enum: ['pending', 'processing', 'shipped', 'delivered'],
+      enum: orderStatusEnum,
       default: 'pending'
     }
   },
