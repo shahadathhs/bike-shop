@@ -4,8 +4,7 @@ import express, { Application, Request, Response } from 'express'
 import apiInfoLogger from './app/middlewares/apiInfoLogger'
 import errorHandler from './app/middlewares/errorHandler'
 import notFound from './app/middlewares/notFound'
-import { bikeRoutes } from './app/modules/bike/bike.route'
-import { orderRoutes } from './app/modules/order/order.route'
+import appRoutes from './app/routes/router'
 
 // ** express app **
 const app: Application = express()
@@ -40,8 +39,7 @@ app.get('/api', (req: Request, res: Response) => {
 })
 
 // ** API Routes **
-app.use('/api/products', bikeRoutes)
-app.use('/api/orders', orderRoutes)
+app.use('/api', appRoutes)
 
 // ** API Endpoint Not Found **
 app.use('*', notFound)
