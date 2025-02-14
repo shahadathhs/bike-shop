@@ -117,12 +117,7 @@ const updateBike = async (req: Request, res: Response, next: NextFunction) => {
 
     // * Handle case where payload is empty
     if (Object.keys(payload).length === 0) {
-      errorResponse(
-        res,
-        new Error('No fields to update.'),
-        'No fields to update.',
-        400
-      )
+      errorResponse(res, new Error('No fields to update.'), 'No fields to update.', 400)
       return
     }
 
@@ -130,12 +125,7 @@ const updateBike = async (req: Request, res: Response, next: NextFunction) => {
     const updatedBike = await bikeServices.updateBikeService(productId, payload)
 
     if (!updatedBike) {
-      errorResponse(
-        res,
-        new Error('Failed to update bike.'),
-        'Failed to update bike.',
-        500
-      )
+      errorResponse(res, new Error('Failed to update bike.'), 'Failed to update bike.', 500)
       return
     }
 
@@ -174,12 +164,7 @@ const deleteBike = async (req: Request, res: Response, next: NextFunction) => {
     // * Delete bike
     const deletedBike = await bikeServices.deleteBikeService(productId)
     if (!deletedBike) {
-      errorResponse(
-        res,
-        new Error('Failed to delete bike.'),
-        'Failed to delete bike.',
-        500
-      )
+      errorResponse(res, new Error('Failed to delete bike.'), 'Failed to delete bike.', 500)
       return
     }
 

@@ -2,9 +2,7 @@ import mongoose from 'mongoose'
 
 import { IErrorResponse, IErrorSource } from '../../interface/error'
 
-const handleValidationError = (
-  err: mongoose.Error.ValidationError
-): IErrorResponse => {
+const handleValidationError = (err: mongoose.Error.ValidationError): IErrorResponse => {
   const errorSources: IErrorSource[] = Object.values(err.errors).map(
     (val: mongoose.Error.ValidatorError | mongoose.Error.CastError) => {
       return {

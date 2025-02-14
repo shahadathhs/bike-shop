@@ -1,6 +1,9 @@
 import bcrypt from 'bcryptjs'
 import mongoose, { Model, Schema } from 'mongoose'
 
+import { httpStatusCode } from '../../enum/statusCode'
+import AppError from '../../errorHandling/errors/AppError'
+
 import { IUser } from './user.interface'
 
 // * User Schema
@@ -30,6 +33,10 @@ const UserSchema: Schema<IUser> = new mongoose.Schema(
       enum: ['customer', 'admin'],
       default: 'customer'
     },
+    isActive: {
+      type: Boolean,
+      default: true
+    },
     accountCreatedAt: {
       type: Date,
       default: Date.now
@@ -39,6 +46,15 @@ const UserSchema: Schema<IUser> = new mongoose.Schema(
     timestamps: true
   }
 )
+
+// * Pre-save middleware to validate unique email
+UserSchema.pre<IUser>('save', async function (next) {
+  const existingUser = await User.findOne({ email: this.email })
+  if (existingUser) {
+    throw new AppError(httpStatusCode.BAD_REQUEST, 'Email already exists')
+  }
+  next()
+})
 
 // * Pre-save middleware to hash the password if modified or new
 UserSchema.pre<IUser>('save', async function (next) {
@@ -56,16 +72,12 @@ UserSchema.pre<IUser>('save', async function (next) {
 })
 
 // * Instance method to compare an entered password with the stored hashed password
-UserSchema.methods.matchPassword = async function (
-  enteredPassword: string
-): Promise<boolean> {
+UserSchema.methods.matchPassword = async function (enteredPassword: string): Promise<boolean> {
   return await bcrypt.compare(enteredPassword, this.password)
 }
 
 // * Instance method to update the user's password
-UserSchema.methods.updatePassword = async function (
-  newPassword: string
-): Promise<void> {
+UserSchema.methods.updatePassword = async function (newPassword: string): Promise<void> {
   const salt = await bcrypt.genSalt(10)
   this.password = await bcrypt.hash(newPassword, salt)
   await this.save()
@@ -87,11 +99,9 @@ UserSchema.methods.isAdmin = function (): boolean {
   return this.role === 'admin'
 }
 
-// * Static method to find a user by email
-UserSchema.statics.findByEmail = function (
-  email: string
-): Promise<IUser | null> {
-  return this.findOne({ email })
+// * Static method to deactivate a user
+UserSchema.statics.deactivateUser = function (userId: mongoose.Types.ObjectId): Promise<void> {
+  return this.updateOne({ _id: userId }, { isActive: false })
 }
 
 // * Create and export the User model

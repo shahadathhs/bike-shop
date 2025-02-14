@@ -1,18 +1,31 @@
-import { Document } from "mongoose";
+import mongoose, { Document } from 'mongoose'
 
-export type TRole = 'admin' | 'customer';
+export type TRole = 'admin' | 'customer'
+
+export type TJwtPayload = {
+  email: string
+  userId: mongoose.Types.ObjectId
+  role: TRole
+}
 
 export interface IUser extends Document {
-  name: string;
-  email: string;
-  password: string;
-  role: TRole;
-  accountCreatedAt: Date;
-  createdAt: Date;
-  updatedAt: Date;
-  matchPassword(enteredPassword: string): Promise<boolean>;
-  updatePassword(newPassword: string): Promise<void>;
-  toProfileJSON(): { id: string; name: string; email: string; role: TRole; password: string };
-  isAdmin(): boolean;
-  findByEmail(email: string): Promise<IUser | null>;
+  name: string
+  email: string
+  password: string
+  role: TRole
+  isActive: boolean
+  accountCreatedAt: Date
+  createdAt: Date
+  updatedAt: Date
+  matchPassword(enteredPassword: string): Promise<boolean>
+  updatePassword(newPassword: string): Promise<void>
+  toProfileJSON(): {
+    id: string
+    name: string
+    email: string
+    role: TRole
+    password: string
+  }
+  isAdmin(): boolean
+  deactivateUser(userId: mongoose.Types.ObjectId): Promise<void>
 }

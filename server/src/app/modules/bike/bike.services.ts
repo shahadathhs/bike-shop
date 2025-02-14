@@ -53,10 +53,7 @@ const getBikeByIdService = async (id: string): Promise<IBike | null> => {
  * @param payload - The object containing the fields to be updated, with their corresponding values.
  * @returns A promise that resolves to the updated bike object, or null if no bike with the given ID exists.
  */
-const updateBikeService = async (
-  id: string,
-  payload: Partial<IBike>
-): Promise<IBike | null> => {
+const updateBikeService = async (id: string, payload: Partial<IBike>): Promise<IBike | null> => {
   const result = await Bike.findOneAndUpdate({ _id: id }, payload, {
     new: true
   })

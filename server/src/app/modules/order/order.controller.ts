@@ -34,12 +34,7 @@ const createOrder = async (req: Request, res: Response, next: NextFunction) => {
 
     // * Check if the bike is in stock
     if (!bike.inStock) {
-      errorResponse(
-        res,
-        new Error('Bike is not in stock.'),
-        'Bike is not in stock.',
-        400
-      )
+      errorResponse(res, new Error('Bike is not in stock.'), 'Bike is not in stock.', 400)
       return
     }
 
@@ -92,11 +87,7 @@ const createOrder = async (req: Request, res: Response, next: NextFunction) => {
  * @param res - The HTTP response object used to send back the desired response.
  * @param next - The next middleware function in the Express request-response cycle.
  */
-const calculateRevenue = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+const calculateRevenue = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const totalRevenue = await orderServices.calculateRevenueService()
     successResponse(res, { totalRevenue }, 'Revenue calculated successfully')

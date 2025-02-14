@@ -3,7 +3,6 @@ import { Router } from 'express'
 import { bikeRoutes } from '../modules/bike/bike.route'
 import { orderRoutes } from '../modules/order/order.route'
 
-
 const appRoutes = Router()
 
 const moduleRoutes = [

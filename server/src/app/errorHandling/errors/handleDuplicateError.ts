@@ -1,8 +1,4 @@
-import {
-  IErrorResponse,
-  IErrorSource,
-  IMongooseError
-} from '../../interface/error'
+import { IErrorResponse, IErrorSource, IMongooseError } from '../../interface/error'
 
 const handleDuplicateError = (err: IMongooseError): IErrorResponse => {
   // Extract field name and value causing the duplicate error

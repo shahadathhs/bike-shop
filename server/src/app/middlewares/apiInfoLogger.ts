@@ -8,22 +8,10 @@ const apiInfoLogger = (req: Request, res: Response, next: NextFunction) => {
   const logDetails = {
     method: req.method,
     url: req.url,
-    body:
-      req.body && Object.keys(req.body).length > 0
-        ? JSON.stringify(req.body)
-        : 'N/A',
-    query:
-      req.query && Object.keys(req.query).length > 0
-        ? JSON.stringify(req.query)
-        : 'N/A',
-    params:
-      req.params && Object.keys(req.params).length > 0
-        ? JSON.stringify(req.params)
-        : 'N/A',
-    token:
-      configuration.env === 'development'
-        ? req.headers.authorization || 'N/A'
-        : null,
+    body: req.body && Object.keys(req.body).length > 0 ? JSON.stringify(req.body) : 'N/A',
+    query: req.query && Object.keys(req.query).length > 0 ? JSON.stringify(req.query) : 'N/A',
+    params: req.params && Object.keys(req.params).length > 0 ? JSON.stringify(req.params) : 'N/A',
+    token: configuration.env === 'development' ? req.headers.authorization || 'N/A' : null,
     cookies: configuration.env === 'development' ? req.cookies || 'N/A' : null
   }
 
@@ -48,9 +36,7 @@ const apiInfoLogger = (req: Request, res: Response, next: NextFunction) => {
   res.on('finish', () => {
     const responseLog = {
       statusCode: res.statusCode,
-      responseBody: responseBody
-        ? JSON.stringify(responseBody)
-        : 'No response body',
+      responseBody: responseBody ? JSON.stringify(responseBody) : 'No response body',
       responseHeaders: res.getHeaders()
     }
 

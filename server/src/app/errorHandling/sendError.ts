@@ -14,4 +14,3 @@ const sendError = (res: Response, error: IErrorResponse) => {
 }
 
 export default sendError
-

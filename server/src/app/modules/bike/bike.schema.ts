@@ -17,8 +17,7 @@ export const bikeSchema = z.object({
     .positive('Price must be greater than zero'),
   category: z.enum(['Mountain', 'Road', 'Hybrid', 'Electric'], {
     errorMap: () => ({
-      message:
-        'Invalid bike category. Allowed values are Mountain, Road, Hybrid, or Electric.'
+      message: 'Invalid bike category. Allowed values are Mountain, Road, Hybrid, or Electric.'
     })
   }),
   description: z

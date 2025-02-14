@@ -10,11 +10,7 @@ const router = Router()
 router.post('/', validateRequest(bikeSchema), bikeController.createBike)
 router.get('/', bikeController.getAllBikes)
 router.get('/:productId', bikeController.getBikeById)
-router.put(
-  '/:productId',
-  validateRequest(bikeUpdateSchema),
-  bikeController.updateBike
-)
+router.put('/:productId', validateRequest(bikeUpdateSchema), bikeController.updateBike)
 router.delete('/:productId', bikeController.deleteBike)
 
 export const bikeRoutes = router

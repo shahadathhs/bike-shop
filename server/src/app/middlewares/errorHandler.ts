@@ -15,8 +15,7 @@ const errorHandler = (
   // * Send a generic error message if the error wasn't handled
   if (!res.headersSent) {
     const statusCode = err.statusCode || 500
-    const message =
-    configuration.env === 'development' ? err.message : 'Internal Server Error'
+    const message = configuration.env === 'development' ? err.message : 'Internal Server Error'
     errorResponse(res, { message } as Error, statusCode)
   }
 }

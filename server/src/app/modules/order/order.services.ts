@@ -15,10 +15,7 @@ import { Order } from './order.model'
  * @param payload - The order data to be created, adhering to the IOrder interface.
  * @returns A promise that resolves to the created order object.
  */
-const createOrderService = async (
-  bike: IBike,
-  payload: IOrder
-): Promise<IOrder> => {
+const createOrderService = async (bike: IBike, payload: IOrder): Promise<IOrder> => {
   // * Reduce inventory and update inStock if necessary
   bike.quantity -= payload.quantity
   if (bike.quantity === 0) {
