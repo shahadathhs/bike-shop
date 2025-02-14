@@ -1,12 +1,17 @@
 import mongoose, { Schema } from 'mongoose'
 
-import { bikeCategoryEnum } from './bike.helper'
+import { bikeCategoryEnum, bikeModelEnum } from './bike.helper'
 import { IBike } from './bike.interface'
 
 const BikeSchema: Schema<IBike> = new Schema(
   {
     name: { type: String, required: true },
     brand: { type: String, required: true },
+    modelName: {
+      type: String,
+      enum: bikeModelEnum,
+      required: true
+    },
     price: { type: Number, required: true, min: 0 },
     category: {
       type: String,

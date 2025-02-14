@@ -1,11 +1,18 @@
 import { z } from 'zod'
 
+import { bikeCategoryEnum, bikeModelEnum } from './bike.helper'
+
 export const bikeSchema = z.object({
   name: z
     .string()
     .trim()
     .min(3, 'Name must be at least 3 characters long')
     .max(50, 'Name cannot exceed 50 characters'),
+  modelName: z.enum(bikeModelEnum, {
+    errorMap: () => ({
+      message: `Invalid bike model. Allowed values are ${bikeModelEnum.join(', ')}.`
+    })
+  }),
   brand: z
     .string()
     .trim()
@@ -15,9 +22,9 @@ export const bikeSchema = z.object({
     .number()
     .min(0, 'Price must be a non-negative number')
     .positive('Price must be greater than zero'),
-  category: z.enum(['Mountain', 'Road', 'Hybrid', 'Electric'], {
+  category: z.enum(bikeCategoryEnum, {
     errorMap: () => ({
-      message: 'Invalid bike category. Allowed values are Mountain, Road, Hybrid, or Electric.'
+      message: `Invalid bike category. Allowed values are ${bikeCategoryEnum.join(', ')}.`
     })
   }),
   description: z
