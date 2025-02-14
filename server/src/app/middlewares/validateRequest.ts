@@ -1,15 +1,23 @@
 import { Request, Response, NextFunction } from 'express'
 import { ZodSchema } from 'zod'
 
-import errorResponse from '../res/error.res'
+import sendError from '../errorHandling/sendError'
+import simplifyError from '../errorHandling/simplifyError'
 
-export const validateRequest = (schema: ZodSchema, message: string) => {
-  return (req: Request, res: Response, next: NextFunction) => {
+export default function validateRequest(schema: ZodSchema) {
+  return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      schema.parse(req.body) // * Validate request body
-      next() // * Proceed to the next middleware/controller if validation passes
+      await schema.parseAsync({
+        body: req.body,
+        query: req.query,
+        params: req.params,
+        cookies: req.cookies
+      })
+      next()
     } catch (error) {
-      return errorResponse(res, error as Error, message, 400) // * Handle validation errors
+      const errorResponse = simplifyError(error)
+      sendError(res, errorResponse)
+      next(error)
     }
   }
 }
