@@ -4,7 +4,7 @@ import mongoose, { Model, Schema } from 'mongoose'
 import { httpStatusCode } from '../../enum/statusCode'
 import AppError from '../../errorHandling/errors/AppError'
 
-import { IUser } from './user.interface'
+import { IUser } from './auth.user.interface'
 
 // * User Schema
 const UserSchema: Schema<IUser> = new mongoose.Schema(
@@ -36,10 +36,6 @@ const UserSchema: Schema<IUser> = new mongoose.Schema(
     isActive: {
       type: Boolean,
       default: true
-    },
-    accountCreatedAt: {
-      type: Date,
-      default: Date.now
     }
   },
   {
@@ -97,6 +93,11 @@ UserSchema.methods.toProfileJSON = function () {
 // * Instance method to check if the user is an admin
 UserSchema.methods.isAdmin = function (): boolean {
   return this.role === 'admin'
+}
+
+// * Instance method to check if the user is active
+UserSchema.methods.isActive = function (): boolean {
+  return this.isActive
 }
 
 // * Static method to deactivate a user

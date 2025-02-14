@@ -2,13 +2,13 @@ import { NextFunction, Request, Response } from 'express'
 import jwt from 'jsonwebtoken'
 import mongoose from 'mongoose'
 
-import { configuration } from '../config/config'
 import { httpStatusCode } from '../enum/statusCode'
 import AppError from '../errorHandling/errors/AppError'
 import sendError from '../errorHandling/sendError'
 import simplifyError from '../errorHandling/simplifyError'
-import { TJwtPayload, TRole } from '../modules/user/user.interface'
-import User from '../modules/user/user.model'
+import { TJwtPayload, TRole } from '../modules/auth/auth.user.interface'
+import User from '../modules/auth/auth.user.model'
+import { verifyToken } from '../modules/auth/auth.utils'
 
 export default function Authentication(...requiredRoles: TRole[]) {
   return async (req: Request, res: Response, next: NextFunction) => {
@@ -24,7 +24,7 @@ export default function Authentication(...requiredRoles: TRole[]) {
       const token = authHeader.split(' ')[1]
 
       // * Step 3: Verify the token
-      const decoded = jwt.verify(token, configuration.jwt.secret as string) as TJwtPayload
+      const decoded = verifyToken(token) as TJwtPayload
 
       if (!decoded) {
         throw new AppError(httpStatusCode.UNAUTHORIZED, 'Invalid token!')

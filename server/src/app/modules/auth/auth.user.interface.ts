@@ -14,7 +14,6 @@ export interface IUser extends Document {
   password: string
   role: TRole
   isActive: boolean
-  accountCreatedAt: Date
   createdAt: Date
   updatedAt: Date
   matchPassword(enteredPassword: string): Promise<boolean>
