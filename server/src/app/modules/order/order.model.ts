@@ -23,6 +23,11 @@ const orderSchema = new Schema<IOrder>(
       type: Number,
       required: true,
       min: 0
+    },
+    status: {
+      type: String,
+      enum: ['pending', 'processing', 'shipped', 'delivered'],
+      default: 'pending'
     }
   },
   {
