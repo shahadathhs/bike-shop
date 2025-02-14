@@ -1,0 +1,50 @@
+import { NextFunction, Request, Response } from 'express'
+
+import { httpStatusCode } from '../../enum/statusCode'
+import sendError from '../../errorHandling/sendError'
+import simplifyError from '../../errorHandling/simplifyError'
+import sendResponse from '../../utils/sendResponse'
+
+import { AuthService } from './auth.service'
+
+
+const registerUser = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const result = await AuthService.registerUser(req.body)
+
+    sendResponse(res, {
+      statusCode: httpStatusCode.CREATED,
+      success: true,
+      message: 'Registration successful.',
+      data: result
+    })
+  } catch (error) {
+    const errorResponse = simplifyError(error)
+    sendError(res, errorResponse)
+    next(error)
+  }
+}
+
+const loginUser = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const result = await AuthService.loginUser(req.body)
+
+    sendResponse(res, {
+      statusCode: httpStatusCode.OK,
+      success: true,
+      message: 'Login successful.',
+      data: {
+        token: result.token
+      }
+    })
+  } catch (error) {
+    const errorResponse = simplifyError(error)
+    sendError(res, errorResponse)
+    next(error)
+  }
+}
+
+export const AuthController = {
+  registerUser,
+  loginUser
+}

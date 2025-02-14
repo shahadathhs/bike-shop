@@ -26,5 +26,4 @@ export interface IUser extends Document {
     password: string
   }
   isAdmin(): boolean
-  deactivateUser(userId: mongoose.Types.ObjectId): Promise<void>
 }

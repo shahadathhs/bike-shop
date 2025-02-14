@@ -95,16 +95,6 @@ UserSchema.methods.isAdmin = function (): boolean {
   return this.role === 'admin'
 }
 
-// * Instance method to check if the user is active
-UserSchema.methods.isActive = function (): boolean {
-  return this.isActive
-}
-
-// * Static method to deactivate a user
-UserSchema.statics.deactivateUser = function (userId: mongoose.Types.ObjectId): Promise<void> {
-  return this.updateOne({ _id: userId }, { isActive: false })
-}
-
 // * Create and export the User model
 const User: Model<IUser> = mongoose.model<IUser>('User', UserSchema)
 export default User
