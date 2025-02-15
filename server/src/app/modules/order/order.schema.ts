@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { orderStatusEnum } from './order.helper'
 
 export const orderSchema = z.object({
-  email: z.string().email('Invalid email format').min(1, 'Email is required'),
+  email: z.string().email('Invalid email format'),
 
   product: z
     .string()
@@ -16,7 +16,13 @@ export const orderSchema = z.object({
 
   status: z.enum(orderStatusEnum, {
     errorMap: () => ({
-      message: `Invalid bike model. Allowed values are ${orderStatusEnum.join(', ')}.`
+      message: `Invalid order status. Allowed values are ${orderStatusEnum.join(', ')}.`
     })
-  })
+  }),
+
+  isDelivered: z.boolean().optional(),
+
+  isDeleted: z.boolean().optional()
 })
+
+export const updateOrderSchema = orderSchema.partial()

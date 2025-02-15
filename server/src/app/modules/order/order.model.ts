@@ -8,7 +8,8 @@ const orderSchema = new Schema<IOrder>(
     email: {
       type: String,
       required: true,
-      trim: true
+      trim: true,
+      ref: 'User'
     },
     product: {
       type: mongoose.Schema.Types.ObjectId,
@@ -29,6 +30,14 @@ const orderSchema = new Schema<IOrder>(
       type: String,
       enum: orderStatusEnum,
       default: 'pending'
+    },
+    isDelivered: {
+      type: Boolean,
+      default: false
+    },
+    isDeleted: {
+      type: Boolean,
+      default: false
     }
   },
   {
