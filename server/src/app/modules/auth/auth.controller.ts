@@ -7,7 +7,6 @@ import sendResponse from '../../utils/sendResponse'
 
 import { AuthService } from './auth.service'
 
-
 const registerUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const result = await AuthService.registerUser(req.body)
@@ -54,7 +53,6 @@ const deactivateUser = async (req: Request, res: Response, next: NextFunction) =
       success: true,
       message: 'User deactivated successfully.',
       data: result
-    
     })
   } catch (error) {
     const errorResponse = simplifyError(error)

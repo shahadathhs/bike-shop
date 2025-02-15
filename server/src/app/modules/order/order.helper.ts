@@ -3,7 +3,6 @@ export const orderStatusEnum = ['pending', 'processing', 'shipped', 'delivered']
 // * Infer the types from enums using typeof and array indexing
 export type TOrderStatus = (typeof orderStatusEnum)[number]
 
-
 /**
  * Interface for revenue summary analytics.
  */

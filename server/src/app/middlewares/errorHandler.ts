@@ -1,7 +1,6 @@
 import { Request, Response } from 'express'
 
 import { configuration } from '../config/config'
-import errorResponse from '../res/error.res'
 
 const errorHandler = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -16,7 +15,14 @@ const errorHandler = (
   if (!res.headersSent) {
     const statusCode = err.statusCode || 500
     const message = configuration.env === 'development' ? err.message : 'Internal Server Error'
-    errorResponse(res, { message } as Error, statusCode)
+
+    res.status(statusCode).send({
+      success: false,
+      statusCode,
+      message,
+      error: err.errorSources,
+      stack: configuration.env === 'development' ? err.stack : undefined
+    })
   }
 }
 

@@ -1,7 +1,7 @@
-import mongoose from 'mongoose';
+import mongoose from 'mongoose'
 
-import { httpStatusCode } from '../enum/statusCode';
-import AppError from '../errorHandling/errors/AppError';
+import { httpStatusCode } from '../enum/statusCode'
+import AppError from '../errorHandling/errors/AppError'
 
 /**
  * Validates if a provided id is a valid MongoDB ObjectId.
@@ -10,6 +10,6 @@ import AppError from '../errorHandling/errors/AppError';
  */
 export const validateObjectId = (id: string): void => {
   if (!mongoose.Types.ObjectId.isValid(id)) {
-    throw new AppError(httpStatusCode.BAD_REQUEST, 'Invalid bike id.');
+    throw new AppError(httpStatusCode.BAD_REQUEST, 'Invalid bike id.')
   }
-};
+}

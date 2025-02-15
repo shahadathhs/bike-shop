@@ -48,6 +48,9 @@ router.patch(
 // Delete an order - admin only
 router.delete('/:id', Authentication(UserRole.ADMIN), orderController.deleteOrder)
 
+// Cancel an order - customer only
+router.patch('/:id/cancel', Authentication(UserRole.CUSTOMER), orderController.cancelOrder)
+
 // Get all orders - admin only
 router.get('/admin/getAll', Authentication(UserRole.ADMIN), orderController.getAllOrders)
 
