@@ -7,8 +7,8 @@ import {
   ScrollRestoration,
 } from "react-router";
 
-import type { Route } from "./+types/root";
 import "./app.css";
+import type { Route } from "./+types/root";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -62,12 +62,12 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   }
 
   return (
-    <main className="pt-16 p-4 container mx-auto">
-      <h1>{message}</h1>
-      <p>{details}</p>
+    <main className="pt-16 p-4 container mx-auto text-center">
+      <h1 className="text-xl font-bold">{message}</h1>
+      <p className="text-lg">{details}</p>
       {stack && (
         <pre className="w-full p-4 overflow-x-auto">
-          <code>{stack}</code>
+          <code className="text-sm">{stack}</code>
         </pre>
       )}
     </main>
