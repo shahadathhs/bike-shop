@@ -36,7 +36,7 @@ export const bikeSchema = z.object({
     .number()
     .int('Quantity must be an integer')
     .min(0, 'Quantity must be a non-negative integer'),
-  inStock: z.boolean()
+  inStock: z.boolean().optional()
 })
 
 // * Update schema where all fields are optional, but  if a field is provided, it must pass the validation rules for that field.

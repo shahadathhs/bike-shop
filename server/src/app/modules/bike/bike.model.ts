@@ -17,4 +17,10 @@ const BikeSchema: Schema<IBike> = new Schema(
   { timestamps: true }
 )
 
+// Pre-save middleware to calculate inStock based on quantity
+BikeSchema.pre<IBike>('save', function (next) {
+  this.inStock = this.quantity > 0
+  next()
+})
+
 export const Bike = mongoose.model<IBike>('Bike', BikeSchema)
