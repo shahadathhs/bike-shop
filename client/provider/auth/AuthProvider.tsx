@@ -1,8 +1,18 @@
-import { use, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AuthContext } from "./AuthContext";
 
+export interface IUser {
+  name: string;
+  email: string;
+  password: string;
+  role: "admin" | "customer";
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<IUser | any>(null);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -19,7 +29,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [user, mounted]);
 
-  const login = (user: any) => {
+  const login = (user: IUser) => {
     setUser(user);
     localStorage.setItem("user", JSON.stringify(user));
   };
