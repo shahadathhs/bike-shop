@@ -1,3 +1,4 @@
+import { useAuth } from "provider/auth/AuthContext";
 import ThemeToggle from "provider/theme/ThemeToggle";
 import { Link, NavLink } from "react-router";
 
@@ -38,6 +39,8 @@ const navItems = [
 ];
 
 export default function NavBar() {
+  const { user } = useAuth();
+
   return (
     <div className="navbar bg-base-100 shadow-sm">
       {/* Navbar Start */}
@@ -73,7 +76,7 @@ export default function NavBar() {
         </div>
         {/* Logo */}
         <Link to="/">
-          <img src="/motorbike.png" alt="logo" className="max-h-20" />
+          <img src="/motorbike.png" alt="logo" className="max-h-16" />
         </Link>
       </div>
 
@@ -90,7 +93,25 @@ export default function NavBar() {
 
       {/* Navbar End */}
       <div className="navbar-end flex items-center gap-3">
-        {/* Dashboard Link */}
+        {/* Dashboard or login Link */}
+        {user ? (
+          user.role === "admin" ? (
+            <Link to="/dashboard/admin" className="btn btn-primary btn-outline">
+              Dashboard
+            </Link>
+          ) : (
+            <Link
+              to="/dashboard/customer"
+              className="btn btn-primary btn-outline"
+            >
+              Dashboard
+            </Link>
+          )
+        ) : (
+          <Link to="/auth/login" className="btn btn-primary btn-outline">
+            Login
+          </Link>
+        )}
 
         {/* Theme Toggle */}
         <ThemeToggle />

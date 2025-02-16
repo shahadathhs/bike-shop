@@ -1,14 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
+import Cookies from "js-cookie";
 import { AuthContext } from "./AuthContext";
 
 export interface IUser {
-  name: string;
-  email: string;
-  password: string;
-  role: "admin" | "customer";
-  isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  token: string;
+  user: {
+    name: string;
+    email: string;
+    role: string;
+  };
 }
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -17,27 +17,33 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const storedUser = localStorage.getItem("user");
-      if (storedUser) setUser(JSON.parse(storedUser));
+      // * Retrieve the stored user from cookies
+      const storedUser = Cookies.get("user");
+      if (storedUser) {
+        try {
+          setUser(JSON.parse(storedUser));
+        } catch (error) {
+          console.error("Error parsing user cookie:", error);
+        }
+      }
       setMounted(true);
     }
   }, []);
 
   useEffect(() => {
     if (mounted) {
-      localStorage.setItem("user", JSON.stringify(user));
+      if (user) {
+        // * Store the user in a cookie (expires in 3 days)
+        Cookies.set("user", JSON.stringify(user), { expires: 3 });
+      } else {
+        Cookies.remove("user");
+      }
     }
   }, [user, mounted]);
 
-  const login = (user: IUser) => {
-    setUser(user);
-    localStorage.setItem("user", JSON.stringify(user));
-  };
+  const login = (user: IUser) => setUser(user);
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem("user");
-  };
+  const logout = () => setUser(null);
 
   const authInfo = useMemo(() => ({ user, setUser, login, logout }), [user]);
 

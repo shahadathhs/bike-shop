@@ -32,9 +32,7 @@ const loginUser = async (req: Request, res: Response, next: NextFunction) => {
       statusCode: httpStatusCode.OK,
       success: true,
       message: 'Login successful.',
-      data: {
-        token: result.token
-      }
+      data: result
     })
   } catch (error) {
     const errorResponse = simplifyError(error)

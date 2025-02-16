@@ -16,7 +16,7 @@ const registerUser = async (payload: IUser): Promise<Partial<IUser>> => {
 const loginUser = async (payload: {
   email: string
   password: string
-}): Promise<{ token: string }> => {
+}): Promise<{ token: string; name: string; email: string; role: string }> => {
   const { email, password } = payload
 
   // * try to get user data with password by email
@@ -44,7 +44,12 @@ const loginUser = async (payload: {
   // * Generate token
   const token = createToken(jwtPayload)
 
-  return { token }
+  return {
+    token,
+    name: user.name,
+    email: user.email,
+    role: user.role
+  }
 }
 
 const deactivateUser = async (id: string): Promise<IUser> => {
