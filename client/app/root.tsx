@@ -9,7 +9,8 @@ import {
 
 import "./app.css";
 import type { Route } from "./+types/root";
-import { ThemeProvider } from "components/theme/ThemeProvider";
+import { ThemeProvider } from "provider/theme/ThemeProvider";
+import { AuthProvider } from "provider/auth/AuthProvider";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -44,9 +45,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   return (
-    <ThemeProvider>
-      <Outlet />
-    </ThemeProvider>
+    <AuthProvider>
+      <ThemeProvider>
+        <Outlet />
+      </ThemeProvider>
+    </AuthProvider>
   );
 }
 
