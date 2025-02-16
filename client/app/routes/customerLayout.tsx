@@ -1,4 +1,19 @@
-import { Link, Outlet } from "react-router";
+import Cookies from "js-cookie";
+import { Link, Outlet, redirect } from "react-router";
+
+export const clientLoader = () => {
+  const user = Cookies.get("user");
+  if (!user) {
+    return redirect("/auth/login");
+  }
+
+  const parsedUser = JSON.parse(user);
+  if (parsedUser.role !== "customer") {
+    return redirect("/");
+  }
+
+  return null;
+};
 
 export default function DashboardCustomerLayout() {
   return (

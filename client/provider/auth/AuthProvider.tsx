@@ -4,11 +4,9 @@ import { AuthContext } from "./AuthContext";
 
 export interface IUser {
   token: string;
-  user: {
-    name: string;
-    email: string;
-    role: string;
-  };
+  name: string;
+  email: string;
+  role: string;
 }
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
