@@ -71,10 +71,10 @@ export default function NavBar() {
             ))}
           </ul>
         </div>
-        {/* Logo / Brand */}
-        <NavLink to="/" className="btn btn-ghost text-xl">
-          BikeShop
-        </NavLink>
+        {/* Logo */}
+        <Link to="/">
+          <img src="/motorbike.png" alt="logo" className="max-h-20" />
+        </Link>
       </div>
 
       {/* Navbar Center */}
