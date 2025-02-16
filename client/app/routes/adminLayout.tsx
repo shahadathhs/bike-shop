@@ -1,4 +1,7 @@
 import Cookies from "js-cookie";
+import { useAuth } from "provider/auth/AuthContext";
+import ThemeToggle from "provider/theme/ThemeToggle";
+import { useRef } from "react";
 import { Link, Outlet, redirect } from "react-router";
 
 export const clientLoader = () => {
@@ -16,6 +19,8 @@ export const clientLoader = () => {
 };
 
 export default function DashboardAdminLayout() {
+  const { logout } = useAuth();
+
   return (
     <main className="min-h-screen w-full flex justify-between">
       <div className="drawer lg:drawer-open">
@@ -42,7 +47,7 @@ export default function DashboardAdminLayout() {
             aria-label="close sidebar"
             className="drawer-overlay"
           ></label>
-          <ul className="menu bg-base-200 text-base-content min-h-full w-40 p-4">
+          <ul className="menu bg-base-200 text-base-content min-h-full flex flex-col justify-between w-40 p-4">
             {/* Sidebar content here */}
             <li>
               {navItems.map((item) => (
@@ -55,6 +60,17 @@ export default function DashboardAdminLayout() {
                 </Link>
               ))}
             </li>
+
+            {/* Logout button and Theme toggle */}
+            <li>
+              {/* Logout button */}
+              <button onClick={logout} className="btn btn-error mb-2">
+                Logout
+              </button>
+
+              {/* Theme toggle */}
+              <ThemeToggle />
+            </li>
           </ul>
         </div>
       </div>
@@ -66,5 +82,5 @@ const navItems = [
   { label: "Admin", route: "/dashboard/admin" },
   { label: "Users", route: "/dashboard/admin/users" },
   { label: "Analytics", route: "/dashboard/admin/analytics" },
-  { label: "Orders", route: "/dashboard/admin/projects" },
+  { label: "Orders", route: "/dashboard/admin/orders" },
 ];

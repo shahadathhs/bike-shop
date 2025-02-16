@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Cookies from "js-cookie";
 import { AuthContext } from "./AuthContext";
+import { useNavigate } from "react-router";
 
 export interface IUser {
   token: string;
@@ -12,6 +13,7 @@ export interface IUser {
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<IUser | any>(null);
   const [mounted, setMounted] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -39,9 +41,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [user, mounted]);
 
-  const login = (user: IUser) => setUser(user);
+  const login = (user: IUser) => {
+    setUser(user);
+    Cookies.set("user", JSON.stringify(user), { expires: 3 });
+  };
 
-  const logout = () => setUser(null);
+  const logout = () => {
+    setUser(null);
+    Cookies.remove("user");
+    navigate("/");
+  };
 
   const authInfo = useMemo(() => ({ user, setUser, login, logout }), [user]);
 
