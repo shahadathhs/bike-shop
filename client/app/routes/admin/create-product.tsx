@@ -65,7 +65,7 @@ export const clientAction = async ({ request }: ClientActionFunctionArgs) => {
 
 export default function CreateProduct() {
   const fetcher = useFetcher();
-  console.log("fetcher", fetcher);
+  // console.log("fetcher", fetcher);
   const isSubmitting = fetcher.state === "submitting";
 
   const navigate = useNavigate();
