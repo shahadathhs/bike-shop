@@ -103,7 +103,7 @@ export const clientAction = async ({ request }: ClientActionFunctionArgs) => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ newQuantity }),
+          body: JSON.stringify({ quantity: newQuantity }),
         }
       );
 
@@ -135,6 +135,7 @@ export default function Products() {
 
   const fetcher = useFetcher();
   const isSubmitting = fetcher.state === "submitting";
+  console.log("fetcher", fetcher);
 
   useEffect(() => {
     if (fetcher.data?.success) {
@@ -188,13 +189,68 @@ export default function Products() {
                         Edit
                       </Link>
                       {/* restock form */}
-                      <fetcher.Form method="post">
-                        <input type="hidden" name="action" value="restock" />
-                        <input type="hidden" name="id" value={product._id} />
-                        <button type="submit" className="btn btn-info btn-sm">
-                          {isSubmitting ? "Restocking..." : "Restock"}
-                        </button>
-                      </fetcher.Form>
+                      {/* Open the modal using document.getElementById('ID').showModal() method */}
+                      <button
+                        className="btn btn-info btn-sm"
+                        onClick={() =>
+                          (
+                            document.getElementById(
+                              "restock-modal"
+                            ) as HTMLDialogElement
+                          )?.showModal()
+                        }
+                      >
+                        Restock
+                      </button>
+
+                      {/* Restock Modal */}
+                      <dialog id="restock-modal" className="modal">
+                        <div className="modal-box">
+                          <fetcher.Form
+                            method="post"
+                            className="flex flex-col gap-4"
+                          >
+                            <input
+                              type="hidden"
+                              name="action"
+                              value="restock"
+                            />
+                            <input
+                              type="hidden"
+                              name="id"
+                              value={product._id}
+                            />
+                            <div className="text-left">
+                              <label className="label mb-2">
+                                Quantity to restock:
+                              </label>
+                              <input
+                                type="number"
+                                id="quantity"
+                                name="quantity"
+                                className="input input-bordered w-full"
+                                required
+                              />
+                            </div>
+                            <div>
+                              <button
+                                type="submit"
+                                disabled={isSubmitting}
+                                className="btn btn-info btn-sm"
+                              >
+                                {isSubmitting ? "Restocking..." : "Restock"}
+                              </button>
+                            </div>
+                          </fetcher.Form>
+                          <div className="modal-action">
+                            <form method="dialog">
+                              {/* if there is a button in form, it will close the modal */}
+                              <button className="btn">Close</button>
+                            </form>
+                          </div>
+                        </div>
+                      </dialog>
+
                       {/* Delete from */}
                       <fetcher.Form method="delete">
                         <input type="hidden" name="action" value="delete" />
