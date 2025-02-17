@@ -4,7 +4,7 @@ import {
   useFetcher,
   useLoaderData,
   useNavigate,
-  useParams,
+  type ClientActionFunctionArgs,
   type ClientLoaderFunctionArgs,
 } from "react-router";
 import { brands, categories, models } from "utils/bikeUtils";
@@ -38,6 +38,68 @@ export const clientLoader = async ({ params }: ClientLoaderFunctionArgs) => {
     console.error("Error fetching product:", err);
     return {
       error: "Failed to fetch product",
+      errorDetails: err,
+    };
+  }
+};
+
+export const clientAction = async ({ request }: ClientActionFunctionArgs) => {
+  const formData = await request.formData();
+  const id = formData.get("id") as string;
+
+  const token = getToken();
+
+  const name = formData.get("name") as string;
+  const brand = formData.get("brand") as string;
+  const modelName = formData.get("modelName") as string;
+  const price = formData.get("price") as string;
+  const quantity = formData.get("quantity") as string;
+  const description = formData.get("description") as string;
+  const category = formData.get("category") as string;
+  const image = formData.get("image") as string;
+
+  const formDataObject = {
+    name,
+    brand,
+    modelName,
+    price: Number(price),
+    quantity: Number(quantity),
+    description,
+    category,
+    image,
+  };
+
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_API_URL}/bikes/${id}`,
+      {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formDataObject),
+      }
+    );
+
+    if (response.ok) {
+      const data = await response.json();
+      return {
+        success: true,
+        data,
+      };
+    } else {
+      const errorData = await response.json();
+      return {
+        success: false,
+        error: errorData.message,
+        errorDetails: errorData,
+      };
+    }
+  } catch (err) {
+    console.error("Error updating product:", err);
+    return {
+      error: "Failed to update product",
       errorDetails: err,
     };
   }
@@ -95,6 +157,8 @@ export default function UpdateProduct() {
     <div className="container mx-auto p-4">
       <h1 className="text-3xl font-bold my-4 text-center">Update Product</h1>
       <fetcher.Form method="post" className="max-w-lg mx-auto space-y-4">
+        <input type="hidden" name="id" value={product._id} />
+
         <div>
           <label htmlFor="name" className="block mb-1">
             Name
@@ -129,12 +193,12 @@ export default function UpdateProduct() {
         </div>
 
         <div>
-          <label htmlFor="model" className="block mb-1">
+          <label htmlFor="modelName" className="block mb-1">
             Model
           </label>
           <select
-            id="model"
-            name="model"
+            id="modelName"
+            name="modelName"
             defaultValue={product.modelName}
             className="select select-bordered w-full"
             required
@@ -226,7 +290,7 @@ export default function UpdateProduct() {
             <img
               src={image}
               alt="Product Preview"
-              className="mt-2 w-32 h-32 object-cover"
+              className="mt-2 w-32 h-32 object-contain"
             />
           )}
         </div>
@@ -236,7 +300,7 @@ export default function UpdateProduct() {
           disabled={isSubmitting}
           className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition-colors"
         >
-          {isSubmitting ? "Creating..." : "Create Product"}
+          {isSubmitting ? "Updating..." : "Update Product"}
         </button>
       </fetcher.Form>
     </div>

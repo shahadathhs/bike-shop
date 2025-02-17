@@ -237,7 +237,7 @@ export default function CreateProduct() {
             <img
               src={image}
               alt="Product Preview"
-              className="mt-2 w-32 h-32 object-cover"
+              className="mt-2 w-32 h-32 object-contain"
             />
           )}
         </div>
