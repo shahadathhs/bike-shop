@@ -30,6 +30,7 @@ export default [
       route("/analytics", "routes/admin/analytics.tsx"),
       route("/products", "routes/admin/products.tsx"),
       route("/create-product", "routes/admin/create-product.tsx"),
+      route("/update-product/:id", "routes/admin/update-product.tsx"),
       route("/orders", "routes/admin/orders.tsx"),
     ]),
   ]),

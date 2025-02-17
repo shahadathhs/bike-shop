@@ -1,6 +1,15 @@
 import Cookies from "js-cookie";
 import type { IUser } from "provider/auth/AuthProvider";
-import { Link, redirect, useLoaderData } from "react-router";
+import { useEffect } from "react";
+import toast from "react-hot-toast";
+import {
+  Link,
+  redirect,
+  useFetcher,
+  useLoaderData,
+  type ClientActionFunctionArgs,
+} from "react-router";
+import { getToken } from "utils/getToken";
 
 export const clientLoader = async () => {
   const user = Cookies.get("user");
@@ -39,42 +48,103 @@ export const clientLoader = async () => {
     };
   }
 };
+
+export const clientAction = async ({ request }: ClientActionFunctionArgs) => {
+  const formData = await request.formData();
+  const action = formData.get("action");
+
+  const token = getToken();
+
+  if (action === "delete") {
+    const productId = formData.get("id");
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/bikes/${productId}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        return {
+          success: true,
+          message: "Product deleted successfully",
+        };
+      } else {
+        const errorData = await response.json();
+        return {
+          error: errorData.message || "Failed to delete product",
+          errorDetails: errorData,
+        };
+      }
+    } catch (err: any) {
+      console.error("Error deleting product:", err);
+      return {
+        error: err.message || "Failed to delete product",
+        errorDetails: err,
+      };
+    }
+  }
+
+  if (action === "restock") {
+    const productId = formData.get("id");
+    const newQuantity = formData.get("quantity");
+
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/bikes/${productId}/restock`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ newQuantity }),
+        }
+      );
+
+      if (response.ok) {
+        return {
+          success: true,
+          message: "Product restocked successfully",
+        };
+      } else {
+        const errorData = await response.json();
+        return {
+          error: errorData.message || "Failed to restock product",
+          errorDetails: errorData,
+        };
+      }
+    } catch (err: any) {
+      console.error("Error restocking product:", err);
+      return {
+        error: err.message || "Failed to restock product",
+        errorDetails: err,
+      };
+    }
+  }
+};
+
 export default function Products() {
   const loaderData = useLoaderData();
-  console.log("loaderData", loaderData);
   const products = loaderData.products.data;
 
-  // Delete product handler
-  // const handleDelete = async (id) => {
-  //   if (!window.confirm("Are you sure you want to delete this product?"))
-  //     return;
-  //   try {
-  //     await axios.delete(`${import.meta.env.VITE_API_URL}/bikes/${id}`);
-  //     setProducts(products.filter((product) => product._id !== id));
-  //   } catch (err) {
-  //     alert("Error deleting product");
-  //   }
-  // };
+  const fetcher = useFetcher();
+  const isSubmitting = fetcher.state === "submitting";
 
-  // Restock product handler
-  // const handleRestock = async (id) => {
-  //   const newQuantity = prompt("Enter new quantity for restocking:");
-  //   if (newQuantity === null) return;
-  //   try {
-  //     await axios.patch(`${import.meta.env.VITE_API_URL}/bikes/${id}/restock`, {
-  //       quantity: Number(newQuantity),
-  //     });
-  //     setProducts(
-  //       products.map((product) =>
-  //         product._id === id
-  //           ? { ...product, quantity: Number(newQuantity) }
-  //           : product
-  //       )
-  //     );
-  //   } catch (err) {
-  //     alert("Error restocking product");
-  //   }
-  // };
+  useEffect(() => {
+    if (fetcher.data?.success) {
+      toast.dismiss();
+      toast.success(fetcher.data.message || "Operation successful");
+    } else if (fetcher.data?.error) {
+      toast.dismiss();
+      toast.error(fetcher.data.error);
+    }
+  }, []);
 
   return (
     <div className="container mx-auto p-4">
@@ -109,25 +179,30 @@ export default function Products() {
                     <td>{product.category}</td>
                     <td>${product.price}</td>
                     <td>{product.quantity}</td>
-                    <td className="space-x-2">
+                    <td className="space-x-2 flex items-center gap-2 justify-center">
+                      {/* Edit button */}
                       <Link
                         to={`/dashboard/admin/update-product/${product._id}`}
                         className="btn btn-warning btn-sm"
                       >
                         Edit
                       </Link>
-                      <button
-                        // onClick={() => handleRestock(product._id)}
-                        className="btn btn-info btn-sm"
-                      >
-                        Restock
-                      </button>
-                      <button
-                        // onClick={() => handleDelete(product._id)}
-                        className="btn btn-error btn-sm"
-                      >
-                        Delete
-                      </button>
+                      {/* restock form */}
+                      <fetcher.Form method="post">
+                        <input type="hidden" name="action" value="restock" />
+                        <input type="hidden" name="id" value={product._id} />
+                        <button type="submit" className="btn btn-info btn-sm">
+                          {isSubmitting ? "Restocking..." : "Restock"}
+                        </button>
+                      </fetcher.Form>
+                      {/* Delete from */}
+                      <fetcher.Form method="delete">
+                        <input type="hidden" name="action" value="delete" />
+                        <input type="hidden" name="id" value={product._id} />
+                        <button type="submit" className="btn btn-error btn-sm">
+                          {isSubmitting ? "Deleting..." : "Delete"}
+                        </button>
+                      </fetcher.Form>
                     </td>
                   </tr>
                 ))}
