@@ -83,4 +83,5 @@ const navItems = [
   { label: "Users", route: "/dashboard/admin/users" },
   { label: "Analytics", route: "/dashboard/admin/analytics" },
   { label: "Orders", route: "/dashboard/admin/orders" },
+  { label: "Products", route: "/dashboard/admin/products" },
 ];

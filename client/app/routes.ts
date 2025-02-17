@@ -29,6 +29,7 @@ export default [
       route("/users", "routes/admin/users.tsx"),
       route("/analytics", "routes/admin/analytics.tsx"),
       route("/products", "routes/admin/products.tsx"),
+      route("/create-product", "routes/admin/create-product.tsx"),
       route("/orders", "routes/admin/orders.tsx"),
     ]),
   ]),

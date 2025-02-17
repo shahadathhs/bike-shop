@@ -9,6 +9,7 @@ export interface IBike extends Document {
   price: number
   category: TBikeCategory
   description: string
+  image: string
   quantity: number // * Represents the current available stock
   inStock?: boolean // * Should be computed from quantity
 }
