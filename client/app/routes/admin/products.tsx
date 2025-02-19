@@ -1,10 +1,7 @@
-import Cookies from "js-cookie";
-import type { IUser } from "provider/auth/AuthProvider";
 import { useEffect } from "react";
 import toast from "react-hot-toast";
 import {
   Link,
-  redirect,
   useFetcher,
   useLoaderData,
   type ClientActionFunctionArgs,
@@ -12,26 +9,12 @@ import {
 import { getToken } from "utils/getToken";
 
 export const clientLoader = async () => {
-  const user = Cookies.get("user");
-  if (!user) {
-    return redirect("/auth/login");
-  }
-
-  const parsedUser: IUser = JSON.parse(user);
-  if (parsedUser.role !== "admin") {
-    return redirect("/");
-  }
-  const token = parsedUser.token as string;
-
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/bikes`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/bikes`);
 
     if (response.ok) {
       const data = await response.json();
+      console.log("response", data);
       return {
         success: true,
         products: data,
@@ -131,7 +114,7 @@ export const clientAction = async ({ request }: ClientActionFunctionArgs) => {
 
 export default function Products() {
   const loaderData = useLoaderData();
-  const products = loaderData.products.data;
+  const products = loaderData.products.data.bikes;
 
   const fetcher = useFetcher();
   const isSubmitting = fetcher.state === "submitting";
@@ -156,125 +139,137 @@ export default function Products() {
         </Link>
       </div>
 
-      <div className="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
-        <table className=" w-full table table-zebra">
-          {products.length > 0 ? (
-            <>
-              <thead className="text-center">
-                <tr>
-                  <th>Name</th>
-                  <th>Brand</th>
-                  <th>Model</th>
-                  <th>Category</th>
-                  <th>Price</th>
-                  <th>Quantity</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody className="text-center">
-                {products.map((product: any) => (
-                  <tr key={product._id}>
-                    <td>{product.name}</td>
-                    <td>{product.brand}</td>
-                    <td>{product.modelName}</td>
-                    <td>{product.category}</td>
-                    <td>${product.price}</td>
-                    <td>{product.quantity}</td>
-                    <td className="space-x-2 flex items-center gap-2 justify-center">
-                      {/* Edit button */}
-                      <Link
-                        to={`/dashboard/admin/update-product/${product._id}`}
-                        className="btn btn-warning btn-sm"
-                      >
-                        Edit
-                      </Link>
-                      {/* restock form */}
-                      {/* Open the modal using document.getElementById('ID').showModal() method */}
-                      <button
-                        className="btn btn-info btn-sm"
-                        onClick={() =>
-                          (
-                            document.getElementById(
-                              "restock-modal"
-                            ) as HTMLDialogElement
-                          )?.showModal()
-                        }
-                      >
-                        Restock
-                      </button>
+      {fetcher.state === "submitting" && (
+        <div className="flex justify-center items-center">
+          <span className="loading loading-spinner loading-lg"></span>
+        </div>
+      )}
 
-                      {/* Restock Modal */}
-                      <dialog id="restock-modal" className="modal">
-                        <div className="modal-box">
-                          <fetcher.Form
-                            method="post"
-                            className="flex flex-col gap-4"
-                          >
-                            <input
-                              type="hidden"
-                              name="action"
-                              value="restock"
-                            />
-                            <input
-                              type="hidden"
-                              name="id"
-                              value={product._id}
-                            />
-                            <div className="text-left">
-                              <label className="label mb-2">
-                                Quantity to restock:
-                              </label>
-                              <input
-                                type="number"
-                                id="quantity"
-                                name="quantity"
-                                className="input input-bordered w-full"
-                                required
-                              />
-                            </div>
-                            <div>
-                              <button
-                                type="submit"
-                                disabled={isSubmitting}
-                                className="btn btn-info btn-sm"
-                              >
-                                {isSubmitting ? "Restocking..." : "Restock"}
-                              </button>
-                            </div>
-                          </fetcher.Form>
-                          <div className="modal-action">
-                            <form method="dialog">
-                              {/* if there is a button in form, it will close the modal */}
-                              <button className="btn">Close</button>
-                            </form>
-                          </div>
-                        </div>
-                      </dialog>
-
-                      {/* Delete from */}
-                      <fetcher.Form method="delete">
-                        <input type="hidden" name="action" value="delete" />
-                        <input type="hidden" name="id" value={product._id} />
-                        <button type="submit" className="btn btn-error btn-sm">
-                          {isSubmitting ? "Deleting..." : "Delete"}
-                        </button>
-                      </fetcher.Form>
-                    </td>
+      {fetcher.state !== "submitting" && (
+        <div className="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
+          <table className=" w-full table table-zebra">
+            {products.length > 0 ? (
+              <>
+                <thead className="text-center">
+                  <tr>
+                    <th>Name</th>
+                    <th>Brand</th>
+                    <th>Model</th>
+                    <th>Category</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Actions</th>
                   </tr>
-                ))}
+                </thead>
+                <tbody className="text-center">
+                  {products.map((product: any) => (
+                    <tr key={product._id}>
+                      <td>{product.name}</td>
+                      <td>{product.brand}</td>
+                      <td>{product.modelName}</td>
+                      <td>{product.category}</td>
+                      <td>${product.price}</td>
+                      <td>{product.quantity}</td>
+                      <td className="space-x-2 flex items-center gap-2 justify-center">
+                        {/* Edit button */}
+                        <Link
+                          to={`/dashboard/admin/update-product/${product._id}`}
+                          className="btn btn-warning btn-sm"
+                        >
+                          Edit
+                        </Link>
+                        {/* restock form */}
+                        {/* Open the modal using document.getElementById('ID').showModal() method */}
+                        <button
+                          className="btn btn-info btn-sm"
+                          onClick={() =>
+                            (
+                              document.getElementById(
+                                "restock-modal"
+                              ) as HTMLDialogElement
+                            )?.showModal()
+                          }
+                        >
+                          Restock
+                        </button>
+
+                        {/* Restock Modal */}
+                        <dialog id="restock-modal" className="modal">
+                          <div className="modal-box">
+                            <fetcher.Form
+                              method="post"
+                              className="flex flex-col gap-4"
+                            >
+                              <input
+                                type="hidden"
+                                name="action"
+                                value="restock"
+                              />
+                              <input
+                                type="hidden"
+                                name="id"
+                                value={product._id}
+                              />
+                              <div className="text-left">
+                                <label className="label mb-2">
+                                  Quantity to restock:
+                                </label>
+                                <input
+                                  type="number"
+                                  id="quantity"
+                                  name="quantity"
+                                  defaultValue={product.quantity}
+                                  className="input input-bordered w-full"
+                                  required
+                                />
+                              </div>
+                              <div>
+                                <button
+                                  type="submit"
+                                  disabled={isSubmitting}
+                                  className="btn btn-info btn-sm"
+                                >
+                                  {isSubmitting ? "Restocking..." : "Restock"}
+                                </button>
+                              </div>
+                            </fetcher.Form>
+                            <div className="modal-action">
+                              <form method="dialog">
+                                {/* if there is a button in form, it will close the modal */}
+                                <button className="btn">Close</button>
+                              </form>
+                            </div>
+                          </div>
+                        </dialog>
+
+                        {/* Delete from */}
+                        <fetcher.Form method="delete">
+                          <input type="hidden" name="action" value="delete" />
+                          <input type="hidden" name="id" value={product._id} />
+                          <button
+                            type="submit"
+                            className="btn btn-error btn-sm"
+                          >
+                            {isSubmitting ? "Deleting..." : "Delete"}
+                          </button>
+                        </fetcher.Form>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </>
+            ) : (
+              <tbody>
+                <tr>
+                  <td colSpan={5} className="text-center py-4">
+                    No products found.
+                  </td>
+                </tr>
               </tbody>
-            </>
-          ) : (
-            <tbody>
-              <tr>
-                <td colSpan={5} className="text-center py-4">
-                  No products found.
-                </td>
-              </tr>
-            </tbody>
-          )}
-        </table>
-      </div>
+            )}
+          </table>
+        </div>
+      )}
     </div>
   );
 }

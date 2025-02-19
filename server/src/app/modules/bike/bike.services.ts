@@ -1,7 +1,6 @@
 import { httpStatusCode } from '../../enum/statusCode'
 import AppError from '../../errorHandling/errors/AppError'
 import { validateObjectId } from '../../helpers/validateObjectId'
-import { QueryBuilder } from '../../queryBuilder/queryBuilder'
 
 import { IBikeQueryOptions } from './bike.helper'
 import { IBike } from './bike.interface'
@@ -12,58 +11,75 @@ const createBikeService = async (payload: IBike): Promise<IBike> => {
   return result
 }
 
-const getAllBikesService = async (queryOptions: IBikeQueryOptions = {}): Promise<IBike[]> => {
-  // * Step 1: Build the initial query.
-  const query = Bike.find()
+interface IBikeResponse {
+  bikes: IBike[]
+  metadata: {
+    total: number
+    page: number
+    limit: number
+  }
+}
 
-  // * Step 2: Apply query options to the query builder.
-  const queryBuilder = new QueryBuilder<IBike>(query, queryOptions)
+export const getAllBikesService = async (
+  queryOptions: IBikeQueryOptions = {}
+): Promise<IBikeResponse> => {
+  // Destructure query options with default values for pagination.
+  const {
+    searchTerm,
+    minPrice,
+    maxPrice,
+    model,
+    category,
+    brand,
+    page = 1,
+    limit = 10
+  } = queryOptions
 
-  // * Step 3: Apply range filters for price.
-  const rangeFilters = []
-  if (queryOptions.minPrice !== undefined || queryOptions.maxPrice !== undefined) {
-    rangeFilters.push({
-      fieldName: 'price',
-      min: Number(queryOptions.minPrice),
-      max: Number(queryOptions.maxPrice)
-    })
-  }
-  // Initialize the range filters if they are provided
-  if (rangeFilters.length > 0) {
-    queryBuilder.filterByRange(rangeFilters)
-  }
+  // Build the filter object based on the provided options.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const filter: any = {}
 
-  // * Step 4: Apply field filters for model, category, and brand.
-  const fieldFilters = []
-  if (queryOptions.model) {
-    fieldFilters.push({
-      fieldName: 'model',
-      searchTerm: queryOptions.model
-    })
-  }
-  if (queryOptions.category) {
-    fieldFilters.push({
-      fieldName: 'category',
-      searchTerm: queryOptions.category
-    })
-  }
-  if (queryOptions.brand) {
-    fieldFilters.push({
-      fieldName: 'brand',
-      searchTerm: queryOptions.brand
-    })
-  }
-  // Initialize the field filters if they are provided
-  if (fieldFilters.length > 0) {
-    queryBuilder.filterByFields(fieldFilters)
+  if (searchTerm) {
+    // Searching in name, brand, or category fields.
+    filter.$or = [
+      { name: { $regex: searchTerm, $options: 'i' } },
+      { brand: { $regex: searchTerm, $options: 'i' } },
+      { category: { $regex: searchTerm, $options: 'i' } }
+    ]
   }
 
-  // * Step 5: Initialize pagination
-  queryBuilder.paginate(Number(queryOptions.page), Number(queryOptions.limit))
+  // Price range filtering.
+  if (minPrice !== undefined || maxPrice !== undefined) {
+    filter.price = {}
+    if (minPrice !== undefined) filter.price.$gte = Number(minPrice)
+    if (maxPrice !== undefined) filter.price.$lte = Number(maxPrice)
+  }
 
-  // * Execute the final query and return the bikes.
-  const bikes = await queryBuilder.query
-  return bikes
+  // Exact field filters.
+  if (model) filter.model = model
+  if (category) filter.category = category
+  if (brand) filter.brand = brand
+
+  // Calculate pagination variables.
+  const currentPage = Number(page)
+  const itemsPerPage = Number(limit)
+  const skip = (currentPage - 1) * itemsPerPage
+
+  // Get total number of bikes matching the filter.
+  const total = await Bike.countDocuments(filter)
+
+  // Retrieve the bikes with the applied filter and pagination.
+  const bikes = await Bike.find(filter).skip(skip).limit(itemsPerPage)
+
+  // Return the bikes along with metadata.
+  return {
+    bikes,
+    metadata: {
+      total,
+      page: currentPage,
+      limit: itemsPerPage
+    }
+  }
 }
 
 const getBikeByIdService = async (id: string): Promise<IBike | null> => {
