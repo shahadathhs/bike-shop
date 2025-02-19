@@ -7,6 +7,7 @@ import {
   type ClientActionFunctionArgs,
 } from "react-router";
 import { brands, categories, models } from "utils/bikeUtils";
+import { useDebounce } from "utils/debounce";
 import { getToken } from "utils/getToken";
 
 export const clientLoader = async () => {
@@ -124,8 +125,21 @@ export default function Products() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Query/filter state variables
+  // Local state for the input value
+  const [inputValue, setInputValue] = useState("");
+  // Actual search term that drives data fetching
   const [searchTerm, setSearchTerm] = useState("");
+
+  // Debounce the input value with a delay of 100ms
+  const debouncedInput = useDebounce(inputValue, 100);
+
+  // Update the actual search term whenever the debounced value changes
+  useEffect(() => {
+    setSearchTerm(debouncedInput);
+    setPage(1); // Reset to first page whenever search changes
+  }, [debouncedInput]);
+
+  // Query/filter state variables
   const [priceRange, setPriceRange] = useState("all"); // Options: "all", "under300", "300to500", "500to800", "above800"
   const [model, setModel] = useState("all"); // "all" or specific values like "Sport", etc.
   const [category, setCategory] = useState("all"); // "all", "Mountain", "Road", etc.
@@ -225,10 +239,7 @@ export default function Products() {
             type="text"
             placeholder="Search by name, brand, or category..."
             value={searchTerm}
-            onChange={(e) => {
-              setSearchTerm(e.target.value);
-              setPage(1); // Reset to first page
-            }}
+            onChange={(e) => setInputValue(e.target.value)}
             className="input input-bordered max-w-lg"
           />
         </div>
