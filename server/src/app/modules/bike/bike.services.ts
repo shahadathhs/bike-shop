@@ -56,7 +56,7 @@ export const getAllBikesService = async (
   }
 
   // Exact field filters.
-  if (model) filter.model = model
+  if (model) filter.modelName = model
   if (category) filter.category = category
   if (brand) filter.brand = brand
 
