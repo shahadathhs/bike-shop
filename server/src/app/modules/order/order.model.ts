@@ -39,7 +39,7 @@ const orderSchema = new Schema<IOrder, OrderModel, IOrderMethods>(
     status: {
       type: String,
       enum: orderStatusEnum,
-      default: 'processing'
+      default: 'pending'
     },
     isDelivered: {
       type: Boolean,

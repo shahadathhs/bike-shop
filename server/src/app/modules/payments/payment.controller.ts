@@ -19,6 +19,9 @@ const createCheckoutSession = async (
     // * step 1: create a stripe instance
     const stripe = new Stripe(secretKey)
 
+    // * step 2: generate a random 32 byte string
+    const randomString = crypto.randomUUID()
+
     // * step 2: create a checkout session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -36,7 +39,7 @@ const createCheckoutSession = async (
       ],
       metadata: { productId, email },
       mode: 'payment',
-      success_url: `${clientURl}/checkout/success?productId=${productId}&email=${email}&quantity=${quantity}&price=${price}`,
+      success_url: `${clientURl}/checkout/success?${randomString}=${randomString}&productId=${productId}&${randomString}2=${randomString}&email=${email}&quantity=${quantity}&${randomString}3=${randomString}&price=${price}`,
       cancel_url: `${clientURl}/checkout/cancel?productId=${productId}`
     })
 

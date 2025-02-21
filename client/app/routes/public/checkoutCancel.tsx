@@ -1,6 +1,15 @@
 import React from "react";
-import { Link, useLocation } from "react-router";
+import { Link, redirect, useLocation } from "react-router";
 import { XCircleIcon } from "lucide-react";
+import { getToken } from "utils/getToken";
+
+export const clientLoader = async ({ params }: { params: { id: string } }) => {
+  const token = getToken();
+
+  if (!token) return redirect("/auth/login");
+
+  return null;
+};
 
 export default function CheckoutCancel() {
   const location = useLocation();
@@ -21,19 +30,12 @@ export default function CheckoutCancel() {
         </p>
 
         <div className="flex justify-between">
-        
-          <Link
-            to="/product"
-            className="btn btn-sm btn-primary"
-          >
+          <Link to="/product" className="btn btn-sm btn-primary">
             Back to Products
           </Link>
 
           {productId && (
-            <Link
-              to={`/product/${productId}`}
-              className="btn btn-sm btn-error"
-            >
+            <Link to={`/product/${productId}`} className="btn btn-sm btn-error">
               View Product Details
             </Link>
           )}

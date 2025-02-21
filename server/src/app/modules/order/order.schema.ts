@@ -19,7 +19,7 @@ export const orderSchema = z.object({
       errorMap: () => ({
         message: `Invalid order status. Allowed values are ${orderStatusEnum.join(', ')}.`
       })
-    }),
+    }).optional(),
 
     isDelivered: z.boolean().optional(),
 
