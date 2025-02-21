@@ -2,6 +2,7 @@ import Banner from "components/ui/Banner";
 import type { Route } from "./+types/home";
 import { useLoaderData } from "react-router";
 import Product from "components/ui/Product";
+import Testimonials from "components/ui/Testimonials";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -39,6 +40,8 @@ export default function Home() {
 
       {/* Products section */}
       <Product products={products} />
+
+      <Testimonials />
     </div>
   );
 }

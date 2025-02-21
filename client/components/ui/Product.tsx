@@ -4,8 +4,8 @@ export default function Product({ products }: any) {
   if (products.length === 0) return null;
 
   return (
-    <div className="container mx-auto py-8">
-      <h2 className="text-3xl font-semibold mb-4">Bikes for You</h2>
+    <div className="py-16">
+       <h2 className="text-3xl font-bold mb-6 text-center">Popular Products</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {products.slice(0, 5).map((product: any) => (
           <div
