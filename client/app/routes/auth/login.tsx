@@ -1,5 +1,5 @@
 import { useAuth } from "provider/auth/AuthContext";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import toast from "react-hot-toast";
 import {
   useFetcher,
@@ -46,11 +46,11 @@ export const clientAction = async ({ request }: ClientActionFunctionArgs) => {
 
 export default function Login() {
   const fetcher = useFetcher();
-  console.log("fetcher", fetcher);
+  const user = fetcher.data?.user;
   const isSubmitting = fetcher.state === "submitting";
+
   const { login } = useAuth();
   const navigate = useNavigate();
-  const user = fetcher.data?.user;
 
   useEffect(() => {
     const handleFetcherData = async () => {
@@ -64,7 +64,6 @@ export default function Login() {
         //* wait for 1 second before redirecting
         await new Promise((resolve) => setTimeout(resolve, 1000));
 
-        // * navigate to dashboard based on user role
         if (user.role === "admin") {
           navigate("/dashboard/admin");
         } else if (user.role === "customer") {

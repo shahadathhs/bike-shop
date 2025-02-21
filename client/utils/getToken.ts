@@ -9,8 +9,8 @@ export const getToken = () => {
   }
 
   const parsedUser: IUser = JSON.parse(user);
-  if (parsedUser.role !== "admin") {
-    return redirect("/");
+  if (!parsedUser.token) {
+    return redirect("/auth/login");
   }
   const token = parsedUser.token as string;
   return token;
