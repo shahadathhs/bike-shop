@@ -3,7 +3,7 @@ import { redirect, useFetcher, useLocation, useNavigate } from "react-router";
 import { getToken } from "utils/getToken";
 import toast from "react-hot-toast";
 
-export const clientLoader = async ({ params }: { params: { id: string } }) => {
+export const clientLoader = async () => {
   const token = getToken();
 
   if (!token) return redirect("/auth/login");
@@ -45,18 +45,13 @@ export const clientAction = async ({ request }: { request: Request }) => {
     return data;
   } catch (error) {
     console.error("Error creating order:", error);
-    return {
-      error: "Failed to create order",
-      errorDetails: error,
-    };
+    return { error: "Failed to create order", errorDetails: error };
   }
 };
 
 export default function CheckoutOutSuccess() {
   const location = useLocation();
   const navigate = useNavigate();
-
-  // * Extract query parameters
   const searchParams = new URLSearchParams(location.search);
   const productId = searchParams.get("productId") as string;
   const email = searchParams.get("email") as string;
@@ -74,39 +69,49 @@ export default function CheckoutOutSuccess() {
       toast.dismiss();
       toast.success("Order created successfully");
 
-      // * wait for 1 second before navigating
       setTimeout(() => {
-        // Clear the query parameters from the URL
         navigate("/");
       }, 1000);
     }
   }, [fetcher.data]);
 
   return (
-    <div className="container mx-auto p-4 text-center">
-      <h1 className="text-3xl font-bold mb-4">Checkout Successful</h1>
-      <p className="text-lg text-green-600">Your payment was successful!</p>
-      <p>Order details:</p>
-      <ul className="text-left mx-auto w-1/2">
-        <li>Product ID: {price}</li>
-        <li>Email: {email}</li>
-        <li>Total Price: ${price}</li>
-        <li>Quantity: {quantity}</li>
-      </ul>
+    <div className="min-h-[400px] flex items-center justify-center">
+      <div className="rounded-xl p-4 shadow-lg w-full max-w-md  border border-white/30">
+        <h1 className="text-2xl font-bold mb-2 text-center">
+          🎉 Payment Successful!
+        </h1>
+        <p className="text-lg  mb-2">
+          Your order is pending. Confirm your order details below:
+        </p>
 
-      <fetcher.Form method="post" className="mt-6">
-        <input type="hidden" name="productId" value={productId} />
-        <input type="hidden" name="email" value={email} />
-        <input type="hidden" name="price" value={price} />
-        <input type="hidden" name="quantity" value={quantity} />
-        <button
-          className="mt-6 px-4 py-2 bg-blue-500 text-white rounded"
-          type="submit"
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? "Creating Order..." : "Create Order"}
-        </button>
-      </fetcher.Form>
+        <p>
+          <strong>Product ID:</strong> {productId}
+        </p>
+        <p>
+          <strong>Email:</strong> {email}
+        </p>
+        <p>
+          <strong>Total Price:</strong> ${price}
+        </p>
+        <p>
+          <strong>Quantity:</strong> {quantity}
+        </p>
+        <fetcher.Form method="post" className="mt-4 text-center">
+          <input type="hidden" name="productId" value={productId} />
+          <input type="hidden" name="email" value={email} />
+          <input type="hidden" name="price" value={price} />
+          <input type="hidden" name="quantity" value={quantity} />
+
+          <button
+            className="btn btn-active btn-success"
+            type="submit"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Creating Order..." : "Confirm Order"}
+          </button>
+        </fetcher.Form>
+      </div>
     </div>
   );
 }
