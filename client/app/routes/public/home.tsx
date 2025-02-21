@@ -5,6 +5,7 @@ import Product from "components/ui/Product";
 import Testimonials from "components/ui/Testimonials";
 import WhyChooseUs from "components/ui/WhyChooseUs";
 import PaymentProcess from "components/ui/PaymentProcess";
+import FAQ from "components/ui/FAQ";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -42,8 +43,8 @@ export default function Home() {
       <PaymentProcess />
       <Product products={products} />
       <WhyChooseUs />
-
       <Testimonials />
+      <FAQ />
     </div>
   );
 }
