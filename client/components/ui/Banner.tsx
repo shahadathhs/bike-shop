@@ -12,7 +12,7 @@ const banners = [
   },
   {
     id: 2,
-    image: "/banner/1.png",
+    image: "/banner/2.png",
     title: "New Arrivals Are Here!",
     subtitle: "Check out the latest trends in our collection.",
     description:
@@ -20,7 +20,7 @@ const banners = [
   },
   {
     id: 3,
-    image: "/banner/1.png",
+    image: "/banner/3.avif",
     title: "Limited Time Offer!",
     subtitle: "Hurry up! Exclusive discounts on selected items.",
     description:
@@ -28,7 +28,7 @@ const banners = [
   },
   {
     id: 4,
-    image: "/banner/1.png",
+    image: "/banner/4.png",
     title: "Shop Now and Save!",
     subtitle: "Don't miss out on our amazing deals.",
     description:
@@ -44,7 +44,7 @@ const banners = [
   },
   {
     id: 6,
-    image: "/banner/1.png",
+    image: "/banner/3.avif",
     title: "Shop Now and Save!",
     subtitle: "Don't miss out on our amazing deals.",
     description:
@@ -75,14 +75,14 @@ export default function Banner() {
           <img
             src={banner.image}
             alt={banner.title}
-            className="w-full h-full object-cover"
+            className="w-full  object-contain"
           />
-          <div className="absolute inset-0 flex flex-col items-center bg-base-100 bg-opacity-10 justify-center text-center p-6">
-            <h1 className="text-4xl font-bold mb-2 text-primary">
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6">
+            <h1 className="text-4xl font-bold mb-2 text-primary bg-base-100 rounded-lg p-2">
               {banner.title}
             </h1>
-            <p className="text-2xl mb-2 max-w-xl mx-auto text-gray-400">{banner.subtitle}</p>
-            <p className="text-lg text-gray-400 max-w-xl mx-auto">{banner.description}</p>
+            <p className="text-2xl mb-2 max-w-xl mx-auto text-white">{banner.subtitle}</p>
+            <p className="text-lg text-white max-w-xl mx-auto">{banner.description}</p>
             <Link
               to="/product"
               className="btn btn-primary mt-4"

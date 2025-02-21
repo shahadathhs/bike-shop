@@ -34,6 +34,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
         <Links />
+
+        <link rel="icon" href={`/favicon.ico?v=${Date.now()}`} type="image/x-icon" />
       </head>
       <body>
         <Toaster position="top-center" />

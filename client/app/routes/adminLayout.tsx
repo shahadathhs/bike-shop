@@ -1,7 +1,6 @@
 import Cookies from "js-cookie";
 import { useAuth } from "provider/auth/AuthContext";
 import ThemeToggle from "provider/theme/ThemeToggle";
-import { useRef } from "react";
 import { Link, Outlet, redirect } from "react-router";
 
 export const clientLoader = () => {
