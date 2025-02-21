@@ -37,7 +37,7 @@ const createCheckoutSession = async (
       metadata: { productId, email },
       mode: 'payment',
       success_url: `${clientURl}/checkout/success?productId=${productId}&email=${email}&quantity=${quantity}&price=${price}`,
-      cancel_url: `${clientURl}/checkout/cancel`
+      cancel_url: `${clientURl}/checkout/cancel?productId=${productId}`
     })
 
     // * step 3: send the session id to the client

@@ -14,6 +14,8 @@ export default [
     route("/product", "routes/public/product.tsx"),
     route("/product/:id", "routes/public/productDetails.tsx"), // * protected route
     route("/product/:id/checkout", "routes/public/checkout.tsx"), // * protected route
+    route("/checkout/success", "routes/public/checkoutSuccess.tsx"), // * protected route
+    route("/checkout/cancel", "routes/public/checkoutCancel.tsx"), // * protected route
   ]),
 
   //* Auth routes

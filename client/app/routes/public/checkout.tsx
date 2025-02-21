@@ -135,7 +135,7 @@ export default function CheckoutPage() {
         </div>
 
         <input type="hidden" name="price" value={product.price} />
-        <input type="hidden" name="productId" value={product.id} />
+        <input type="hidden" name="productId" value={product._id} />
         <input type="hidden" name="productName" value={product.name} />
         <input type="hidden" name="email" value={user.email} />
 
