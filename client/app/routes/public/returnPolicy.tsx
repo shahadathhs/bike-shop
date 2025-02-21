@@ -1,6 +1,6 @@
 export default function ReturnPolicy() {
   return (
-    <div className="container mx-auto py-16">
+    <div className="container mx-auto py-10">
       <h1 className="text-4xl font-bold mb-4">Return Policy</h1>
       <p className="text-lg mb-6">
         At Bike Store, we want you to be completely satisfied with your
