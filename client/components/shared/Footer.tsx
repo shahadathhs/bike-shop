@@ -14,6 +14,7 @@ export default function Footer() {
           Providing reliable bikes since 2020
         </p>
       </aside>
+
       <nav>
         <h6 className="footer-title">Social</h6>
         <div className="grid grid-flow-col gap-4">
@@ -52,6 +53,27 @@ export default function Footer() {
           </a>
         </div>
       </nav>
+
+      <div className="mt-6">
+        {/* Policy Links */}
+        <div className="flex space-x-6">
+          <Link to="/privacy-policy" className="text-white hover:underline">
+            Privacy Policy
+          </Link>
+          <Link to="/terms-of-service" className="text-white hover:underline">
+            Terms of Service
+          </Link>
+          <Link to="/return-policy" className="text-white hover:underline">
+            Return Policy
+          </Link>
+        </div>
+
+        {/* Contact Info */}
+        <div className="mt-4">
+          <p className="text-white">Email: support@bikestore.com</p>
+          <p className="text-white">Phone: +1 234 567 890</p>
+        </div>
+      </div>
     </footer>
   );
 }

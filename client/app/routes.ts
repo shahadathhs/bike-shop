@@ -9,13 +9,21 @@ import {
 export default [
   // * Home Layout routes
   layout("routes/publicLayout.tsx", [
+    // * Public routes
     index("routes/public/home.tsx"),
     route("/about", "routes/public/about.tsx"),
     route("/product", "routes/public/product.tsx"),
-    route("/product/:id", "routes/public/productDetails.tsx"), // * protected route
-    route("/product/:id/checkout", "routes/public/checkout.tsx"), // * protected route
-    route("/checkout/success", "routes/public/checkoutSuccess.tsx"), // * protected route
-    route("/checkout/cancel", "routes/public/checkoutCancel.tsx"), // * protected route
+
+    // * Legal routes
+    route("/terms-of-service", "routes/public/termsOfService.tsx"),
+    route("/privacy-policy", "routes/public/privacyPolicy.tsx"),
+    route("/return-policy", "routes/public/returnPolicy.tsx"),
+
+    // * Protected routes
+    route("/product/:id", "routes/public/productDetails.tsx"),
+    route("/product/:id/checkout", "routes/public/checkout.tsx"),
+    route("/checkout/success", "routes/public/checkoutSuccess.tsx"),
+    route("/checkout/cancel", "routes/public/checkoutCancel.tsx"),
   ]),
 
   //* Auth routes
