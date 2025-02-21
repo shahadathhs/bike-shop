@@ -35,12 +35,12 @@ export const clientLoader = async () => {
 
 export default function Home() {
   const loaderData = useLoaderData();
-  const products = loaderData.data.bikes;
+  const products = loaderData?.data?.bikes;
   return (
     <div>
       <Banner />
       <PaymentProcess />
-      <Product products={products} />
+      {products && <Product products={products} />}
       <WhyChooseUs />
       <Testimonials />
       <FAQ />
