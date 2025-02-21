@@ -3,6 +3,8 @@ import type { Route } from "./+types/home";
 import { useLoaderData } from "react-router";
 import Product from "components/ui/Product";
 import Testimonials from "components/ui/Testimonials";
+import WhyChooseUs from "components/ui/WhyChooseUs";
+import PaymentProcess from "components/ui/PaymentProcess";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -37,9 +39,9 @@ export default function Home() {
   return (
     <div>
       <Banner />
-
-      {/* Products section */}
+      <PaymentProcess />
       <Product products={products} />
+      <WhyChooseUs />
 
       <Testimonials />
     </div>
