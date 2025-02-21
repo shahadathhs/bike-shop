@@ -14,20 +14,7 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
 // ** cors **
-app.use(
-  cors({
-    origin: [
-      'http://localhost:5173',
-      'http://localhost:5174',
-      'http://localhost:4173',
-      'http://localhost:4174',
-      'http://localhost:3000',
-      'https://bike-shop-client-two.vercel.app'
-    ],
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-    credentials: true
-  })
-)
+app.use(cors())
 
 // ** API Info Logger **
 app.use(apiInfoLogger)
