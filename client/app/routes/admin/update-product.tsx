@@ -108,10 +108,8 @@ export const clientAction = async ({ request }: ClientActionFunctionArgs) => {
 export default function UpdateProduct() {
   const loaderData = useLoaderData();
   const product = loaderData.product.data;
-  // console.log("product", product);
 
   const fetcher = useFetcher();
-  // console.log("fetcher", fetcher);
   const isSubmitting = fetcher.state === "submitting";
 
   const navigate = useNavigate();
@@ -138,7 +136,6 @@ export default function UpdateProduct() {
   // * Convert selected image to base64 string
   const handleImageChange = (e: any) => {
     const file = e.target.files[0];
-    console.log(file);
     if (file) {
       const reader = new FileReader();
       if (file.type === "image/jpeg" || file.type === "image/png") {

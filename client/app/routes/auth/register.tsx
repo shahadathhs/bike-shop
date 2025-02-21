@@ -62,7 +62,6 @@ export const clientAction = async ({ request }: ClientActionFunctionArgs) => {
 export default function Register() {
   const fetcher = useFetcher();
   const isSubmitting = fetcher.state === "submitting";
-  console.log("fetcher", fetcher);
 
   const navigate = useNavigate();
 

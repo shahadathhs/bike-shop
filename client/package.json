@@ -13,6 +13,7 @@
     "@react-router/node": "^7.1.5",
     "@react-router/serve": "^7.1.5",
     "@stripe/stripe-js": "^5.6.0",
+    "cloudinary": "^2.5.1",
     "isbot": "^5.1.17",
     "js-cookie": "^3.0.5",
     "lucide-react": "^0.475.0",

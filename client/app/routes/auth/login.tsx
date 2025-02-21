@@ -29,7 +29,6 @@ export const clientAction = async ({ request }: ClientActionFunctionArgs) => {
   });
 
   const data = await response.json();
-  console.log("data", data);
 
   if (response.ok) {
     return {

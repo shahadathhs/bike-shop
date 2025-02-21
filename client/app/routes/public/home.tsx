@@ -36,7 +36,6 @@ export const clientLoader = async () => {
 export default function Home() {
   const loaderData = useLoaderData();
   const products = loaderData.data.bikes;
-  console.log("products", products);
   return (
     <div>
       <Banner />

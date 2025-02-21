@@ -75,7 +75,6 @@ export const clientAction = async ({ request }: { request: Request }) => {
 
     const responseData = await response.json();
     const { session } = responseData;
-    console.log("Session:", session);
 
     // * Redirect to checkout
     const stripe = await stripePromise;

@@ -82,7 +82,6 @@ export default function ALLProductPage() {
 
       if (response.ok) {
         const data = await response.json();
-        console.log("Fetched products:", data);
         setProducts(data.data.bikes);
         setMetadata(data.data.metadata);
       } else {

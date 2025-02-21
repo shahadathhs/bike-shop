@@ -73,16 +73,16 @@ export default function Authentication(...requiredRoles: TRole[]) {
 
       // * Move to the next middleware
       next()
-    } catch (error) {
-      if (error instanceof jwt.JsonWebTokenError) {
-        const error = new AppError(httpStatusCode.UNAUTHORIZED, 'Invalid token pls login again!')
+    } catch (err) {
+      if (err instanceof jwt.JsonWebTokenError) {
+        const error = new AppError(httpStatusCode.UNAUTHORIZED, err.message || 'Invalid token pls login again!')
         const errorResponse = simplifyError(error)
         sendError(res, errorResponse)
         next(error)
       } else {
-        const errorResponse = simplifyError(error)
+        const errorResponse = simplifyError(err)
         sendError(res, errorResponse)
-        next(error)
+        next(err)
       }
     }
   }
