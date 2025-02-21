@@ -134,7 +134,7 @@ export default function ALLProductPage() {
               <div key={product._id} className="card bg-base-100 shadow-lg">
                 <figure>
                   <img
-                    src={product.image || "https://via.placeholder.com/150"}
+                    src={product.image}
                     alt={product.name}
                     className="object-cover h-48 w-full"
                   />
@@ -142,7 +142,10 @@ export default function ALLProductPage() {
                 <div className="card-body">
                   <h2 className="card-title">{product.name}</h2>
                   <p>{product.description.substring(0, 100)}...</p>
-                  <p className="text-lg font-semibold">${product.price}</p>
+                  <p className="text-lg font-semibold">
+                    {" "}
+                    <strong>Price:</strong> ${product.price}
+                  </p>
                   <div className="card-actions justify-end">
                     <Link
                       to={`/product/${product._id}`}
