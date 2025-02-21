@@ -4,11 +4,13 @@ import {
   useFetcher,
   useLoaderData,
   useNavigate,
-  type ClientActionFunctionArgs,
+  type ActionFunctionArgs,
   type ClientLoaderFunctionArgs,
 } from "react-router";
 import { brands, categories, models } from "utils/bikeUtils";
 import { getToken } from "utils/getToken";
+import { parseFormData, type FileUpload } from "@mjackson/form-data-parser";
+import { v2 as cloudinary } from "cloudinary";
 
 export const clientLoader = async ({ params }: ClientLoaderFunctionArgs) => {
   const id = params.id;
@@ -43,12 +45,53 @@ export const clientLoader = async ({ params }: ClientLoaderFunctionArgs) => {
   }
 };
 
-export const clientAction = async ({ request }: ClientActionFunctionArgs) => {
-  const formData = await request.formData();
+export const action = async ({ request }: ActionFunctionArgs) => {
+  // * step 1:  Configure Cloudinary
+  cloudinary.config({
+    cloud_name: import.meta.env.VITE_CLOUDINARY_CLOUD_NAME,
+    api_key: import.meta.env.VITE_CLOUDINARY_API_KEY,
+    api_secret: import.meta.env.VITE_CLOUDINARY_API_SECRET,
+  });
+
+  // * step 2: Custom upload handler that streams the file to Cloudinary
+  async function uploadHandler(fileUpload: FileUpload) {
+    if (fileUpload.fieldName === "image") {
+      return new Promise<string>((resolve, reject) => {
+        // Start Cloudinary upload stream
+        const uploadStream = cloudinary.uploader.upload_stream(
+          { folder: "bikes" }, // Optional: specify a folder in Cloudinary
+          (error, result) => {
+            if (error) {
+              return reject(error);
+            }
+            // Resolve with the secure URL from Cloudinary
+            if (result && result.secure_url) {
+              resolve(result.secure_url);
+            } else {
+              reject(new Error("Cloudinary upload failed"));
+            }
+          }
+        );
+        // Pipe the file stream into Cloudinary's upload stream
+        fileUpload.stream().pipeTo(
+          new WritableStream({
+            write(chunk) {
+              uploadStream.write(chunk);
+            },
+            close() {
+              uploadStream.end();
+            },
+          })
+        );
+      });
+    }
+    // * For other fields/files, simply pass the raw data
+  }
+
+  // * step 3: Parse the form data using the custom upload handler
+  const formData = await parseFormData(request, uploadHandler);
+
   const id = formData.get("id") as string;
-
-  const token = getToken();
-
   const name = formData.get("name") as string;
   const brand = formData.get("brand") as string;
   const modelName = formData.get("modelName") as string;
@@ -57,6 +100,7 @@ export const clientAction = async ({ request }: ClientActionFunctionArgs) => {
   const description = formData.get("description") as string;
   const category = formData.get("category") as string;
   const image = formData.get("image") as string;
+  const token = formData.get("csrf_token") as string;
 
   const formDataObject = {
     name,
@@ -112,6 +156,7 @@ export default function UpdateProduct() {
   const fetcher = useFetcher();
   const isSubmitting = fetcher.state === "submitting";
 
+  const token = getToken() as string;
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -153,7 +198,12 @@ export default function UpdateProduct() {
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-3xl font-bold my-4 text-center">Update Product</h1>
-      <fetcher.Form method="post" className="max-w-lg mx-auto space-y-4">
+      <fetcher.Form
+        method="post"
+        encType="multipart/form-data"
+        className="max-w-lg mx-auto space-y-4"
+      >
+        <input type="hidden" name="csrf_token" value={token} />
         <input type="hidden" name="id" value={product._id} />
 
         <div>
@@ -278,11 +328,12 @@ export default function UpdateProduct() {
           <input
             type="file"
             id="image"
+            name="image"
             onChange={handleImageChange}
             className="file-input file-input-bordered w-full"
             accept="image/*"
           />
-          <input type="hidden" name="image" value={image} />
+       
           {image && (
             <img
               src={image}

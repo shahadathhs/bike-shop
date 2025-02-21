@@ -33,7 +33,7 @@ export default function ProductDetailsPage() {
         {/* Product Image */}
         <div className="md:w-1/2">
           <img
-            src={product.image || "https://via.placeholder.com/400"}
+            src={product.image}
             alt={product.name}
             className="w-full h-auto object-cover rounded"
           />
