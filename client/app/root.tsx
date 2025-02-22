@@ -12,6 +12,7 @@ import type { Route } from "./+types/root";
 import { ThemeProvider } from "provider/theme/ThemeProvider";
 import { AuthProvider } from "provider/auth/AuthProvider";
 import { Toaster } from "react-hot-toast";
+import { useEffect, useState } from "react";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -35,7 +36,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
 
-        <link rel="icon" href={`/favicon.ico?v=${Date.now()}`} type="image/x-icon" />
+        <link
+          rel="icon"
+          href={`/favicon.ico?v=${Date.now()}`}
+          type="image/x-icon"
+        />
       </head>
       <body>
         <Toaster position="top-center" />
@@ -48,6 +53,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
+  const [isClient, setIsClient] = useState(false);
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  //* show a loading indicator while the app is initializing
+  if (!isClient) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <AuthProvider>
       <ThemeProvider>

@@ -1,6 +1,6 @@
 import Banner from "components/ui/Banner";
 import type { Route } from "./+types/home";
-import { useLoaderData } from "react-router";
+import { useLoaderData, type LoaderFunction } from "react-router";
 import Product from "components/ui/Product";
 import Testimonials from "components/ui/Testimonials";
 import WhyChooseUs from "components/ui/WhyChooseUs";
@@ -14,7 +14,7 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
-export const clientLoader = async () => {
+export const loader: LoaderFunction = async () => {
   try {
     const response = await fetch(`${import.meta.env.VITE_API_URL}/bikes`);
 
