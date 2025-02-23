@@ -101,7 +101,7 @@ const updatePassword = async (req: Request, res: Response, next: NextFunction) =
 
 const getAllUsers = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const result = await AuthService.getAllUsers()
+    const result = await AuthService.getAllUsers(req.query)
     sendResponse(res, {
       statusCode: httpStatusCode.OK,
       success: true,

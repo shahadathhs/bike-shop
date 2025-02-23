@@ -4,20 +4,29 @@ import { getToken } from "utils/getToken";
 
 export default function Users() {
   const [users, setUsers] = useState([]);
-  const [metadata, setMetadata] = useState({ total: 0, page: 1, limit: 10 });
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [emailFilter, setEmailFilter] = useState("");
 
   const token = getToken();
 
   // Fetch users with pagination and optional email filtering.
-  const fetchUsers = async (page = 1, limit = 10) => {
+  const fetchUsers = async (page = 1, limit = 10, email = "") => {
     setLoading(true);
     try {
+      const queryParams = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString(),
+      });
+      // Append the email query parameter if provided.
+      if (email) {
+        queryParams.append("email", email);
+      }
       const response = await fetch(
-        `${
-          import.meta.env.VITE_API_URL
-        }/auth/getAll?page=${page}&limit=${limit}`,
+        `${import.meta.env.VITE_API_URL}/auth/getAll?${queryParams.toString()}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -31,7 +40,7 @@ export default function Users() {
       }
       const responseData = await response.json();
       setUsers(responseData.data.users);
-      setMetadata(responseData.data.metadata);
+      setTotal(responseData.data.metadata.total);
     } catch (err: any) {
       console.error(err);
       setError(err.message || "Failed to fetch users");
@@ -40,25 +49,39 @@ export default function Users() {
     setLoading(false);
   };
 
+  // Fetch users on state changes.
   useEffect(() => {
     if (token) {
-      fetchUsers(metadata.page, metadata.limit);
+      fetchUsers(page, limit, emailFilter);
     }
-  }, [token, metadata.page, metadata.limit]);
+  }, [token, page, limit, emailFilter]);
 
-  // Calculate total pages for pagination
-  const totalPages = Math.ceil(metadata.total / metadata.limit);
+  const totalPages = Math.ceil(total / limit);
 
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-3xl font-bold mb-4">Users</h1>
+
+      {/* Email Filter Input */}
+      <div className="mb-4">
+        <input
+          type="email"
+          value={emailFilter}
+          onChange={(e) => {
+            setPage(1); // Reset to first page on filter change.
+            setEmailFilter(e.target.value);
+          }}
+          placeholder="Filter by email"
+          className="input input-bordered"
+        />
+      </div>
 
       {loading && <p>Loading users...</p>}
       {error && <p className="text-red-500">{error}</p>}
       {!loading && users.length === 0 && <p>No users found.</p>}
       {!loading && users.length > 0 && (
         <div className="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
-          <table className=" w-full table table-zebra">
+          <table className="w-full table table-zebra">
             <thead className="bg-gray-200">
               <tr>
                 <th>Name</th>
@@ -74,9 +97,7 @@ export default function Users() {
                   <td>{user.name}</td>
                   <td>{user.email}</td>
                   <td>{user.role}</td>
-                  <td>
-                    {user.isActive ? "Active" : "Inactive"}
-                  </td>
+                  <td>{user.isActive ? "Active" : "Inactive"}</td>
                   <td className="flex gap-2">
                     {user.isActive && (
                       <button className="btn btn-error btn-sm">
@@ -109,42 +130,31 @@ export default function Users() {
       {/* Pagination Controls */}
       <div className="flex justify-end gap-4 items-center mt-4">
         <button
-          onClick={() =>
-            setMetadata((prev) => ({
-              ...prev,
-              page: Math.max(prev.page - 1, 1),
-            }))
-          }
+          onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
           className="btn btn-outline btn-sm"
-          disabled={metadata.page === 1}
+          disabled={page === 1}
         >
           Previous
         </button>
         <span className="text-secondary">
-          Page {metadata.page} of {totalPages}
+          Page {page} of {totalPages}
         </span>
         <button
           onClick={() =>
-            setMetadata((prev) => ({
-              ...prev,
-              page: prev.page < totalPages ? prev.page + 1 : prev.page,
-            }))
+            setPage((prev) => (prev < totalPages ? prev + 1 : prev))
           }
           className="btn btn-outline btn-sm"
-          disabled={metadata.page >= totalPages}
+          disabled={page >= totalPages}
         >
           Next
         </button>
         <div>
           <select
-            value={metadata.limit}
-            onChange={(e) =>
-              setMetadata((prev) => ({
-                ...prev,
-                limit: parseInt(e.target.value),
-                page: 1,
-              }))
-            }
+            value={limit}
+            onChange={(e) => {
+              setPage(1); // Reset page when limit changes.
+              setLimit(parseInt(e.target.value));
+            }}
             className="select select-bordered btn-sm"
           >
             <option value="10">10 per page</option>
