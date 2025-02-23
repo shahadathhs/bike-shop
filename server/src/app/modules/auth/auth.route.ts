@@ -19,4 +19,11 @@ router.post('/login', validateRequest(AuthValidation.loginUserZodSchema), AuthCo
 
 router.post('/deactivate/:id', Authentication(UserRole.ADMIN), AuthController.deactivateUser)
 
+router.patch(
+  '/update-profile',
+  Authentication(UserRole.CUSTOMER),
+  validateRequest(AuthValidation.updateProfileZodSchema),
+  AuthController.updateProfile
+)
+
 export const AuthRoutes = router

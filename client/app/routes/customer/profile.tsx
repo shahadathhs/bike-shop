@@ -1,15 +1,22 @@
 import React, { useState } from "react";
 import { useAuth } from "provider/auth/AuthContext";
 import toast from "react-hot-toast";
+import Cookies from "js-cookie";
+import type { IUser } from "provider/auth/AuthProvider";
 
 export default function CustomerProfile() {
   const { user, login } = useAuth();
-  const [name, setName] = useState(user?.name || "");
-  const [email, setEmail] = useState(user?.email || "");
+  const cookieUser = Cookies.get("user");
+  const parsedUser: IUser = JSON.parse(cookieUser || "{}");
+
+  const [name, setName] = useState(user?.name || parsedUser.name || "");
+  const [email, setEmail] = useState(user?.email || parsedUser.email || "");
+
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [loading1, setLoading1] = useState(false);
 
   const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,9 +24,9 @@ export default function CustomerProfile() {
     try {
       // Call backend to update profile info
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/users/profile`,
+        `${import.meta.env.VITE_API_URL}/auth/update-profile`,
         {
-          method: "PUT",
+          method: "PATCH",
           headers: {
             Authorization: `Bearer ${user.token}`,
             "Content-Type": "application/json",
@@ -28,8 +35,8 @@ export default function CustomerProfile() {
         }
       );
       const responseData = await response.json();
-      // Update context (and possibly cookies/local storage) with new user info
-      login(responseData.data.data);
+      console.log("responseData", responseData);
+      login({ ...user, name });
       toast.success("Profile updated successfully!");
     } catch (error: any) {
       console.error("Error updating profile:", error);
@@ -44,7 +51,7 @@ export default function CustomerProfile() {
       toast.error("New passwords do not match");
       return;
     }
-    setLoading(true);
+    setLoading1(true);
     try {
       // Call backend to update password (currentPassword is required for security)
       await fetch(`${import.meta.env.VITE_API_URL}/users/password`, {
@@ -63,7 +70,7 @@ export default function CustomerProfile() {
     } catch (error: any) {
       toast.error(error.response?.data?.error || "Failed to update password");
     }
-    setLoading(false);
+    setLoading1(false);
   };
 
   return (
@@ -86,7 +93,7 @@ export default function CustomerProfile() {
         </div>
         <div>
           <label htmlFor="email" className="label">
-            Email
+            Email (Cannot be changed)
           </label>
           <input
             type="email"
@@ -94,6 +101,7 @@ export default function CustomerProfile() {
             onChange={(e) => setEmail(e.target.value)}
             className="input input-bordered w-full"
             required
+            disabled
           />
         </div>
         <button type="submit" disabled={loading} className="btn btn-primary">
@@ -143,10 +151,10 @@ export default function CustomerProfile() {
           </div>
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading1}
             className="btn btn-secondary"
           >
-            {loading ? "Updating..." : "Update Password"}
+            {loading1 ? "Updating..." : "Update Password"}
           </button>
         </form>
       </div>

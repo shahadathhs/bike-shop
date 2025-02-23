@@ -60,8 +60,17 @@ const deactivateUser = async (id: string): Promise<IUser> => {
   return updatedUser
 }
 
+const updateProfile = async (id: string, payload: Partial<IUser>): Promise<IUser> => {
+  const updatedUser = await User.findByIdAndUpdate(id, payload, { new: true })
+  if (!updatedUser) {
+    throw new AppError(httpStatusCode.NOT_FOUND, 'User not found')
+  }
+  return updatedUser
+}
+
 export const AuthService = {
   registerUser,
   loginUser,
-  deactivateUser
+  deactivateUser,
+  updateProfile
 }
