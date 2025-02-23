@@ -54,14 +54,20 @@ export default function CustomerProfile() {
     setLoading1(true);
     try {
       // Call backend to update password (currentPassword is required for security)
-      await fetch(`${import.meta.env.VITE_API_URL}/users/password`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${user.token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ currentPassword, newPassword }),
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/auth/update-password`,
+        {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ currentPassword, newPassword }),
+        }
+      );
+      const responseData = await response.json();
+      console.log("responseData", responseData);
+
       toast.success("Password updated successfully!");
       // Clear password fields after successful update
       setCurrentPassword("");

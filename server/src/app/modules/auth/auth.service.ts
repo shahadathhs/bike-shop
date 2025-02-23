@@ -1,3 +1,4 @@
+import bcrypt from 'bcryptjs'
 import mongoose from 'mongoose'
 
 import { httpStatusCode } from '../../enum/statusCode'
@@ -67,10 +68,42 @@ const updateProfile = async (id: string, payload: Partial<IUser>): Promise<IUser
   }
   return updatedUser
 }
+const updatePassword = async (
+  id: string,
+  payload: { currentPassword: string; newPassword: string }
+): Promise<IUser> => {
+  const { currentPassword, newPassword } = payload
+  const user = await User.findById(id).select('+password')
+  if (!user) {
+    throw new AppError(httpStatusCode.NOT_FOUND, 'User not found')
+  }
+
+  const isPasswordMatched = await bcrypt.compare(currentPassword, user.password)
+  if (!isPasswordMatched) {
+    throw new AppError(httpStatusCode.UNAUTHORIZED, 'Invalid credentials')
+  }
+  const salt = await bcrypt.genSalt(10)
+  const updatedPassword = await bcrypt.hash(newPassword, salt)
+
+  await User.findByIdAndUpdate(id, { password: updatedPassword }, { new: true })
+
+  // Now fetch the updated user
+  const updatedUser = await User.findById(id).select('+password')
+  if (!updatedUser) {
+    throw new AppError(httpStatusCode.NOT_FOUND, 'User not found')
+  }
+
+  const passwordMatch = await updatedUser.matchPassword(newPassword)
+  if (!passwordMatch) {
+    throw new AppError(httpStatusCode.INTERNAL_SERVER_ERROR, 'Password update failed')
+  }
+  return updatedUser
+}
 
 export const AuthService = {
   registerUser,
   loginUser,
   deactivateUser,
-  updateProfile
+  updateProfile,
+  updatePassword
 }

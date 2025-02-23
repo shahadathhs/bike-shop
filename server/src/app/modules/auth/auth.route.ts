@@ -26,4 +26,10 @@ router.patch(
   AuthController.updateProfile
 )
 
+router.patch(
+  '/update-password',
+  Authentication(UserRole.CUSTOMER),
+  AuthController.updatePassword
+)
+
 export const AuthRoutes = router
