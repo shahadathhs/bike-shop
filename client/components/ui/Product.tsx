@@ -30,7 +30,7 @@ export default function Product({ products }: any) {
           </div>
         ))}
       </div>
-      <div className="text-center mt-4">
+      <div className="text-center mt-8">
         <Link to="/product" className="btn btn-primary">
           View All Products
         </Link>

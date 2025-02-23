@@ -30,7 +30,7 @@ export default function Testimonials() {
         <h2 className="text-3xl font-bold mb-6">What Our Customers Say</h2>
         <div className="flex flex-wrap justify-center gap-8">
           {testimonials.map((testimonial) => (
-            <div key={testimonial.id} className="w-full sm:w-1/3 p-4 bg-white rounded-lg shadow-lg">
+            <div key={testimonial.id} className="w-full sm:w-1/3 p-4 border rounded-lg shadow-lg">
               <div className="flex justify-center mb-4">
                 <img
                   src={testimonial.image}
@@ -38,7 +38,7 @@ export default function Testimonials() {
                   className="w-16 h-16 rounded-full object-cover"
                 />
               </div>
-              <p className="text-lg italic text-gray-700 mb-4">"{testimonial.text}"</p>
+              <p className="text-lg italic text-gray-400 mb-4">"{testimonial.text}"</p>
               <p className="text-md font-semibold">{testimonial.name}</p>
             </div>
           ))}

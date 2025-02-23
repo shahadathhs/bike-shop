@@ -21,6 +21,7 @@
     "isbot": "^5.1.17",
     "js-cookie": "^3.0.5",
     "lucide-react": "^0.475.0",
+    "nanoid": "^5.1.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hot-toast": "^2.5.2",

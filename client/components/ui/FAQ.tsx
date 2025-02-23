@@ -37,7 +37,7 @@ export default function FAQ() {
           {faqData.map((item) => (
             <div
               key={item.question}
-              className="bg-white p-6 rounded-lg shadow-md"
+              className="border p-6 rounded-lg shadow-md"
             >
               <h3 className="text-xl font-semibold mb-2">{item.question}</h3>
               <p>{item.answer}</p>
