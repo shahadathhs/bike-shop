@@ -1,6 +1,7 @@
 import { useAuth } from "provider/auth/AuthContext";
 import ThemeToggle from "provider/theme/ThemeToggle";
 import { Link, NavLink } from "react-router";
+import logoImg from "assets/logo.png";
 
 function RouterNavLink({
   to,
@@ -76,7 +77,7 @@ export default function NavBar() {
         </div>
         {/* Logo */}
         <Link to="/">
-          <img src="/motorbike.png" alt="logo" className="max-h-16" />
+          <img src={logoImg} alt="logo" className="max-h-16" />
         </Link>
       </div>
 

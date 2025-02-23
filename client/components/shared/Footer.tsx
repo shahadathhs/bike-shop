@@ -1,4 +1,5 @@
 import { Link } from "react-router";
+import logoImg from "assets/logo.png";
 
 export default function Footer() {
   return (
@@ -6,7 +7,7 @@ export default function Footer() {
       <aside>
         {/* Logo */}
         <Link to="/">
-          <img src="/motorbike.png" alt="logo" className="max-h-20" />
+          <img src={logoImg} alt="logo" className="max-h-20" />
         </Link>
         <p>
           Bike Store.

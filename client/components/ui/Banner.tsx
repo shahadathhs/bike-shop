@@ -1,10 +1,14 @@
 import { useState } from "react";
 import { Link } from "react-router";
+import b1 from "assets/banner/1.png";
+import b2 from "assets/banner/2.png";
+import b3 from "assets/banner/3.avif";
+import b4 from "assets/banner/4.png";
 
 const banners = [
   {
     id: 1,
-    image: "/banner/1.png",
+    image: b1,
     title: "Discover the Best Deals!",
     subtitle: "Shop now and save big on your favorite products.",
     description:
@@ -12,7 +16,7 @@ const banners = [
   },
   {
     id: 2,
-    image: "/banner/2.png",
+    image: b2,
     title: "New Arrivals Are Here!",
     subtitle: "Check out the latest trends in our collection.",
     description:
@@ -20,7 +24,7 @@ const banners = [
   },
   {
     id: 3,
-    image: "/banner/3.avif",
+    image: b3,
     title: "Limited Time Offer!",
     subtitle: "Hurry up! Exclusive discounts on selected items.",
     description:
@@ -28,7 +32,7 @@ const banners = [
   },
   {
     id: 4,
-    image: "/banner/4.png",
+    image: b4,
     title: "Shop Now and Save!",
     subtitle: "Don't miss out on our amazing deals.",
     description:
@@ -36,7 +40,7 @@ const banners = [
   },
   {
     id: 5,
-    image: "/banner/1.png",
+    image: b2,
     title: "Hurry Up!",
     subtitle: "Hurry up! Exclusive discounts on selected items.",
     description:
@@ -44,7 +48,7 @@ const banners = [
   },
   {
     id: 6,
-    image: "/banner/3.avif",
+    image: b3,
     title: "Shop Now and Save!",
     subtitle: "Don't miss out on our amazing deals.",
     description:

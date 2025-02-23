@@ -1,22 +1,26 @@
+import c1 from "assets/customer/john.png";
+import c2 from "assets/customer/jane.png";
+import c3 from "assets/customer/mark.png";
+
 export default function Testimonials() {
   const testimonials = [
     {
       id: 1,
       name: "John Doe",
       text: "Amazing service! I found exactly what I needed and the shopping experience was fantastic.",
-      image: "/customer/john.png",
+      image: c1,
     },
     {
       id: 2,
       name: "Jane Smith",
       text: "Love the quality of the products! I'll definitely be shopping here again.",
-      image: "/customer/jane.png",
+      image: c2,
     },
     {
       id: 3,
       name: "Mark Lee",
       text: "Great prices and fast shipping! Highly recommend this store.",
-      image: "/customer/mark.png",
+      image: c3,
     },
   ];
 
