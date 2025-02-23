@@ -3,7 +3,7 @@ import { useAuth } from "provider/auth/AuthContext";
 import ThemeToggle from "provider/theme/ThemeToggle";
 import { Link, Outlet, redirect } from "react-router";
 
-export const clientLoader = () => {
+export const clientLoader = ({ request }: { request: Request }) => {
   const user = Cookies.get("user");
   if (!user) {
     return redirect("/auth/login");
@@ -12,6 +12,13 @@ export const clientLoader = () => {
   const parsedUser = JSON.parse(user);
   if (parsedUser.role !== "customer") {
     return redirect("/");
+  }
+
+  const url = new URL(request.url)
+  const pathname = url.pathname
+  // console.log('pathname', pathname)
+  if (pathname === "/dashboard/customer") {
+    return redirect("/dashboard/customer/orders")
   }
 
   return null;
@@ -78,8 +85,8 @@ export default function DashboardCustomerLayout() {
 }
 const navItems = [
   { label: "Home", route: "/" },
-  { label: "Customer", route: "/dashboard/customer" },
+  // { label: "Customer", route: "/dashboard/customer" },
   { label: "Orders", route: "/dashboard/customer/orders" },
   { label: "Profile", route: "/dashboard/customer/profile" },
-  { label: "Orders Tracking", route: "/dashboard/customer/tracking" },
+  // { label: "Orders Tracking", route: "/dashboard/customer/tracking" },
 ];

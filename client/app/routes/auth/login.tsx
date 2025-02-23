@@ -64,9 +64,9 @@ export default function Login() {
         await new Promise((resolve) => setTimeout(resolve, 1000));
 
         if (user.role === "admin") {
-          navigate("/dashboard/admin");
+          navigate("/dashboard/admin/analytics");
         } else if (user.role === "customer") {
-          navigate("/dashboard/customer");
+          navigate("/dashboard/customer/orders");
         }
       } else if (fetcher.data?.error) {
         toast.dismiss();

@@ -3,7 +3,7 @@ import { useAuth } from "provider/auth/AuthContext";
 import ThemeToggle from "provider/theme/ThemeToggle";
 import { Link, Outlet, redirect } from "react-router";
 
-export const clientLoader = () => {
+export const clientLoader = ({ request }: { request: Request }) => {
   const user = Cookies.get("user");
   if (!user) {
     return redirect("/auth/login");
@@ -12,6 +12,13 @@ export const clientLoader = () => {
   const parsedUser = JSON.parse(user);
   if (parsedUser.role !== "admin") {
     return redirect("/");
+  }
+
+  const url = new URL(request.url)
+  const pathname = url.pathname
+  // console.log('pathname', pathname)
+  if (pathname === "/dashboard/admin") {
+    return redirect('/dashboard/admin/analytics')
   }
 
   return null;
@@ -78,7 +85,7 @@ export default function DashboardAdminLayout() {
 }
 const navItems = [
   { label: "Home", route: "/" },
-  { label: "Admin", route: "/dashboard/admin" },
+  // { label: "Admin", route: "/dashboard/admin" },
   { label: "Users", route: "/dashboard/admin/users" },
   { label: "Analytics", route: "/dashboard/admin/analytics" },
   { label: "Orders", route: "/dashboard/admin/orders" },
