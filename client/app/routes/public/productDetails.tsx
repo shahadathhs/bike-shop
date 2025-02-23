@@ -1,5 +1,13 @@
 import { Link, redirect, useLoaderData } from "react-router";
 import { getToken } from "utils/getToken";
+import type { Route } from "./+types/productDetails";
+
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: 'Bike Store - Product Details' },
+    { name: "description", content: "Explore our wide range of bikes and find the perfect one for you!" },
+  ];
+}
 
 export const clientLoader = async ({ params }: { params: { id: string } }) => {
   const token = getToken();

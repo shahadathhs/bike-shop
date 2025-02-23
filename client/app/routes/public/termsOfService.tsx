@@ -1,3 +1,12 @@
+import type { Route } from "./+types/termsOfService";
+
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Bike Store - Terms of Service" },
+    { name: "description", content: "Know more about our terms of service" },
+  ];
+}
+
 export default function TermsOfService() {
   return (
     <div className="container mx-auto py-10">

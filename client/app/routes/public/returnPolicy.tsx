@@ -1,3 +1,12 @@
+import type { Route } from "./+types/returnPolicy";
+
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Bike Store - Return Policy" },
+    { name: "description", content: "Know more about our return policy" },
+  ];
+}
+
 export default function ReturnPolicy() {
   return (
     <div className="container mx-auto py-10">

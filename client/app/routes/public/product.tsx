@@ -4,6 +4,14 @@ import { Link } from "react-router";
 import { getToken } from "utils/getToken";
 import { useDebounce } from "utils/debounce";
 import { brands, categories, models } from "utils/bikeUtils";
+import type { Route } from "./+types/product";
+
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Bike Store - Products" },
+    { name: "description", content: "See & buy bikes" },
+  ];
+}
 
 export default function ALLProductPage() {
   // Local state for products and pagination metadata.

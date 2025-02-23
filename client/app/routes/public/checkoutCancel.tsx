@@ -2,6 +2,14 @@ import React from "react";
 import { Link, redirect, useLocation } from "react-router";
 import { XCircleIcon } from "lucide-react";
 import { getToken } from "utils/getToken";
+import type { Route } from "./+types/checkoutCancel";
+
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Bike Store - Checkout Cancel" },
+    { name: "description", content: "Checkout Cancel" },
+  ];
+}
 
 export const clientLoader = async ({ params }: { params: { id: string } }) => {
   const token = getToken();

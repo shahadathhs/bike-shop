@@ -4,9 +4,17 @@ import Cookies from "js-cookie";
 import type { IUser } from "provider/auth/AuthProvider";
 import { redirect, useFetcher, useLoaderData } from "react-router";
 import { getToken } from "utils/getToken";
+import type { Route } from "./+types/checkoutCancel";
 
 // * Initialize Stripe
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
+
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Bike Store - Checkout" },
+    { name: "description", content: "Checkout page" },
+  ];
+}
 
 export const clientLoader = async ({ params }: { params: { id: string } }) => {
   const user = Cookies.get("user");

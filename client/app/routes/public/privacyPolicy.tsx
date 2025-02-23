@@ -1,3 +1,12 @@
+import type { Route } from "./+types/privacyPolicy";
+
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Bike Store - Privacy Policy" },
+    { name: "description", content: "Know more about our privacy policy" },
+  ];
+}
+
 export default function PrivacyPolicy() {
   return (
     <div className="container mx-auto py-10">

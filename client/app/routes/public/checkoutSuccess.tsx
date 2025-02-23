@@ -2,6 +2,14 @@ import { useEffect } from "react";
 import { redirect, useFetcher, useLocation, useNavigate } from "react-router";
 import { getToken } from "utils/getToken";
 import toast from "react-hot-toast";
+import type { Route } from "./+types/checkoutSuccess";
+
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Bike Store - Checkout Success" },
+    { name: "description", content: "Checkout Success" },
+  ];
+}
 
 export const clientLoader = async () => {
   const token = getToken();

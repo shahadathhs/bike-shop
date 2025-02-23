@@ -1,10 +1,10 @@
 import {
-  isRouteErrorResponse,
   Links,
   Meta,
   Outlet,
   Scripts,
   ScrollRestoration,
+  useRouteError,
 } from "react-router";
 
 import "./app.css";
@@ -13,6 +13,7 @@ import { ThemeProvider } from "provider/theme/ThemeProvider";
 import { AuthProvider } from "provider/auth/AuthProvider";
 import { Toaster } from "react-hot-toast";
 import { useEffect, useState } from "react";
+import { ErrorBoundaryComponent } from "components/error/ErrorBoundaryComponent";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -26,6 +27,13 @@ export const links: Route.LinksFunction = () => [
     href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap",
   },
 ];
+
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Bike Store" },
+    { name: "description", content: "Welcome to Bike Store" },
+  ];
+}
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -72,31 +80,7 @@ export default function App() {
   );
 }
 
-export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
-  let message = "Oops!";
-  let details = "An unexpected error occurred.";
-  let stack: string | undefined;
-
-  if (isRouteErrorResponse(error)) {
-    message = error.status === 404 ? "404" : "Error";
-    details =
-      error.status === 404
-        ? "The requested page could not be found."
-        : error.statusText || details;
-  } else if (import.meta.env.DEV && error && error instanceof Error) {
-    details = error.message;
-    stack = error.stack;
-  }
-
-  return (
-    <main className="pt-16 p-4 container mx-auto text-center">
-      <h1 className="text-xl font-bold">{message}</h1>
-      <p className="text-lg">{details}</p>
-      {stack && (
-        <pre className="w-full p-4 overflow-x-auto">
-          <code className="text-sm">{stack}</code>
-        </pre>
-      )}
-    </main>
-  );
+export function ErrorBoundary() {
+  const error = useRouteError();
+  return <ErrorBoundaryComponent error={error} />;
 }

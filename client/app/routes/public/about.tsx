@@ -1,9 +1,9 @@
-import { isRouteErrorResponse, useLoaderData } from "react-router";
+import { isRouteErrorResponse } from "react-router";
 import type { Route } from "./+types/about";
 
 export function meta() {
   return [
-    { title: "About Us" },
+    { title: "Bike Store - About Us" },
     { name: "description", content: "Know more about us" },
   ];
 }
