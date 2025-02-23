@@ -99,11 +99,40 @@ const updatePassword = async (
   }
   return updatedUser
 }
+const getAllUsers = async (
+  queryOptions: { email?: string; page?: number; limit?: number } = {}
+): Promise<{ users: IUser[]; metadata: { total: number; page: number; limit: number } }> => {
+  const { email, page = 1, limit = 10 } = queryOptions
+  const filter: { email?: { $regex: string; $options: string } } = {}
+
+  // If email is provided, search using case-insensitive regex.
+  if (email) {
+    filter.email = { $regex: email, $options: 'i' }
+  }
+
+  // Calculate how many documents to skip.
+  const skip = (page - 1) * limit
+
+  // Fetch the users with pagination.
+  const users = await User.find(filter).skip(skip).limit(limit)
+  // Get the total count of users matching the filter.
+  const total = await User.countDocuments(filter)
+
+  return {
+    users,
+    metadata: {
+      total,
+      page,
+      limit
+    }
+  }
+}
 
 export const AuthService = {
   registerUser,
   loginUser,
   deactivateUser,
   updateProfile,
-  updatePassword
+  updatePassword,
+  getAllUsers
 }

@@ -62,7 +62,6 @@ const deactivateUser = async (req: Request, res: Response, next: NextFunction) =
 const updateProfile = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const user = req.user
-    console.log('user', user)
     const { userId: id } = user
     const result = await AuthService.updateProfile(id, req.body)
 
@@ -100,10 +99,28 @@ const updatePassword = async (req: Request, res: Response, next: NextFunction) =
   }
 }
 
+const getAllUsers = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const result = await AuthService.getAllUsers()
+    sendResponse(res, {
+      statusCode: httpStatusCode.OK,
+      success: true,
+      message: 'Users retrieved successfully.',
+      data: result
+    })
+    next()
+  } catch (error) {
+    const errorResponse = simplifyError(error)
+    sendError(res, errorResponse)
+    next(error)
+  }
+}
+
 export const AuthController = {
   registerUser,
   loginUser,
   deactivateUser,
   updateProfile,
-  updatePassword
+  updatePassword,
+  getAllUsers
 }
