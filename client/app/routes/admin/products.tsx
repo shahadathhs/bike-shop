@@ -232,17 +232,15 @@ export default function Products() {
       </div>
 
       {/* Filter Form */}
-      <div className="mb-6 flex flex-col sm:flex-row gap-4">
-        <div className="flex flex-col sm:flex-row gap-4 flex-1">
-          <input
-            type="text"
-            placeholder="Search by name, brand, or category..."
-            value={searchTerm}
-            onChange={(e) => setInputValue(e.target.value)}
-            className="input input-bordered max-w-lg"
-          />
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="mb-6 flex flex-col lg:flex-row lg:justify-between gap-4">
+        <input
+          type="text"
+          placeholder="Search by name, brand, or category..."
+          value={searchTerm}
+          onChange={(e) => setInputValue(e.target.value)}
+          className="input input-bordered w-full md:max-w-lg lg:flex-1"
+        />
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {/* Price Range filter */}
           <select
             value={priceRange}
@@ -250,7 +248,7 @@ export default function Products() {
               setPriceRange(e.target.value);
               setPage(1);
             }}
-            className="select select-bordered flex-1"
+            className="select select-bordered w-full"
           >
             <option value="all">All Prices</option>
             <option value="under300">Under $300</option>
@@ -259,14 +257,14 @@ export default function Products() {
             <option value="above800">Above $800</option>
           </select>
 
-          {/* Model filter */}
+          {/* Model Filter */}
           <select
             value={model}
             onChange={(e) => {
               setModel(e.target.value);
               setPage(1);
             }}
-            className="select select-bordered flex-1"
+            className="select select-bordered w-full"
           >
             <option value="all">All Models</option>
             {models.map((model) => (
@@ -276,14 +274,14 @@ export default function Products() {
             ))}
           </select>
 
-          {/* category filter */}
+          {/* Category Filter */}
           <select
             value={category}
             onChange={(e) => {
               setCategory(e.target.value);
               setPage(1);
             }}
-            className="select select-bordered flex-1"
+            className="select select-bordered w-full"
           >
             <option value="all">All Categories</option>
             {categories.map((category) => (
@@ -293,14 +291,14 @@ export default function Products() {
             ))}
           </select>
 
-          {/* brand filter */}
+          {/* Brand Filter */}
           <select
             value={brand}
             onChange={(e) => {
               setBrand(e.target.value);
               setPage(1);
             }}
-            className="select select-bordered flex-1"
+            className="select select-bordered w-full"
           >
             <option value="all">All Brands</option>
             {brands.map((brand) => (

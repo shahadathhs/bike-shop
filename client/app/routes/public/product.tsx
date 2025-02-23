@@ -211,18 +211,18 @@ export default function ALLProductPage() {
       <h1 className="text-2xl font-bold mb-4">All Products</h1>
 
       {/* Filter Section */}
-      <div className="mb-6 flex flex-col md:flex-row md:justify-between gap-4">
+      <div className="mb-6 flex flex-col lg:flex-row lg:justify-between gap-4">
         {/* Search Input */}
         <input
           type="text"
           placeholder="Search by name, brand, or category..."
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
-          className="input input-bordered max-w-lg flex-1"
+          className="input input-bordered w-full lg:max-w-lg lg:flex-1"
         />
 
         {/* Filter Dropdowns */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {/* Price Range Filter */}
           <select
             value={priceRange}
@@ -230,7 +230,7 @@ export default function ALLProductPage() {
               setPriceRange(e.target.value);
               setPage(1);
             }}
-            className="select select-bordered"
+            className="select select-bordered w-full"
           >
             <option value="all">All Prices</option>
             <option value="under300">Under $300</option>
@@ -246,7 +246,7 @@ export default function ALLProductPage() {
               setModel(e.target.value);
               setPage(1);
             }}
-            className="select select-bordered"
+            className="select select-bordered w-full"
           >
             <option value="all">All Models</option>
             {models.map((m) => (
@@ -263,7 +263,7 @@ export default function ALLProductPage() {
               setCategory(e.target.value);
               setPage(1);
             }}
-            className="select select-bordered"
+            className="select select-bordered w-full"
           >
             <option value="all">All Categories</option>
             {categories.map((c) => (
@@ -280,7 +280,7 @@ export default function ALLProductPage() {
               setBrand(e.target.value);
               setPage(1);
             }}
-            className="select select-bordered"
+            className="select select-bordered w-full"
           >
             <option value="all">All Brands</option>
             {brands.map((b) => (

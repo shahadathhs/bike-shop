@@ -65,10 +65,22 @@ const getMyOrdersService = async (
   email: string,
   page: number = 1,
   limit: number = 10
-): Promise<IOrder[]> => {
+): Promise<{ orders: IOrder[]; metadata: { total: number; page: number; limit: number } }> => {
   const skip = (page - 1) * limit
+  // Retrieve the paginated orders and populate the 'product' field.
   const orders = await Order.find({ email }).populate('product').skip(skip).limit(limit)
-  return orders
+
+  // Count the total number of orders for the given email.
+  const total = await Order.countDocuments({ email })
+
+  return {
+    orders,
+    metadata: {
+      total,
+      page,
+      limit
+    }
+  }
 }
 
 const updateOrderService = async (id: string, payload: Partial<IOrder>): Promise<IOrder | null> => {

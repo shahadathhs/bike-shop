@@ -41,7 +41,11 @@ const getOrderById = async (req: Request, res: Response, next: NextFunction) => 
 
 const getMyOrders = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const result = await orderServices.getMyOrdersService(req.params.email)
+    const result = await orderServices.getMyOrdersService(
+      req.params.email,
+      Number(req.query.page),
+      Number(req.query.limit)
+    )
 
     sendResponse(res, {
       statusCode: httpStatusCode.OK,
