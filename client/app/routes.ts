@@ -51,7 +51,7 @@ export default [
       index("routes/customer/customer.tsx"),
       route("/orders", "routes/customer/orders.tsx"),
       route("/profile", "routes/customer/profile.tsx"),
-      route("/tracking", "routes/customer/tracking.tsx"),
+      // route("/tracking", "routes/customer/tracking.tsx"),
     ]),
   ]),
 ] satisfies RouteConfig;

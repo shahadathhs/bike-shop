@@ -42,8 +42,13 @@ const createOrderService = async (payload: IOrder): Promise<IOrder> => {
 
   // * Create the order
   const order = new Order(payload)
-  const result = await order.save()
-  return result
+  const savedOrder = await order.save()
+  // Now, populate the 'product' field by querying the saved order:
+  const populatedOrder = await Order.findById(savedOrder._id).populate('product')
+  if (!populatedOrder) {
+    throw new AppError(httpStatusCode.NOT_FOUND, 'Order not found.')
+  }
+  return populatedOrder
 }
 
 const getOrderByIdService = async (id: string): Promise<IOrder | null> => {
@@ -56,8 +61,13 @@ const getOrderByIdService = async (id: string): Promise<IOrder | null> => {
   return result
 }
 
-const getMyOrdersService = async (email: string): Promise<IOrder[]> => {
-  const orders = await Order.find({ 'customer.email': email })
+const getMyOrdersService = async (
+  email: string,
+  page: number = 1,
+  limit: number = 10
+): Promise<IOrder[]> => {
+  const skip = (page - 1) * limit
+  const orders = await Order.find({ email }).populate('product').skip(skip).limit(limit)
   return orders
 }
 
