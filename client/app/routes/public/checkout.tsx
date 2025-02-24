@@ -69,7 +69,7 @@ export const clientAction = async ({ request }: { request: Request }) => {
         },
         body: JSON.stringify({
           quantity,
-          price,
+          price: price * quantity,
           productId,
           productName,
           email,
