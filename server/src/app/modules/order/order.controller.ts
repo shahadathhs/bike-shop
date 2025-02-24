@@ -126,7 +126,7 @@ const cancelOrder = async (req: Request, res: Response, next: NextFunction) => {
 
 const getAllOrders = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const result = await orderServices.getAllOrdersService()
+    const result = await orderServices.getAllOrdersService(req.query)
     sendResponse(res, {
       statusCode: httpStatusCode.OK,
       success: true,

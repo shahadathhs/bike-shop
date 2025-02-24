@@ -1,5 +1,6 @@
 import { httpStatusCode } from '../../enum/statusCode'
 import AppError from '../../errorHandling/errors/AppError'
+import { IBike } from '../bike/bike.interface'
 import { BikeServices } from '../bike/bike.services'
 
 import { IAnalytics, IOrderAnalytics, IRevenueSummary, TOrderStatus } from './order.helper'
@@ -134,9 +135,42 @@ const cancelOrderService = async (id: string): Promise<IOrder | null> => {
   return result
 }
 
-const getAllOrdersService = async (): Promise<IOrder[]> => {
-  const result = await Order.find()
-  return result
+const getAllOrdersService = async ({
+  searchTerm = '',
+  page = 1,
+  limit = 10
+}): Promise<{ orders: IOrder[]; metadata: { total: number; page: number; limit: number } }> => {
+  const skip = (page - 1) * limit
+  const searchRegex = new RegExp(searchTerm, 'i')
+
+  // Find orders with populated product details
+  const orders = await Order.find()
+    .populate('product') // Populate the product field first
+    .exec()
+
+  // Filter orders based on search criteria (product fields)
+  const filteredOrders = orders.filter(order => {
+    const product = order.product as unknown as IBike
+    return (
+      product &&
+      (searchRegex.test(product.name) ||
+        searchRegex.test(product.brand) ||
+        searchRegex.test(product.modelName) ||
+        searchRegex.test(product.category))
+    )
+  })
+
+  // Apply pagination to the filtered orders
+  const paginatedOrders = filteredOrders.slice(skip, skip + limit)
+
+  return {
+    orders: paginatedOrders,
+    metadata: {
+      total: filteredOrders.length,
+      page,
+      limit
+    }
+  }
 }
 
 const calculateRevenueService = async (): Promise<number> => {
