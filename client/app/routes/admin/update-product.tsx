@@ -62,10 +62,11 @@ export const action = async ({ request }: ActionFunctionArgs) => {
           { folder: "bikes" }, // Optional: specify a folder in Cloudinary
           (error, result) => {
             if (error) {
-              return reject(error);
+              console.error("Cloudinary upload error:", error);
+              return resolve("");
             }
             // Resolve with the secure URL from Cloudinary
-            if (result && result.secure_url) {
+            if (!error && result && result.secure_url) {
               resolve(result.secure_url);
             } else {
               reject(new Error("Cloudinary upload failed"));
@@ -99,6 +100,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const quantity = formData.get("quantity") as string;
   const description = formData.get("description") as string;
   const category = formData.get("category") as string;
+  const previousImage = formData.get("prev_image") as string;
   const image = formData.get("image") as string;
   const token = formData.get("csrf_token") as string;
 
@@ -110,7 +112,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     quantity: Number(quantity),
     description,
     category,
-    image,
+    image: image ? image : previousImage,
   };
 
   try {
@@ -325,6 +327,7 @@ export default function UpdateProduct() {
           <label htmlFor="image" className="block mb-1">
             Product Image
           </label>
+          <input type="hidden" name="prev_image" value={product.image} />
           <input
             type="file"
             id="image"
@@ -333,7 +336,7 @@ export default function UpdateProduct() {
             className="file-input file-input-bordered w-full"
             accept="image/*"
           />
-       
+
           {image && (
             <img
               src={image}
