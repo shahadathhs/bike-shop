@@ -9,89 +9,34 @@ import {
 } from "react-router";
 import { brands, categories, models } from "utils/bikeUtils";
 import { getToken } from "utils/getToken";
-import { parseFormData, type FileUpload } from "@mjackson/form-data-parser";
-import { v2 as cloudinary } from "cloudinary";
 
 export const clientLoader = async ({ params }: ClientLoaderFunctionArgs) => {
   const id = params.id;
-
   const token = getToken();
 
   try {
     const response = await fetch(
       `${import.meta.env.VITE_API_URL}/bikes/${id}`,
       {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       }
     );
 
     if (response.ok) {
       const data = await response.json();
-      return {
-        success: true,
-        product: data,
-      };
+      return { success: true, product: data };
     } else {
       throw new Error("Failed to fetch product");
     }
   } catch (err) {
     console.error("Error fetching product:", err);
-    return {
-      error: "Failed to fetch product",
-      errorDetails: err,
-    };
+    return { error: "Failed to fetch product", errorDetails: err };
   }
 };
 
 export const action = async ({ request }: ActionFunctionArgs) => {
-  // * step 1:  Configure Cloudinary
-  cloudinary.config({
-    cloud_name: import.meta.env.VITE_CLOUDINARY_CLOUD_NAME,
-    api_key: import.meta.env.VITE_CLOUDINARY_API_KEY,
-    api_secret: import.meta.env.VITE_CLOUDINARY_API_SECRET,
-  });
-
-  // * step 2: Custom upload handler that streams the file to Cloudinary
-  async function uploadHandler(fileUpload: FileUpload) {
-    if (fileUpload.fieldName === "image") {
-      return new Promise<string>((resolve, reject) => {
-        // Start Cloudinary upload stream
-        const uploadStream = cloudinary.uploader.upload_stream(
-          { folder: "bikes" }, // Optional: specify a folder in Cloudinary
-          (error, result) => {
-            if (error) {
-              console.error("Cloudinary upload error:", error);
-              return resolve("");
-            }
-            // Resolve with the secure URL from Cloudinary
-            if (!error && result && result.secure_url) {
-              resolve(result.secure_url);
-            } else {
-              reject(new Error("Cloudinary upload failed"));
-            }
-          }
-        );
-        // Pipe the file stream into Cloudinary's upload stream
-        fileUpload.stream().pipeTo(
-          new WritableStream({
-            write(chunk) {
-              uploadStream.write(chunk);
-            },
-            close() {
-              uploadStream.end();
-            },
-          })
-        );
-      });
-    }
-    // * For other fields/files, simply pass the raw data
-  }
-
-  // * step 3: Parse the form data using the custom upload handler
-  const formData = await parseFormData(request, uploadHandler);
-
+  // Instead of using a custom upload handler for Cloudinary, we simply read the base64 string
+  const formData = await request.formData();
   const id = formData.get("id") as string;
   const name = formData.get("name") as string;
   const brand = formData.get("brand") as string;
@@ -101,6 +46,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const description = formData.get("description") as string;
   const category = formData.get("category") as string;
   const previousImage = formData.get("prev_image") as string;
+  // "image" here is expected to be a base64 string (if provided) via our hidden input.
   const image = formData.get("image") as string;
   const token = formData.get("csrf_token") as string;
 
@@ -112,6 +58,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     quantity: Number(quantity),
     description,
     category,
+    // Use the new base64 image if provided; otherwise fall back to the previous image URL.
     image: image ? image : previousImage,
   };
 
@@ -130,10 +77,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
     if (response.ok) {
       const data = await response.json();
-      return {
-        success: true,
-        data,
-      };
+      return { success: true, data };
     } else {
       const errorData = await response.json();
       return {
@@ -144,10 +88,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     }
   } catch (err) {
     console.error("Error updating product:", err);
-    return {
-      error: "Failed to update product",
-      errorDetails: err,
-    };
+    return { error: "Failed to update product", errorDetails: err };
   }
 };
 
@@ -157,7 +98,6 @@ export default function UpdateProduct() {
 
   const fetcher = useFetcher();
   const isSubmitting = fetcher.state === "submitting";
-
   const token = getToken() as string;
   const navigate = useNavigate();
 
@@ -165,12 +105,9 @@ export default function UpdateProduct() {
     if (fetcher.data?.success) {
       toast.dismiss();
       toast.success("Product Updated successfully");
-
-      // * wait for 1 second before navigating
       const timer = setTimeout(() => {
         navigate("/dashboard/admin/products");
       }, 1000);
-
       return () => clearTimeout(timer);
     } else if (fetcher.data?.error) {
       toast.dismiss();
@@ -178,22 +115,23 @@ export default function UpdateProduct() {
     }
   }, [fetcher.data, navigate]);
 
+  // "image" holds the base64 string if a new image is selected, or defaults to the existing image URL.
   const [image, setImage] = useState(product.image);
 
-  // * Convert selected image to base64 string
+  // When a file is selected, convert it to a base64 string.
   const handleImageChange = (e: any) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
       if (file.type === "image/jpeg" || file.type === "image/png") {
+        const reader = new FileReader();
         reader.onload = () => {
           setImage(reader.result as string);
         };
+        reader.readAsDataURL(file);
       } else {
         toast.dismiss();
         toast.error("Please select a valid image file (JPEG or PNG)");
       }
-      reader.readAsDataURL(file);
     }
   };
 
@@ -207,6 +145,10 @@ export default function UpdateProduct() {
       >
         <input type="hidden" name="csrf_token" value={token} />
         <input type="hidden" name="id" value={product._id} />
+        {/* Always send the previous image */}
+        <input type="hidden" name="prev_image" value={product.image} />
+        {/* Hidden input to send the base64 image data */}
+        <input type="hidden" name="image" value={image} />
 
         <div>
           <label htmlFor="name" className="block mb-1">
@@ -324,19 +266,18 @@ export default function UpdateProduct() {
         </div>
 
         <div>
-          <label htmlFor="image" className="block mb-1">
+          <label htmlFor="imageInput" className="block mb-1">
             Product Image
           </label>
-          <input type="hidden" name="prev_image" value={product.image} />
+          {/* The file input does not have a "name" attribute so it won’t be submitted directly.
+              Instead, handleImageChange updates our base64 image state */}
           <input
             type="file"
-            id="image"
-            name="image"
+            id="imageInput"
             onChange={handleImageChange}
             className="file-input file-input-bordered w-full"
             accept="image/*"
           />
-
           {image && (
             <img
               src={image}

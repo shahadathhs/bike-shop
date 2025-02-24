@@ -243,7 +243,7 @@ export default function Orders() {
                     )}
 
                     {/* delete order */}
-                    {order?.status === "delivered" || order?.isDeleted && (
+                    {(order?.status === "delivered" || order?.isDeleted) && (
                       <fetcher.Form method="delete">
                         <input type="hidden" name="orderId" value={order._id} />
                         <input type="hidden" name="action" value="delete" />
