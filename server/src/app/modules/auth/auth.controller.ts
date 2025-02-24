@@ -116,11 +116,50 @@ const getAllUsers = async (req: Request, res: Response, next: NextFunction) => {
   }
 }
 
+const updateRole = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params
+    const result = await AuthService.updateRole(id)
+
+    sendResponse(res, {
+      statusCode: httpStatusCode.OK,
+      success: true,
+      message: 'User role updated successfully.',
+      data: result
+    })
+    next()
+  } catch (error) {
+    const errorResponse = simplifyError(error)
+    sendError(res, errorResponse)
+    next(error)
+  }
+}
+
+const updateActive = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params
+    const result = await AuthService.updateActive(id)
+    sendResponse(res, {
+      statusCode: httpStatusCode.OK,
+      success: true,
+      message: 'User status updated successfully.',
+      data: result
+    })
+    next()
+  } catch (error) {
+    const errorResponse = simplifyError(error)
+    sendError(res, errorResponse)
+    next(error)
+  }
+}
+
 export const AuthController = {
   registerUser,
   loginUser,
   deactivateUser,
   updateProfile,
   updatePassword,
-  getAllUsers
+  getAllUsers,
+  updateRole,
+  updateActive
 }

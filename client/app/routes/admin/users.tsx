@@ -1,6 +1,52 @@
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { useFetcher } from "react-router";
 import { getToken } from "utils/getToken";
+
+export const action = async ({ request }: any) => {
+  const formData = await request.formData();
+
+  const action = formData.get("action");
+  const token = formData.get("token");
+
+  // * action the toggle user active status
+  if (action === "toggleActive") {
+    const userId = formData.get("userId");
+
+    const response = await fetch(
+      `${import.meta.env.VITE_API_URL}/auth/${userId}/active`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    if (!response.ok) {
+      const errData = await response.json();
+      throw new Error(errData.error || "Failed to update user status");
+    }
+  }
+  // * action the toggle user role
+  if (action === "toggleRole") {
+    const id = formData.get("userId");
+    const response = await fetch(
+      `${import.meta.env.VITE_API_URL}/auth/${id}/role`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    if (!response.ok) {
+      const errData = await response.json();
+      throw new Error(errData.error || "Failed to update user role");
+    }
+  }
+};
 
 export default function Users() {
   const [users, setUsers] = useState([]);
@@ -10,6 +56,9 @@ export default function Users() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [emailFilter, setEmailFilter] = useState("");
+
+  const fetcher = useFetcher();
+  const isSubmitting = fetcher.state === "submitting";
 
   const token = getToken();
 
@@ -54,7 +103,7 @@ export default function Users() {
     if (token) {
       fetchUsers(page, limit, emailFilter);
     }
-  }, [token, page, limit, emailFilter]);
+  }, [token, page, limit, emailFilter, isSubmitting]);
 
   const totalPages = Math.ceil(total / limit);
 
@@ -99,26 +148,33 @@ export default function Users() {
                   <td>{user.role}</td>
                   <td>{user.isActive ? "Active" : "Inactive"}</td>
                   <td className="flex gap-2">
-                    {user.isActive && (
-                      <button className="btn btn-error btn-sm">
-                        Deactivate
-                      </button>
-                    )}
-                    {!user.isActive && (
-                      <button className="btn btn-success btn-sm">
-                        Activate
-                      </button>
-                    )}
-                    {user.role === "admin" && (
-                      <button className="btn btn-warning btn-sm">
-                        Make User
-                      </button>
-                    )}
-                    {user.role === "customer" && (
+                    {/* toggle user active status */}
+                    <fetcher.Form method="post">
+                      <input
+                        type="hidden"
+                        name="token"
+                        value={token as string}
+                      />
+                      <input type="hidden" name="action" value="toggleActive" />
+                      <input type="hidden" name="userId" value={user._id} />
                       <button className="btn btn-info btn-sm">
-                        Make Admin
+                        {user.isActive ? "Deactivate" : "Activate"}
                       </button>
-                    )}
+                    </fetcher.Form>
+
+                    {/* toggle user role */}
+                    <fetcher.Form method="post">
+                      <input
+                        type="hidden"
+                        name="token"
+                        value={token as string}
+                      />
+                      <input type="hidden" name="action" value="toggleRole" />
+                      <input type="hidden" name="userId" value={user._id} />
+                      <button className="btn btn-error btn-sm">
+                        Make {user.role === "customer" ? "Admin" : "Customer"}
+                      </button>
+                    </fetcher.Form>
                   </td>
                 </tr>
               ))}

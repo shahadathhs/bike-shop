@@ -128,11 +128,49 @@ const getAllUsers = async (
   }
 }
 
+const updateRole = async (id: string): Promise<IUser> => {
+  // * get the user by id
+  const user = await User.findById(id)
+  if (!user) {
+    throw new AppError(httpStatusCode.NOT_FOUND, 'User not found')
+  }
+  // * toggle the role
+  const updatedUser = await User.findByIdAndUpdate(
+    id,
+    { role: user.role === 'admin' ? 'customer' : 'admin' },
+    { new: true }
+  )
+  if (!updatedUser) {
+    throw new AppError(httpStatusCode.NOT_FOUND, 'User not found')
+  }
+  return updatedUser
+}
+
+const updateActive = async (id: string): Promise<IUser> => {
+  // * get the user by id
+  const user = await User.findById(id)
+  if (!user) {
+    throw new AppError(httpStatusCode.NOT_FOUND, 'User not found')
+  }
+  // * toggle the role
+  const updatedUser = await User.findByIdAndUpdate(
+    id,
+    { isActive: !user.isActive },
+    { new: true }
+  )
+  if (!updatedUser) {
+    throw new AppError(httpStatusCode.NOT_FOUND, 'User not found')
+  }
+  return updatedUser
+}
+
 export const AuthService = {
   registerUser,
   loginUser,
   deactivateUser,
   updateProfile,
   updatePassword,
-  getAllUsers
+  getAllUsers,
+  updateRole,
+  updateActive
 }

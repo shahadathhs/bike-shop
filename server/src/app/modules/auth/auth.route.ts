@@ -30,4 +30,8 @@ router.patch('/update-password', Authentication(UserRole.CUSTOMER), AuthControll
 
 router.get('/getAll', Authentication(UserRole.ADMIN), AuthController.getAllUsers)
 
+router.patch('/:id/role', Authentication(UserRole.ADMIN), AuthController.updateRole)
+
+router.patch('/:id/active', Authentication(UserRole.ADMIN), AuthController.updateActive)
+
 export const AuthRoutes = router
