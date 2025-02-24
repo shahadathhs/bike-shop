@@ -82,6 +82,41 @@ export async function action({ request }: { request: Request }) {
     }
   }
 
+  if (action === "cancel") {
+    const orderId = formData.get("orderId") as string;
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/orders/${orderId}/cancel`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (response.ok) {
+        const data = await response.json();
+        return {
+          success: true,
+          message: "Order canceled successfully",
+          data: data,
+        };
+      } else {
+        const errorData = await response.json();
+        return {
+          error: errorData.message || "Failed to cancel order",
+          errorDetails: errorData,
+        };
+      }
+    } catch (err: any) {
+      console.error(err);
+      return {
+        error: err.message || "Failed to cancel order",
+      };
+    }
+  }
+
   return null;
 }
 
@@ -188,7 +223,7 @@ export default function Orders() {
                   <td>{order?.status}</td>
                   <td className="flex gap-2">
                     {/* mark as delivered */}
-                    {order?.status !== "delivered" && (
+                    {order?.status !== "delivered" && !order?.isDeleted && (
                       <fetcher.Form method="patch">
                         <input type="hidden" name="orderId" value={order._id} />
                         <input
@@ -208,14 +243,10 @@ export default function Orders() {
                     )}
 
                     {/* delete order */}
-                    {order?.status === "delivered" && (
+                    {order?.status === "delivered" || order?.isDeleted && (
                       <fetcher.Form method="delete">
                         <input type="hidden" name="orderId" value={order._id} />
-                        <input
-                          type="hidden"
-                          name="action"
-                          value="delete"
-                        />
+                        <input type="hidden" name="action" value="delete" />
                         <input
                           type="hidden"
                           name="token"
@@ -228,10 +259,19 @@ export default function Orders() {
                     )}
 
                     {/* cancel order */}
-                    {order?.status !== "delivered" && (
-                      <button className="btn btn-info btn-sm">
-                        Cancel Order
-                      </button>
+                    {order?.status !== "delivered" && !order?.isDeleted && (
+                      <fetcher.Form method="patch">
+                        <input type="hidden" name="orderId" value={order._id} />
+                        <input type="hidden" name="action" value="cancel" />
+                        <input
+                          type="hidden"
+                          name="token"
+                          value={token as string}
+                        />
+                        <button type="submit" className="btn btn-info btn-sm">
+                          Cancel Order
+                        </button>
+                      </fetcher.Form>
                     )}
                   </td>
                 </tr>
