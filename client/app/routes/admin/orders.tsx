@@ -1,6 +1,89 @@
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { useFetcher } from "react-router";
 import { getToken } from "utils/getToken";
+
+export async function action({ request }: { request: Request }) {
+  const formData = await request.formData();
+
+  const action = formData.get("action") as string;
+  const token = formData.get("token") as string;
+
+  if (action === "delete") {
+    const orderId = formData.get("orderId") as string;
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/orders/${orderId}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        return {
+          success: true,
+          message: "Order deleted successfully",
+          data: data,
+        };
+      } else {
+        const errorData = await response.json();
+        return {
+          error: errorData.message || "Failed to delete order",
+          errorDetails: errorData,
+        };
+      }
+    } catch (err: any) {
+      console.error(err);
+      return {
+        error: err.message || "Failed to delete order",
+      };
+    }
+  }
+
+  if (action === "markAsDelivered") {
+    const orderId = formData.get("orderId") as string;
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/orders/${orderId}/status`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ status: "delivered" }),
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        return {
+          success: true,
+          message: "Order marked as delivered successfully",
+          data: data,
+        };
+      } else {
+        const errorData = await response.json();
+        return {
+          error: errorData.message || "Failed to mark order as delivered",
+          errorDetails: errorData,
+        };
+      }
+    } catch (err: any) {
+      console.error(err);
+      return {
+        error: err.message || "Failed to mark order as delivered",
+      };
+    }
+  }
+
+  return null;
+}
 
 export default function Orders() {
   const [orders, setOrders] = useState([]);
@@ -10,6 +93,8 @@ export default function Orders() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+
+  const fetcher = useFetcher();
 
   const token = getToken();
 
@@ -55,7 +140,7 @@ export default function Orders() {
     if (token) {
       fetchOrders(page, limit, searchTerm);
     }
-  }, [token, page, limit, searchTerm]);
+  }, [token, page, limit, searchTerm, fetcher.state]);
 
   const totalPages = Math.ceil(total / limit);
 
@@ -100,11 +185,54 @@ export default function Orders() {
                   <td>{order._id}</td>
                   <td>{order?.product?.name}</td>
                   <td>{order?.totalPrice}</td>
-                  <td>{order.status}</td>
-                  <td>
-                    <button className="btn btn-info btn-sm">
-                      Complete Order
-                    </button>
+                  <td>{order?.status}</td>
+                  <td className="flex gap-2">
+                    {/* mark as delivered */}
+                    {order?.status !== "delivered" && (
+                      <fetcher.Form method="patch">
+                        <input type="hidden" name="orderId" value={order._id} />
+                        <input
+                          type="hidden"
+                          name="action"
+                          value="markAsDelivered"
+                        />
+                        <input
+                          type="hidden"
+                          name="token"
+                          value={token as string}
+                        />
+                        <button type="submit" className="btn btn-info btn-sm">
+                          Mark as Delivered
+                        </button>
+                      </fetcher.Form>
+                    )}
+
+                    {/* delete order */}
+                    {order?.status === "delivered" && (
+                      <fetcher.Form method="delete">
+                        <input type="hidden" name="orderId" value={order._id} />
+                        <input
+                          type="hidden"
+                          name="action"
+                          value="delete"
+                        />
+                        <input
+                          type="hidden"
+                          name="token"
+                          value={token as string}
+                        />
+                        <button type="submit" className="btn btn-info btn-sm">
+                          Delete Order
+                        </button>
+                      </fetcher.Form>
+                    )}
+
+                    {/* cancel order */}
+                    {order?.status !== "delivered" && (
+                      <button className="btn btn-info btn-sm">
+                        Cancel Order
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}

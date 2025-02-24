@@ -38,12 +38,7 @@ router.put(
 )
 
 // Update order status - admin only
-router.patch(
-  '/:id/status',
-  Authentication(UserRole.ADMIN),
-  validateRequest(updateOrderSchema),
-  orderController.updateOrderStatus
-)
+router.patch('/:id/status', Authentication(UserRole.ADMIN), orderController.updateOrderStatus)
 
 // Delete an order - admin only
 router.delete('/:id', Authentication(UserRole.ADMIN), orderController.deleteOrder)

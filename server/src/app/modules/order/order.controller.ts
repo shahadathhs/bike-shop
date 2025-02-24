@@ -78,7 +78,8 @@ const updateOrder = async (req: Request, res: Response, next: NextFunction) => {
 
 const updateOrderStatus = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const result = await orderServices.updateOrderStatusService(req.params.id, req.body)
+    const { status } = req.body
+    const result = await orderServices.updateOrderStatusService(req.params.id, status)
     sendResponse(res, {
       statusCode: httpStatusCode.OK,
       success: true,
