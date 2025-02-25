@@ -117,7 +117,7 @@ export default function CheckoutPage() {
 
       <fetcher.Form
         method="POST"
-        className="bg-white rounded-lg shadow-md p-6 mb-6"
+        className=" rounded-lg shadow-md p-6 mb-6"
       >
         <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
         <div className="flex justify-between mb-4">
@@ -160,7 +160,7 @@ export default function CheckoutPage() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 disabled:bg-blue-300"
+          className="btn btn-primary w-full"
         >
           {isSubmitting ? "Processing..." : "Proceed to Payment"}
         </button>

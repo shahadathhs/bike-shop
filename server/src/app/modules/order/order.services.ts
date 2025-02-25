@@ -189,7 +189,7 @@ const calculateRevenueService = async (): Promise<number> => {
 const getAnalyticsService = async (): Promise<IAnalytics> => {
   // Calculate revenue summary
   const revenueAgg = await Order.aggregate([
-    { $match: { isDeleted: false } },
+    // { $match: { isDeleted: false } },
     {
       $group: {
         _id: null,
@@ -218,7 +218,7 @@ const getAnalyticsService = async (): Promise<IAnalytics> => {
 
   // Calculate orders by status
   const statusAgg = await Order.aggregate([
-    { $match: { isDeleted: false } },
+    // { $match: { isDeleted: false } },
     {
       $group: {
         _id: '$status',

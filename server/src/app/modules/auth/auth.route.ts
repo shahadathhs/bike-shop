@@ -15,7 +15,9 @@ router.post(
   AuthController.registerUser
 )
 
-router.post('/login', validateRequest(AuthValidation.loginUserZodSchema), AuthController.loginUser)
+router.post('/login', 
+  // validateRequest(AuthValidation.loginUserZodSchema), 
+  AuthController.loginUser)
 
 router.post('/deactivate/:id', Authentication(UserRole.ADMIN), AuthController.deactivateUser)
 
