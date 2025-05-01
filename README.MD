@@ -137,7 +137,7 @@ A full-stack Bike Shop application that enables users to browse and purchase bic
 
 ---
 
-## 🏃‍♂️ Running Locally
+## 🏃 Running Locally
 
 ### Prerequisites
 
