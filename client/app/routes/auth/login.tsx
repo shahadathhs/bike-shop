@@ -2,6 +2,11 @@ import { useEffect, useState } from 'react'
 import { useFetcher, useNavigation, type ActionFunction } from 'react-router'
 import { toast } from 'sonner'
 import { authServices } from '~/services/auth.services'
+import { Input } from '~/components/ui/input'
+import { Button } from '~/components/ui/button'
+import { Card, CardHeader, CardTitle, CardContent } from '~/components/ui/card'
+import { Link } from 'react-router'
+import { Label } from '~/components/ui/label'
 
 export const action: ActionFunction = async ({ request }) => {
   const formData = await request.formData()
@@ -18,9 +23,7 @@ export const action: ActionFunction = async ({ request }) => {
 
   const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/login`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password }),
   })
 
@@ -28,17 +31,14 @@ export const action: ActionFunction = async ({ request }) => {
 
   if (response.ok) {
     const user = data?.data
-    const role = user?.role
-
-    // * create user session based on role
     return authServices.createUserSession(
       {
-        token: user?.token,
-        email: user?.email,
-        name: user?.name,
-        role: user?.role,
+        token: user.token,
+        email: user.email,
+        name: user.name,
+        role: user.role,
       },
-      `/${role}`,
+      `/${user.role}`,
     )
   } else {
     console.error('Error logging in', data)
@@ -49,76 +49,89 @@ export const action: ActionFunction = async ({ request }) => {
 export default function Login() {
   const fetcher = useFetcher()
   const navigation = useNavigation()
-  const [shouldShow, setShouldShow] = useState(false)
+  const [submitted, setSubmitted] = useState(false)
+
   const isSubmitting = fetcher.state === 'submitting'
   const isLoading = navigation.state === 'loading'
 
   useEffect(() => {
-    const handleFetcherData = async () => {
-      if (fetcher.data?.success) {
-        toast.success(fetcher.data.message || 'Login successful', {
-          duration: 2000,
-          description: 'Redirecting to dashboard...',
-        })
-      } else if (fetcher.data?.error) {
-        toast.error(fetcher.data.error, {
-          description: fetcher.data.errorDetails?.message,
-        })
-      }
+    if (fetcher.data?.success) {
+      toast.success(fetcher.data.message || 'Login successful', {
+        duration: 2000,
+        description: 'Redirecting to dashboard...',
+      })
+    } else if (fetcher.data?.error) {
+      toast.error(fetcher.data.error, {
+        description: fetcher.data.errorDetails?.message,
+      })
     }
-
-    handleFetcherData()
   }, [fetcher.data])
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4 text-center">Login</h1>
-      <fetcher.Form
-        method="post"
-        onSubmit={() => setShouldShow(true)}
-        className="max-w-md mx-auto space-y-4"
-      >
-        <div>
-          <label htmlFor="email" className="label mb-1">
-            Email
-          </label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            placeholder="Enter your email"
-            className="input input-bordered w-full"
-            required
-          />
+    <div className="flex flex-col lg:flex-row h-[500px] items-center">
+      {/* Welcome Column */}
+      <div className="hidden lg:flex lg:w-1/2 items-center justify-center p-10 border-r">
+        <div className="space-y-6">
+          <h2 className="text-4xl font-bold">Welcome Back</h2>
+          <p className="text-lg">
+            Sign in to manage your orders, track shipments, and explore exclusive offers.
+          </p>
+          <ul className="list-disc list-inside space-y-2">
+            <li>Personalized dashboard</li>
+            <li>Quick checkout</li>
+            <li>Order tracking</li>
+          </ul>
         </div>
-        <div>
-          <label htmlFor="password" className="label mb-1">
-            Password
-          </label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            placeholder="Enter your password"
-            className="input input-bordered w-full"
-            required
-          />
-        </div>
-        <div className="text-center">
-          <button
-            type="submit"
-            disabled={(isSubmitting || isLoading) && shouldShow}
-            className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition-colors"
-          >
-            {(isSubmitting || isLoading) && shouldShow ? 'Logging in...' : 'Login'}
-          </button>
-        </div>
-      </fetcher.Form>
-      <div className="text-center mt-4">
-        Don&apos;t have an account?{' '}
-        <a href="/register" className="link link-primary">
-          Register here
-        </a>
+      </div>
+
+      {/* Form Column */}
+      <div className="flex w-full lg:w-1/2 items-center justify-center p-6">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle className="text-2xl text-center">Login to your account</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <fetcher.Form method="post" className="space-y-4" onSubmit={() => setSubmitted(true)}>
+              <div className="space-y-3">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  type="email"
+                  id="email"
+                  name="email"
+                  placeholder="you@example.com"
+                  required
+                />
+              </div>
+
+              <div className="space-y-3">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  type="password"
+                  id="password"
+                  name="password"
+                  placeholder="Enter your password"
+                  required
+                />
+              </div>
+
+              <Button
+                type="submit"
+                size="lg"
+                className="w-full mt-4 hover:cursor-pointer"
+                disabled={(isSubmitting || isLoading) && submitted}
+              >
+                {(isSubmitting || isLoading) && submitted ? 'Logging in...' : 'Login'}
+              </Button>
+            </fetcher.Form>
+
+            <p className="mt-4 text-center text-sm">
+              Don’t have an account?{' '}
+              <Link to="/register" className="underline">
+                Register here
+              </Link>
+            </p>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )
