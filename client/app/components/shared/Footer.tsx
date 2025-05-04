@@ -14,7 +14,7 @@ const socialLinks = [
 export default function Footer() {
   return (
     <footer className="border-t bg-background text-muted-foreground">
-      <div className="container mx-auto grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-8 p-4">
+      <div className="container mx-auto grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-8 py-10">
         {/* About Section */}
         <div className="col-span-2 lg:col-span-3 space-y-3">
           <div>
@@ -49,7 +49,7 @@ export default function Footer() {
         <div className="space-y-2 flex flex-col">
           <h6 className="text-base font-semibold text-foreground">Quick Links</h6>
           {quickLinks.map(({ to, label }) => (
-            <Link key={to} to={to} className="hover:underline text-xs transition-colors">
+            <Link key={to} to={to} className="hover:underline text-md transition-colors">
               {label}
             </Link>
           ))}
@@ -59,7 +59,7 @@ export default function Footer() {
         <div className="space-y-2 flex flex-col">
           <h6 className="text-base font-semibold text-foreground">Legal</h6>
           {legalLinks.map(({ to, label }) => (
-            <Link key={to} to={to} className="hover:underline text-xs transition-colors">
+            <Link key={to} to={to} className="hover:underline text-md transition-colors">
               {label}
             </Link>
           ))}

@@ -12,6 +12,7 @@ import { Button } from '~/components/ui/button'
 import { Menu } from 'lucide-react'
 import { useState } from 'react'
 import { useAuth } from '~/context/AuthContext'
+import { ModeToggle } from './ModeToggle'
 
 function RouterNavLink({
   to,
@@ -114,6 +115,7 @@ export default function NavBar() {
               </Button>
             </Link>
           )}
+          <ModeToggle />
         </div>
       </div>
     </header>

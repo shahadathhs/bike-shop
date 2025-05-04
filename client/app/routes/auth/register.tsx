@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
-import toast from 'react-hot-toast'
 import { Link, useFetcher, useNavigate, type ActionFunctionArgs } from 'react-router'
+import { toast } from 'sonner'
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData()
@@ -29,25 +29,30 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     return { error: 'Password must be at least 6 characters long' }
   }
 
-  const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/register`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ name, email, password }),
-  })
+  try {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/register`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ name, email, password }),
+    })
 
-  const data = await response.json()
+    const data = await response.json()
 
-  if (response.ok) {
-    return {
-      success: true,
-      message: 'Registration successful',
-      data,
+    if (response.ok) {
+      return {
+        success: true,
+        message: 'Registration successful',
+        data,
+      }
+    } else {
+      console.error('Error registering user', data)
+      return { success: false, message: data.message, errorDetails: data }
     }
-  } else {
-    console.error('Error registering user', data)
-    return { error: data.message, errorDetails: data }
+  } catch (error) {
+    console.error('Error registering user', error)
+    return { success: false, message: 'Registration failed', errorDetails: error }
   }
 }
 
@@ -60,14 +65,18 @@ export default function Register() {
   useEffect(() => {
     const handleFetcherData = async () => {
       if (fetcher.data?.success) {
-        toast.dismiss()
-        toast.success(fetcher.data.message)
+        toast.success(fetcher.data.message, {
+          icon: '🎉',
+          description: 'Redirecting to login...',
+        })
         //* wait for 1 second before redirecting
         await new Promise(resolve => setTimeout(resolve, 1000))
-        navigate('/auth/login')
+        navigate('/login')
       } else if (fetcher.data?.error) {
-        toast.dismiss()
-        toast.error(fetcher.data.error)
+        toast.error(fetcher.data.error || 'Registration failed', {
+          icon: '❌',
+          description: fetcher.data.errorDetails?.message,
+        })
       }
     }
 
@@ -136,7 +145,7 @@ export default function Register() {
         {/* link to login page */}
         <div className="text-center">
           Already have an account?{' '}
-          <Link to="/auth/login" className="link link-primary">
+          <Link to="/login" className="link link-primary">
             Login
           </Link>
         </div>

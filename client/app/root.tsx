@@ -20,6 +20,7 @@ import { ErrorBoundaryComponent } from '~/components/error/ErrorBoundaryComponen
 import Loading from './components/shared/Loading'
 import { Toaster } from './components/ui/sonner'
 import { AuthProvider } from './context/AuthContext'
+import { ThemeProvider } from './components/ui/theme-provider'
 
 export const links: Route.LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -51,7 +52,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <Toaster />
-        {children}
+        <AuthProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            {children}
+          </ThemeProvider>
+        </AuthProvider>
         <ScrollRestoration />
         <Scripts />
       </body>
@@ -71,11 +81,7 @@ export default function App() {
   //* show a loading indicator while the app is initializing
   if (!isClient || isLoading) return <Loading />
 
-  return (
-    <AuthProvider>
-      <Outlet />
-    </AuthProvider>
-  )
+  return <Outlet />
 }
 
 export function ErrorBoundary() {
