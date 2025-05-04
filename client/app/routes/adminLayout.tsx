@@ -1,4 +1,3 @@
-import Cookies from 'js-cookie'
 import { useEffect } from 'react'
 import { Link, Outlet, redirect, useLoaderData } from 'react-router'
 import { adminNavItems } from '~/constant/navigationLinks'
@@ -30,8 +29,6 @@ export default function DashboardAdminLayout() {
   // * Set cookie to context when cookie data changes
   useEffect(() => {
     if (cookie) {
-      console.log('cookie', cookie)
-      Cookies.set('role', cookie.role)
       setCookieToContext(cookie) // * don't set cookie to context if it's null
     }
   }, [cookie, setCookieToContext])

@@ -1,16 +1,17 @@
-import { Link, NavLink } from 'react-router'
+import { Link, NavLink, useFetcher } from 'react-router'
 import logoImg from 'assets/logo.png'
 import { navLinks } from '~/constant/navigationLinks'
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '~/components/ui/sheet'
-// import {
-//   DropdownMenu,
-//   DropdownMenuContent,
-//   DropdownMenuItem,
-//   DropdownMenuTrigger,
-// } from '~/components/ui/dropdown-menu'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '~/components/ui/dropdown-menu'
 import { Button } from '~/components/ui/button'
 import { Menu } from 'lucide-react'
 import { useState } from 'react'
+import { useAuth } from '~/context/AuthContext'
 
 function RouterNavLink({
   to,
@@ -37,6 +38,15 @@ function RouterNavLink({
 
 export default function NavBar() {
   const [open, setOpen] = useState(false)
+  const { role, logout } = useAuth()
+
+  const fetcher = useFetcher()
+
+  const handleLogout = (e: React.MouseEvent) => {
+    e.preventDefault()
+    logout()
+    fetcher.submit(null, { method: 'post', action: '/api/logout' })
+  }
 
   return (
     <header className="border bg-background p-3 md:p-4 my-2 rounded shadow-sm">
@@ -84,27 +94,26 @@ export default function NavBar() {
               </RouterNavLink>
             ))}
           </nav>
-
           {/* Auth & Actions */}
-          {/* {role ? (
+          {role ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline">Dashboard</Button>
+                <Button variant="outline">Profile</Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem asChild>
-                  <Link to={role}>Go to Dashboard</Link>
+                  <Link to={`/${role}`}>Go to Dashboard</Link>
                 </DropdownMenuItem>
-                {/* <DropdownMenuItem onClick={logout}>Logout</DropdownMenuItem> */}
-              {/* </DropdownMenuContent>
-            </DropdownMenu> */}
-          ) : ( 
+                <DropdownMenuItem onClick={e => handleLogout(e)}>Logout</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
             <Link to="/login">
               <Button variant="default" className="hover:cursor-pointer">
                 Login
               </Button>
             </Link>
-          {/* )} */}
+          )}
         </div>
       </div>
     </header>

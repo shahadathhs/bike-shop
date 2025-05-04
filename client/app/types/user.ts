@@ -24,5 +24,6 @@ export type TAuthContext = {
   email: string | undefined
   name: string | undefined
   role: TRole | undefined
+  logout: () => void
   setCookieToContext: (cookie: TCookie) => void
 }

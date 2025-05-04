@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { useFetcher, useNavigate, type ActionFunction } from 'react-router'
+import { useFetcher, useNavigation, type ActionFunction } from 'react-router'
 import { toast } from 'sonner'
 import { authServices } from '~/services/auth.services'
 
@@ -38,7 +38,7 @@ export const action: ActionFunction = async ({ request }) => {
         name: user?.name,
         role: user?.role,
       },
-      role,
+      `/${role}`,
     )
   } else {
     console.error('Error logging in', data)
@@ -48,10 +48,9 @@ export const action: ActionFunction = async ({ request }) => {
 
 export default function Login() {
   const fetcher = useFetcher()
-  const user = fetcher.data?.user
+  const navigation = useNavigation()
   const isSubmitting = fetcher.state === 'submitting'
-
-  const navigate = useNavigate()
+  const isLoading = navigation.state === 'loading'
 
   useEffect(() => {
     const handleFetcherData = async () => {
@@ -60,12 +59,6 @@ export default function Login() {
           duration: 2000,
           description: 'Redirecting to dashboard...',
         })
-
-        if (user.role === 'admin') {
-          navigate('/dashboard/admin/analytics')
-        } else if (user.role === 'customer') {
-          navigate('/dashboard/customer/orders')
-        }
       } else if (fetcher.data?.error) {
         toast.error(fetcher.data.error, {
           description: fetcher.data.errorDetails?.message,
@@ -74,7 +67,7 @@ export default function Login() {
     }
 
     handleFetcherData()
-  }, [fetcher.data, navigate])
+  }, [fetcher.data])
 
   return (
     <div className="container mx-auto p-4">
@@ -109,10 +102,10 @@ export default function Login() {
         <div className="text-center">
           <button
             type="submit"
-            disabled={isSubmitting}
+            disabled={isSubmitting || isLoading}
             className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition-colors"
           >
-            {isSubmitting ? 'Logging in...' : 'Login'}
+            {isSubmitting || isLoading ? 'Logging in...' : 'Login'}
           </button>
         </div>
       </fetcher.Form>

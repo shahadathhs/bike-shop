@@ -50,4 +50,7 @@ export default [
       route('/profile', 'routes/customer/profile.tsx'),
     ]),
   ]),
+
+  // * api routes
+  ...prefix('api', [route('/logout', 'routes/api/logout.ts')]),
 ] satisfies RouteConfig

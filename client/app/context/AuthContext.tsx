@@ -1,5 +1,5 @@
 import Cookies from 'js-cookie'
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
 import type { TAuthContext, TCookie } from '~/types/user'
 
 const AuthContext = createContext<TAuthContext>({
@@ -7,25 +7,36 @@ const AuthContext = createContext<TAuthContext>({
   email: undefined,
   name: undefined,
   role: undefined,
+  logout: () => {},
   setCookieToContext: () => {},
 })
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [cookie, setCookie] = useState<TCookie | null>(null)
+  const [cookie, setCookie] = useState<TCookie | null>(JSON.parse(Cookies.get('cookie') || 'null'))
 
   const setCookieToContext = async (cookie: TCookie) => {
     setCookie(cookie)
-    Cookies.set('token', cookie.token)
-    Cookies.set('email', cookie.email)
-    Cookies.set('name', cookie.name)
-    Cookies.set('role', cookie.role)
   }
+
+  const logout = () => {
+    setCookie(null)
+    Cookies.remove('cookie')
+  }
+
+  // * useEffect to set cookie in the browser
+  // * just set, don't remove inside useEffect
+  useEffect(() => {
+    if (cookie) {
+      Cookies.set('cookie', JSON.stringify(cookie))
+    }
+  }, [cookie])
 
   const value = {
     token: cookie?.token,
     email: cookie?.email,
     name: cookie?.name,
     role: cookie?.role,
+    logout,
     setCookieToContext,
   }
 
@@ -43,9 +54,4 @@ export const useAuth = () => {
 export const useToken = () => {
   const { token } = useAuth()
   return token
-}
-
-export const useRole = () => {
-  const role = Cookies.get('role')
-  return role
 }
