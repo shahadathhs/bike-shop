@@ -52,7 +52,7 @@ async function requireUserSession(request: Request, redirectTo = '/login') {
   const token = await session.get('token')
 
   if (!token) {
-    return redirect(redirectTo, {
+    throw redirect(redirectTo, {
       headers: {
         'Set-Cookie': await sessionStorage.destroySession(session),
       },

@@ -1,11 +1,11 @@
 import { useEffect } from 'react'
-import { redirect, useLoaderData } from 'react-router'
+import { redirect, useLoaderData, type LoaderFunction } from 'react-router'
 import { DashboardLayout } from '~/components/shared/dashboard/DashboardLayout'
 import { useAuth } from '~/context/AuthContext'
 import { authServices } from '~/services/auth.services'
 import type { TCookie } from '~/types/user'
 
-export const loader = async ({ request }: { request: Request }) => {
+export const loader: LoaderFunction = async ({ request }) => {
   // * This ensures only authenticated users can access the dashboard
   await authServices.requireUserSession(request)
 

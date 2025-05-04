@@ -7,27 +7,29 @@ const AuthContext = createContext<TAuthContext>({
   email: undefined,
   name: undefined,
   role: undefined,
-  logout: () => {},
   setCookieToContext: () => {},
 })
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [cookie, setCookie] = useState<TCookie | null>(JSON.parse(Cookies.get('cookie') || 'null'))
 
-  const setCookieToContext = async (cookie: TCookie) => {
-    setCookie(cookie)
+  const setCookieToContext = (newCookie: TCookie | null) => {
+    setCookie(newCookie)
+
+    if (newCookie) {
+      // preserve or update
+      Cookies.set('cookie', JSON.stringify(newCookie), { path: '/' })
+    } else {
+      // explicit removal
+      Cookies.remove('cookie', { path: '/' })
+    }
   }
 
-  const logout = () => {
-    setCookie(null)
-    Cookies.remove('cookie')
-  }
-
-  // * useEffect to set cookie in the browser
-  // * just set, don't remove inside useEffect
   useEffect(() => {
     if (cookie) {
-      Cookies.set('cookie', JSON.stringify(cookie))
+      Cookies.set('cookie', JSON.stringify(cookie), { path: '/' })
+    } else {
+      Cookies.remove('cookie', { path: '/' })
     }
   }, [cookie])
 
@@ -36,7 +38,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     email: cookie?.email,
     name: cookie?.name,
     role: cookie?.role,
-    logout,
     setCookieToContext,
   }
 

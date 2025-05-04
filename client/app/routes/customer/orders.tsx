@@ -1,10 +1,23 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from 'react'
-import toast from 'react-hot-toast'
+import { redirect, type LoaderFunction } from 'react-router'
+import { toast } from 'sonner'
 import { useAuth } from '~/context/AuthContext'
+import { getCookie } from '~/services/auth.services'
+
+export const loader: LoaderFunction = async ({ request }) => {
+  const cookies = await getCookie(request)
+  const token = cookies.token
+
+  if (!token) {
+    return redirect('/login')
+  } else {
+    return null
+  }
+}
 
 export default function CustomerOrders() {
-  const { user } = useAuth()
+  const { token, email } = useAuth()
   const [orders, setOrders] = useState([])
   const [metadata, setMetadata] = useState({ total: 0, page: 1, limit: 10 })
   const [loading, setLoading] = useState(false)
@@ -20,30 +33,32 @@ export default function CustomerOrders() {
       setLoading(true)
       try {
         const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/orders/myOrders/${
-            user?.email
-          }?page=${page}&limit=${limit}`,
+          `${import.meta.env.VITE_API_URL}/orders/myOrders/${email}?page=${page}&limit=${limit}`,
           {
             headers: {
-              Authorization: `Bearer ${user?.token}`,
+              Authorization: `Bearer ${token}`,
             },
           },
         )
         const responseData = await response.json()
+        console.log('responseData', responseData)
         setOrders(responseData.data.orders)
         setMetadata(responseData.data.metadata)
       } catch (err) {
         console.error('Error fetching orders:', err)
         setError('Failed to fetch orders')
-        toast.error('Failed to fetch orders')
+        toast.error('Failed to fetch orders', {
+          duration: 5000,
+          description: 'Please try again later.',
+        })
       }
       setLoading(false)
     }
 
-    if (user && user.token) {
+    if (token) {
       fetchOrders()
     }
-  }, [user, page, limit])
+  }, [page, limit])
 
   // Calculate total pages from metadata.total and limit.
   const totalPages = Math.ceil(metadata.total / limit)

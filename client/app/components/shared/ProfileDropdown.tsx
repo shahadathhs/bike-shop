@@ -12,17 +12,18 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '~/components/ui/dropdown-menu'
+import type { TCookie } from '~/types/user'
 
 export default function ProfileDropdown({ userRole }: { userRole: string }) {
-  const { logout } = useAuth()
+  const { setCookieToContext } = useAuth()
 
   const fetcher = useFetcher()
 
-  const handleLogout = (e: React.MouseEvent) => {
-    e.preventDefault()
-    logout()
+  const handleLogout = () => {
+    setCookieToContext(null as unknown as TCookie)
     fetcher.submit(null, { method: 'post', action: '/api/logout' })
   }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
