@@ -5,15 +5,7 @@ import 'swiper/css/navigation'
 import 'swiper/css/pagination'
 import 'swiper/css/effect-coverflow'
 
-import {
-  Links,
-  Meta,
-  Outlet,
-  Scripts,
-  ScrollRestoration,
-  useNavigation,
-  useRouteError,
-} from 'react-router'
+import { Links, Meta, Outlet, Scripts, ScrollRestoration, useRouteError } from 'react-router'
 import type { Route } from './+types/root'
 import { useEffect, useState } from 'react'
 import { ErrorBoundaryComponent } from '~/components/error/ErrorBoundaryComponent'
@@ -71,15 +63,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   const [isClient, setIsClient] = useState(false)
-  const navigation = useNavigation()
-  const isLoading = navigation.state === 'loading'
 
   useEffect(() => {
     setIsClient(true)
   }, [])
 
   //* show a loading indicator while the app is initializing
-  if (!isClient || isLoading) return <Loading />
+  if (!isClient) return <Loading />
 
   return <Outlet />
 }

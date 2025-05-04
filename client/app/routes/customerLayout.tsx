@@ -12,7 +12,7 @@ export const loader = async ({ request }: { request: Request }) => {
   const url = new URL(request.url)
   const pathname = url.pathname
 
-  if (pathname === '/customer') return redirect('/customer/orders')
+  if (pathname === '/customer') return redirect('/customer/profile')
 
   const cookie = await authServices.getCookie(request)
 

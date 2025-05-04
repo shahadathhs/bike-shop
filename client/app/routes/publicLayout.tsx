@@ -14,7 +14,7 @@ export default function PublicLayout() {
   }, [])
 
   //* show a loading indicator while the app is initializing
-  if (!isClient || isLoading) return <Loading />
+  if (!isClient || isLoading) return <Loading className="h-screen" />
 
   return (
     <main className="container mx-auto px-3 md:px-0">

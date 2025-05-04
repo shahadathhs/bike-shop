@@ -1,9 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { Loader2 } from 'lucide-react'
+import { cn } from '~/lib/utils'
 
-export default function Loading() {
+export default function Loading({ className }: { className?: string }) {
   return (
-    <div className="flex items-center justify-center h-screen">
+    <div className={cn('flex items-center justify-center h-[calc(100vh-88px)]', className)}>
       <Card className="backdrop-blur-lg   rounded-2xl p-8">
         <CardHeader className="text-center">
           <CardTitle className="text-3xl font-extrabold tracking-tight text-primary">

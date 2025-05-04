@@ -1,18 +1,13 @@
-import { Link, NavLink, useFetcher } from 'react-router'
+import { Link, NavLink } from 'react-router'
 import logoImg from 'assets/logo.png'
 import { navLinks } from '~/constant/navigationLinks'
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '~/components/ui/sheet'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '~/components/ui/dropdown-menu'
 import { Button } from '~/components/ui/button'
 import { Menu } from 'lucide-react'
 import { useState } from 'react'
-import { useAuth } from '~/context/AuthContext'
 import { ModeToggle } from './ModeToggle'
+import ProfileDropdown from './ProfileDropdown'
+import { useAuth } from '~/context/AuthContext'
 
 function RouterNavLink({
   to,
@@ -39,15 +34,7 @@ function RouterNavLink({
 
 export default function NavBar() {
   const [open, setOpen] = useState(false)
-  const { role, logout } = useAuth()
-
-  const fetcher = useFetcher()
-
-  const handleLogout = (e: React.MouseEvent) => {
-    e.preventDefault()
-    logout()
-    fetcher.submit(null, { method: 'post', action: '/api/logout' })
-  }
+  const { role } = useAuth()
 
   return (
     <header className="border bg-background p-3 md:p-4 my-2 rounded shadow-sm">
@@ -97,17 +84,7 @@ export default function NavBar() {
           </nav>
           {/* Auth & Actions */}
           {role ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline">Profile</Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem asChild>
-                  <Link to={`/${role}`}>Go to Dashboard</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={e => handleLogout(e)}>Logout</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <ProfileDropdown userRole={role} />
           ) : (
             <Link to="/login">
               <Button size="sm" variant="default" className="hover:cursor-pointer">

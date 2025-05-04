@@ -13,7 +13,7 @@ export const loader = async ({ request }: { request: Request }) => {
   const pathname = url.pathname
 
   // * redirect to analytics page if the user is on the dashboard route
-  if (pathname === 'admin') return redirect('admin/analytics')
+  if (pathname === 'admin') return redirect('admin/profile')
 
   const cookie = await authServices.getCookie(request)
 

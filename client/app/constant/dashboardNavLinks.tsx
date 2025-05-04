@@ -22,6 +22,11 @@ export const adminNavItems: NavigationItem[] = [
     icon: Home,
   },
   {
+    title: 'Profile',
+    to: '/admin/profile',
+    icon: PersonStanding,
+  },
+  {
     title: 'Analytics',
     to: '/admin/analytics',
     icon: BarChart3,
@@ -41,11 +46,7 @@ export const adminNavItems: NavigationItem[] = [
     to: '/admin/users',
     icon: Users,
   },
-  {
-    title: 'Profile',
-    to: '/admin/profile',
-    icon: PersonStanding,
-  },
+
   {
     title: 'Settings',
     to: '/admin/setting',
@@ -60,14 +61,14 @@ export const customerNavItems: NavigationItem[] = [
     icon: Home,
   },
   {
-    title: 'Orders',
-    to: '/customer/orders',
-    icon: ShoppingCart,
-  },
-  {
     title: 'Profile',
     to: '/customer/profile',
     icon: PersonStanding,
+  },
+  {
+    title: 'Orders',
+    to: '/customer/orders',
+    icon: ShoppingCart,
   },
   {
     title: 'Settings',

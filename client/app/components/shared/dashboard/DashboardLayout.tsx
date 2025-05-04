@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
-import { useLocation } from 'react-router'
+import { useLocation, useNavigation } from 'react-router'
 import { SidebarInset, SidebarProvider } from '~/components/ui/sidebar'
 import { DashboardSidebar } from './DashboardSideBar'
 import { DashboardNavbar } from './DashboardNavBar'
 import { Outlet } from 'react-router'
+import Loading from '../Loading'
 
 export function DashboardLayout({ userRole = 'customer' }: { userRole?: 'admin' | 'customer' }) {
   const pathname = useLocation().pathname
@@ -21,14 +22,17 @@ export function DashboardLayout({ userRole = 'customer' }: { userRole?: 'admin' 
     }
   }, [pathname])
 
+  const navigation = useNavigation()
+  const isLoading = navigation.state === 'loading'
+
   return (
     <SidebarProvider>
       <DashboardSidebar userRole={userRole} />
       <div className="min-h-screen bg-background w-full">
         <SidebarInset>
           <DashboardNavbar currentPath={currentPath} userRole={userRole} />
-          <main className="w-full p-4 md:p-6">
-            <Outlet />
+          <main className="w-full p-3">
+            {isLoading ? <Loading className="h-[calc(100vh-88px)]" /> : <Outlet />}
           </main>
         </SidebarInset>
       </div>
