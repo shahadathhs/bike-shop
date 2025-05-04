@@ -73,7 +73,7 @@ export default function PaymentProcess() {
       </div>
 
       <BorderBeam
-        duration={50}
+        duration={30}
         size={300}
         reverse
         className="opacity-0 md:opacity-100 from-transparent via-green-500 to-transparent"

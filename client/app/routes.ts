@@ -13,8 +13,10 @@ export default [
     route('/privacy-policy', 'routes/public/privacyPolicy.tsx'),
     route('/return-policy', 'routes/public/returnPolicy.tsx'),
 
-    // * Protected routes
+    // * Product details routes
     route('/product/:id', 'routes/public/productDetails.tsx'),
+
+    // * Protected routes
     route('/product/:id/checkout', 'routes/public/checkout.tsx'),
     route('/checkout/success', 'routes/public/checkoutSuccess.tsx'),
     route('/checkout/cancel', 'routes/public/checkoutCancel.tsx'),
