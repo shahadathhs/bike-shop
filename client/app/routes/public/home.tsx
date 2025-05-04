@@ -1,13 +1,12 @@
-import Banner from '~/components/ui/Banner'
-import type { Route } from './+types/home'
+import Banner from '~/components/home/Banner'
 import { useLoaderData, type LoaderFunction } from 'react-router'
-import Product from '~/components/ui/Product'
-import Testimonials from '~/components/ui/Testimonials'
-import WhyChooseUs from '~/components/ui/WhyChooseUs'
-import PaymentProcess from '~/components/ui/PaymentProcess'
-import FAQ from '~/components/ui/FAQ'
+import Product from '~/components/home/Product'
+import Testimonials from '~/components/home/Testimonials'
+import WhyChooseUs from '~/components/home/WhyChooseUs'
+import PaymentProcess from '~/components/home/PaymentProcess'
+import FAQ from '~/components/home/FAQ'
 
-export function meta({}: Route.MetaArgs) {
+export function meta() {
   return [{ title: 'Bike Store - Home' }, { name: 'description', content: 'Welcome to Bike Store' }]
 }
 

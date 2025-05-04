@@ -1,12 +1,11 @@
 import { Links, Meta, Outlet, Scripts, ScrollRestoration, useRouteError } from 'react-router'
-
 import './app.css'
 import type { Route } from './+types/root'
-import { ThemeProvider } from '~/provider/theme/ThemeProvider'
 import { AuthProvider } from '~/provider/auth/AuthProvider'
 import { Toaster } from 'react-hot-toast'
 import { useEffect, useState } from 'react'
 import { ErrorBoundaryComponent } from '~/components/error/ErrorBoundaryComponent'
+import Loading from './components/shared/Loading'
 
 export const links: Route.LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -21,7 +20,7 @@ export const links: Route.LinksFunction = () => [
   },
 ]
 
-export function meta({}: Route.MetaArgs) {
+export function meta() {
   return [{ title: 'Bike Store' }, { name: 'description', content: 'Welcome to Bike Store' }]
 }
 
@@ -48,20 +47,17 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   const [isClient, setIsClient] = useState(false)
+
   useEffect(() => {
     setIsClient(true)
   }, [])
 
   //* show a loading indicator while the app is initializing
-  if (!isClient) {
-    return <div>Loading...</div>
-  }
+  if (!isClient) <Loading />
 
   return (
     <AuthProvider>
-      <ThemeProvider>
-        <Outlet />
-      </ThemeProvider>
+      <Outlet />
     </AuthProvider>
   )
 }
