@@ -1,6 +1,10 @@
 import { useEffect } from 'react'
 import { Link, useFetcher, useNavigate, type ActionFunctionArgs } from 'react-router'
 import { toast } from 'sonner'
+import { Card, CardHeader, CardTitle, CardContent } from '~/components/ui/card'
+import { Label } from '~/components/ui/label'
+import { Input } from '~/components/ui/input'
+import { Button } from '~/components/ui/button'
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData()
@@ -12,19 +16,15 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   if (typeof name !== 'string' || !name.trim()) {
     return { error: 'Name is required' }
   }
-
   if (typeof email !== 'string' || !email.trim()) {
     return { error: 'Email is required' }
   }
-
   if (typeof password !== 'string' || !password.trim()) {
     return { error: 'Password is required' }
   }
-
   if (password !== confirmPassword) {
     return { error: 'Passwords do not match' }
   }
-
   if (password.length < 6) {
     return { error: 'Password must be at least 6 characters long' }
   }
@@ -32,133 +32,117 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   try {
     const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/register`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, email, password }),
     })
-
     const data = await response.json()
-
     if (response.ok) {
-      return {
-        success: true,
-        message: 'Registration successful',
-        data,
-      }
+      return { success: true, message: 'Registration successful' }
     } else {
-      console.error('Error registering user', data)
-      return { success: false, message: data.message, errorDetails: data }
+      return { success: false, error: data.message, errorDetails: data }
     }
   } catch (error) {
-    console.error('Error registering user', error)
-    return { success: false, message: 'Registration failed', errorDetails: error }
+    return { success: false, error: 'Registration failed', errorDetails: error }
   }
 }
 
 export default function Register() {
   const fetcher = useFetcher()
+  const navigate = useNavigate()
   const isSubmitting = fetcher.state === 'submitting'
 
-  const navigate = useNavigate()
-
   useEffect(() => {
-    const handleFetcherData = async () => {
-      if (fetcher.data?.success) {
-        toast.success(fetcher.data.message, {
-          icon: '🎉',
-          description: 'Redirecting to login...',
-        })
-        //* wait for 1 second before redirecting
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        navigate('/login')
-      } else if (fetcher.data?.error) {
-        toast.error(fetcher.data.error || 'Registration failed', {
-          icon: '❌',
-          description: fetcher.data.errorDetails?.message,
-        })
-      }
+    if (fetcher.data?.success) {
+      toast.success(fetcher.data.message, {
+        icon: '🎉',
+        description: 'Redirecting to login...',
+      })
+      setTimeout(() => navigate('/login'), 1000)
+    } else if (fetcher.data?.error) {
+      toast.error(fetcher.data.error, {
+        icon: '❌',
+        description: fetcher.data.errorDetails?.message,
+      })
     }
-
-    handleFetcherData()
   }, [fetcher.data, navigate])
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4 text-center">Register to our website</h1>
+    <div className="h-[500px] flex flex-col lg:flex-row pt-10">
+      {/* Left: Welcome Panel */}
+      <div className="hidden lg:flex lg:w-1/2 items-center justify-center p-10 border-r">
+        <div className="space-y-6">
+          <h2 className="text-4xl font-bold">Join Our Community</h2>
+          <p className="text-lg">
+            Create an account to track orders, save favorites, and receive exclusive offers.
+          </p>
+          <ul className="list-disc list-inside space-y-2">
+            <li>Access to order history</li>
+            <li>Personalized recommendations</li>
+            <li>Exclusive member discounts</li>
+          </ul>
+        </div>
+      </div>
 
-      <fetcher.Form method="post" className="max-w-md mx-auto space-y-4">
-        <div>
-          <label htmlFor="name" className="label mb-1">
-            Name
-          </label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            placeholder="Enter your name"
-            className="input input-bordered w-full"
-            required
-          />
-        </div>
-        <div>
-          <label htmlFor="email" className="label mb-1">
-            Email
-          </label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            placeholder="Enter your email"
-            className="input input-bordered w-full"
-            required
-          />
-        </div>
-        <div>
-          <label htmlFor="password" className="label mb-1">
-            Password
-          </label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            placeholder="Enter your password"
-            className="input input-bordered w-full"
-            required
-          />
-        </div>
+      {/* Right: Registration Form */}
+      <div className="flex w-full lg:w-1/2 items-center justify-center p-6">
+        <Card className="w-full max-w-md">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-2xl text-center">Join Us</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <fetcher.Form method="post" className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Name</Label>
+                <Input type="text" id="name" name="name" placeholder="Your full name" required />
+              </div>
 
-        <div>
-          <label htmlFor="confirmPassword" className="label mb-1">
-            Confirm Password
-          </label>
-          <input
-            type="password"
-            id="confirmPassword"
-            name="confirmPassword"
-            placeholder="Confirm your password"
-            className="input input-bordered w-full"
-            required
-          />
-        </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  type="email"
+                  id="email"
+                  name="email"
+                  placeholder="you~example.com"
+                  required
+                />
+              </div>
 
-        {/* link to login page */}
-        <div className="text-center">
-          Already have an account?{' '}
-          <Link to="/login" className="link link-primary">
-            Login
-          </Link>
-        </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  type="password"
+                  id="password"
+                  name="password"
+                  placeholder="Enter your password"
+                  required
+                />
+              </div>
 
-        {/* Submit button */}
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition-colors"
-        >
-          {isSubmitting ? 'Registering...' : 'Register'}
-        </button>
-      </fetcher.Form>
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <Input
+                  type="password"
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  placeholder="Confirm password"
+                  required
+                />
+              </div>
+
+              <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
+                {isSubmitting ? 'Registering...' : 'Register'}
+              </Button>
+            </fetcher.Form>
+
+            <p className="mt-4 text-center text-sm">
+              Already have an account?{' '}
+              <Link to="/login" className="underline">
+                Login here
+              </Link>
+            </p>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }

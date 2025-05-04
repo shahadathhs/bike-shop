@@ -68,7 +68,7 @@ export default function Login() {
   }, [fetcher.data])
 
   return (
-    <div className="flex flex-col lg:flex-row h-[500px] items-center">
+    <div className="flex flex-col lg:flex-row h-[500px] items-center pt-10">
       {/* Welcome Column */}
       <div className="hidden lg:flex lg:w-1/2 items-center justify-center p-10 border-r">
         <div className="space-y-6">
@@ -92,7 +92,7 @@ export default function Login() {
           </CardHeader>
           <CardContent>
             <fetcher.Form method="post" className="space-y-4" onSubmit={() => setSubmitted(true)}>
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
                   type="email"
@@ -103,7 +103,7 @@ export default function Login() {
                 />
               </div>
 
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
                 <Input
                   type="password"

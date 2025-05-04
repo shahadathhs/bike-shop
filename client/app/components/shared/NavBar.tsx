@@ -110,7 +110,7 @@ export default function NavBar() {
             </DropdownMenu>
           ) : (
             <Link to="/login">
-              <Button variant="default" className="hover:cursor-pointer">
+              <Button size="sm" variant="default" className="hover:cursor-pointer">
                 Login
               </Button>
             </Link>

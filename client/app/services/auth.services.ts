@@ -33,7 +33,7 @@ export const getCookie = async (request: Request) => {
 // * create session function
 async function createUserSession({ token, email, name, role }: TCookie, redirectTo: string) {
   const session = await sessionStorage.getSession()
-  console.log('token in createUserSession', token)
+
   session.set('token', token)
   session.set('email', email)
   session.set('name', name)
