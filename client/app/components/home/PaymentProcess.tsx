@@ -1,58 +1,75 @@
 import { Link } from 'react-router'
 import { nanoid } from 'nanoid'
+import { motion } from 'motion/react'
+import { Button } from '~/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
+import { paymentSteps } from '~/constant/paymentSteps'
+import { cn } from '~/lib/utils'
 
-const steps = [
-  {
-    title: 'Step 1: Select Your Product',
-    description:
-      "Choose the product you’d like to purchase and select the quantity. Once you've made your selection, proceed to the checkout page to finalize your order.",
-  },
-  {
-    title: 'Step 2: Go to Checkout',
-    description:
-      'After selecting your quantity, you’ll be directed to our secure checkout page. Here, you can review your order before proceeding.',
-  },
-  {
-    title: 'Step 3: Secure Stripe Payment',
-    description:
-      'On the Stripe checkout page, enter your payment details. Once payment is successful, you’ll be redirected to the order confirmation page.',
-  },
-  {
-    title: 'Step 4: Order Confirmation',
-    description:
-      'After a successful payment, click the confirmation button to finalize your order and receive an order confirmation email.',
-  },
-  {
-    title: 'Step 5: Payment Unsuccessful?',
-    description:
-      'If your payment is unsuccessful, you’ll be redirected to the cancellation page. From there, you can either try again or return to the homepage.',
-  },
-]
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: (i = 1) => ({
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.2,
+      delayChildren: 0.2 * i,
+    },
+  }),
+}
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 },
+}
 
 export default function PaymentProcess() {
   return (
-    <div className="py-16">
-      <div className="text-center">
-        <h2 className="text-3xl font-bold mb-8">How Our Payment Process Works</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-          {steps.map((step, index) => (
-            <div
+    <motion.section
+      className="py-16 px-4 sm:px-6 lg:px-8"
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+      custom={0}
+    >
+      <div className="max-w-5xl mx-auto text-center">
+        <motion.h2 className="text-3xl font-bold mb-10" variants={itemVariants}>
+          How Our Payment Process Works
+        </motion.h2>
+
+        <motion.div
+          className="grid grid-cols-1 sm:grid-cols-2 gap-6"
+          variants={containerVariants}
+          custom={1}
+        >
+          {paymentSteps.map((step, index) => (
+            <motion.div
               key={nanoid()}
-              className={`border p-6 rounded-lg shadow-md ${
-                index === steps.length - 1 ? 'md:col-span-2 md:max-w-[50%] mx-auto' : ''
-              }`}
+              variants={itemVariants}
+              className={cn(
+                index === paymentSteps.length - 1 ? 'sm:col-span-2' : '',
+                'transition-transform transform hover:scale-105',
+              )}
             >
-              <h3 className="text-xl font-semibold mb-4">{step.title}</h3>
-              <p className="text-gray-400">{step.description}</p>
-            </div>
+              <Card className="h-full">
+                <CardHeader>
+                  <CardTitle className="text-lg">{step.title}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground text-sm">{step.description}</p>
+                </CardContent>
+              </Card>
+            </motion.div>
           ))}
-        </div>
-        <div className="mt-8">
-          <Link to="/product" className="btn btn-primary">
-            Start Shopping
+        </motion.div>
+
+        <motion.div className="mt-10" variants={itemVariants}>
+          <Link to="/product">
+            <Button size="lg" variant={'outline'} className='cursor-pointer'>
+              Start Shopping
+            </Button>
           </Link>
-        </div>
+        </motion.div>
       </div>
-    </div>
+    </motion.section>
   )
 }
