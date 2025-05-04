@@ -36,6 +36,8 @@ export default [
       route('/create-product', 'routes/admin/create-product.tsx'),
       route('/update-product/:id', 'routes/admin/update-product.tsx'),
       route('/orders', 'routes/admin/orders.tsx'),
+      route('/setting', 'routes/admin/setting.tsx'),
+      route('/profile', 'routes/admin/profile.tsx'),
     ]),
   ]),
 
@@ -45,6 +47,7 @@ export default [
       index('routes/customer/customer.tsx'),
       route('/orders', 'routes/customer/orders.tsx'),
       route('/profile', 'routes/customer/profile.tsx'),
+      route('/setting', 'routes/customer/setting.tsx'),
     ]),
   ]),
 

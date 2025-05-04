@@ -1,5 +1,5 @@
 import { LogOut, User } from 'lucide-react'
-import { Link } from 'react-router'
+import { Link, useFetcher } from 'react-router'
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar'
 import { Button } from '~/components/ui/button'
 import {
@@ -11,6 +11,8 @@ import {
   DropdownMenuTrigger,
 } from '~/components/ui/dropdown-menu'
 import { SidebarTrigger } from '~/components/ui/sidebar'
+import { useAuth } from '~/context/AuthContext'
+import { ModeToggle } from '../ModeToggle'
 
 interface DashboardNavbarProps {
   currentPath: string
@@ -18,9 +20,14 @@ interface DashboardNavbarProps {
 }
 
 export function DashboardNavbar({ currentPath, userRole = 'customer' }: DashboardNavbarProps) {
-  const handleLogout = () => {
-    // Implement your logout logic here
-    console.log('Logging out...')
+  const { logout } = useAuth()
+
+  const fetcher = useFetcher()
+
+  const handleLogout = (e: React.MouseEvent) => {
+    e.preventDefault()
+    logout()
+    fetcher.submit(null, { method: 'post', action: '/api/logout' })
   }
 
   return (
@@ -62,6 +69,7 @@ export function DashboardNavbar({ currentPath, userRole = 'customer' }: Dashboar
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          <ModeToggle />
         </div>
       </div>
     </header>

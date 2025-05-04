@@ -1,4 +1,13 @@
-import { BarChart3, Home, Package, PersonStanding, ShoppingCart, Users } from 'lucide-react'
+import {
+  BarChart3,
+  Home,
+  Package,
+  PersonStanding,
+  Settings,
+  Settings2,
+  ShoppingCart,
+  Users,
+} from 'lucide-react'
 
 export interface NavigationItem {
   title: string
@@ -32,6 +41,16 @@ export const adminNavItems: NavigationItem[] = [
     to: '/admin/users',
     icon: Users,
   },
+  {
+    title: 'Profile',
+    to: '/admin/profile',
+    icon: PersonStanding,
+  },
+  {
+    title: 'Settings',
+    to: '/admin/setting',
+    icon: Settings2,
+  },
 ]
 
 export const customerNavItems: NavigationItem[] = [
@@ -49,5 +68,10 @@ export const customerNavItems: NavigationItem[] = [
     title: 'Profile',
     to: '/customer/profile',
     icon: PersonStanding,
+  },
+  {
+    title: 'Settings',
+    to: '/customer/setting',
+    icon: Settings,
   },
 ]
