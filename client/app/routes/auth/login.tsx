@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useFetcher, useNavigation, type ActionFunction } from 'react-router'
 import { toast } from 'sonner'
 import { authServices } from '~/services/auth.services'
@@ -49,6 +49,7 @@ export const action: ActionFunction = async ({ request }) => {
 export default function Login() {
   const fetcher = useFetcher()
   const navigation = useNavigation()
+  const [shouldShow, setShouldShow] = useState(false)
   const isSubmitting = fetcher.state === 'submitting'
   const isLoading = navigation.state === 'loading'
 
@@ -72,7 +73,11 @@ export default function Login() {
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4 text-center">Login</h1>
-      <fetcher.Form method="post" className="max-w-md mx-auto space-y-4">
+      <fetcher.Form
+        method="post"
+        onSubmit={() => setShouldShow(true)}
+        className="max-w-md mx-auto space-y-4"
+      >
         <div>
           <label htmlFor="email" className="label mb-1">
             Email
@@ -102,16 +107,16 @@ export default function Login() {
         <div className="text-center">
           <button
             type="submit"
-            disabled={isSubmitting || isLoading}
+            disabled={(isSubmitting || isLoading) && shouldShow}
             className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition-colors"
           >
-            {isSubmitting || isLoading ? 'Logging in...' : 'Login'}
+            {(isSubmitting || isLoading) && shouldShow ? 'Logging in...' : 'Login'}
           </button>
         </div>
       </fetcher.Form>
       <div className="text-center mt-4">
         Don&apos;t have an account?{' '}
-        <a href="/auth/register" className="link link-primary">
+        <a href="/register" className="link link-primary">
           Register here
         </a>
       </div>

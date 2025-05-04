@@ -1,27 +1,41 @@
+// ~/components/ErrorPage.tsx
 import { Link } from 'react-router'
+import { motion } from 'motion/react'
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '~/components/ui/card'
+import { Button } from '~/components/ui/button'
+import { AlertTriangle } from 'lucide-react'
 
-const ErrorComponents = ({
-  message,
-  details,
-  status,
-}: {
-  message: string | null
-  details: string | null
-  status: number | null
-}) => {
+interface ErrorPageProps {
+  status?: number
+  message?: string
+  details?: string
+}
+
+export default function ErrorPage({
+  status = 404,
+  message = 'Oops! The page you’re looking for isn’t here.',
+  details = 'It might have been moved or no longer exists.',
+}: ErrorPageProps) {
   return (
-    <section className="h-screen w-full flex flex-col justify-center items-center">
-      <p className="text-[#FF4D4D] text-lg font-bold font-geist text-center">{status ?? 404}</p>
-      <p className="max-w-[550px] text-center text-black-text font-figtree text-[35px] mt-[30px] font-normal">
-        {message ?? 'Oops! It Looks Like The Page You’re Looking For Isn’t Available.'}
-      </p>
-      <p className="text-tertiary-text mb-[30px] text-lg font-normal leading-[28px] font-geist mt-[30px]">
-        {details ?? 'It might have been moved or doesn‘t exist anymore.'}
-      </p>
-      <Link to="/" className="mt-[30px] btn btn-primary">
-        BACK TO HOME
-      </Link>
-    </section>
+    <motion.section
+      className="h-screen w-full flex items-center justify-center px-4"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
+      <Card className="max-w-md w-full text-center">
+        <CardHeader className="space-y-2 pt-6">
+          <AlertTriangle className="mx-auto h-12 w-12 text-red-500" />
+          <CardTitle className="text-2xl font-bold">{status}</CardTitle>
+          <CardDescription className="text-lg">{message}</CardDescription>
+        </CardHeader>
+        <CardContent className="pb-6">
+          <p className="mb-6 text-sm text-muted-foreground">{details}</p>
+          <Button asChild size="lg" className="w-full">
+            <Link to="/">Back to Home</Link>
+          </Button>
+        </CardContent>
+      </Card>
+    </motion.section>
   )
 }
-export default ErrorComponents
