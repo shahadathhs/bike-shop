@@ -1,64 +1,88 @@
-import { useRef } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router'
 import { Swiper, SwiperSlide } from 'swiper/react'
-import { Autoplay, Navigation, Pagination, EffectFade } from 'swiper/modules'
-import SwiperCore from 'swiper'
+import { Autoplay, Navigation, Pagination, EffectFade, Thumbs } from 'swiper/modules'
+import type { Swiper as SwiperCore } from 'swiper/types'
 import { Button } from '~/components/ui/button'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import 'swiper/css'
 import 'swiper/css/navigation'
 import 'swiper/css/pagination'
 import 'swiper/css/effect-fade'
+import 'swiper/css/thumbs'
 import { banners } from '~/constant/bannerData'
 
 export default function Banner() {
-  const swiperRef = useRef<SwiperCore>(null)
+  const [thumbsSwiper, setThumbsSwiper] = useState<SwiperCore | null>(null)
 
   return (
-    <div className="relative w-full h-[500px]">
-      <Swiper
-        onSwiper={swiper => (swiperRef.current = swiper)}
-        modules={[Navigation, Pagination, Autoplay, EffectFade]}
-        navigation={{
-          prevEl: '.swiper-button-prev',
-          nextEl: '.swiper-button-next',
-        }}
-        pagination={{ clickable: true }}
-        effect="fade"
-        autoplay={{ delay: 5000, disableOnInteraction: false }}
-        loop
-        className="h-full"
-      >
-        {banners.map(banner => (
-          <SwiperSlide key={banner.id}>
-            <div className="relative w-full h-full rounded">
-              <img
-                src={banner.image}
-                alt={banner.title}
-                className="w-full h-full object-cover rounded"
-              />
-              <div className="absolute inset-0 rounded bg-black/40 flex flex-col items-center justify-center text-center p-6 space-y-4">
-                <h1 className="text-4xl font-bold bg-background/80 px-4 py-2 rounded">
-                  {banner.title}
-                </h1>
-                <p className="text-2xl max-w-xl mx-auto text-white">{banner.subtitle}</p>
-                <p className="text-base max-w-lg mx-auto text-white/90">{banner.description}</p>
-                <Link to="/product">
-                  <Button size="lg">Shop Now</Button>
-                </Link>
+    <div>
+      {/* Main Slider */}
+      <div className="relative w-full h-[500px]">
+        <Swiper
+          modules={[Navigation, Pagination, Autoplay, EffectFade, Thumbs]}
+          thumbs={{ swiper: thumbsSwiper }}
+          navigation={{
+            prevEl: '.swiper-button-prev',
+            nextEl: '.swiper-button-next',
+          }}
+          pagination={{ clickable: true }}
+          effect="fade"
+          autoplay={{ delay: 5000, disableOnInteraction: false }}
+          loop
+          className="h-full"
+        >
+          {banners.map(b => (
+            <SwiperSlide key={b.id}>
+              <div className="relative w-full h-full rounded overflow-hidden">
+                <img src={b.image} alt={b.title} className="w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center text-center p-6 space-y-4">
+                  <h1 className="text-4xl font-bold bg-background/80 px-4 py-2 rounded">
+                    {b.title}
+                  </h1>
+                  <p className="text-2xl max-w-xl mx-auto text-white">{b.subtitle}</p>
+                  <p className="text-base max-w-lg mx-auto text-white/90">{b.description}</p>
+                  <Link to="/product">
+                    <Button size="lg">Shop Now</Button>
+                  </Link>
+                </div>
               </div>
-            </div>
-          </SwiperSlide>
-        ))}
+            </SwiperSlide>
+          ))}
 
-        {/* Custom Nav Buttons (overriding default HTML) */}
-        <div className="swiper-button-prev absolute left-4 top-1/2 z-20">
-          <ChevronLeft className="h-5 w-5" />
-        </div>
-        <div className="swiper-button-next absolute right-4 top-1/2 z-20">
-          <ChevronRight className="h-5 w-5" />
-        </div>
-      </Swiper>
+          {/* Prev/Next */}
+          <div className="swiper-button-prev absolute left-4 top-1/2 z-20">
+            <ChevronLeft className="h-6 w-6 text-white" />
+          </div>
+          <div className="swiper-button-next absolute right-4 top-1/2 z-20">
+            <ChevronRight className="h-6 w-6 text-white" />
+          </div>
+        </Swiper>
+      </div>
+
+      {/* Thumbnail Slider */}
+      <div className="mt-4">
+        <Swiper
+          onSwiper={setThumbsSwiper}
+          modules={[Thumbs]}
+          spaceBetween={10}
+          slidesPerView={Math.min(banners.length, 6)}
+          watchSlidesProgress
+          className="h-20"
+        >
+          <div className='grid grid-cols-3'>
+            {banners.map(b => (
+              <SwiperSlide key={`thumb-${b.id}`}>
+                <img
+                  src={b.image}
+                  alt={b.title}
+                  className="h-full w-full object-cover cursor-pointer opacity-60 hover:opacity-100 transition-opacity rounded"
+                />
+              </SwiperSlide>
+            ))}
+          </div>
+        </Swiper>
+      </div>
     </div>
   )
 }
