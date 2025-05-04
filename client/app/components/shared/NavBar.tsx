@@ -35,6 +35,7 @@ function RouterNavLink({
 export default function NavBar() {
   const [open, setOpen] = useState(false)
   const { role } = useAuth()
+  const [showLoginButton, setShowLoginButton] = useState(false)
 
   return (
     <header className="border bg-background p-3 md:p-4 my-2 rounded shadow-sm">
@@ -83,8 +84,8 @@ export default function NavBar() {
             ))}
           </nav>
           {/* Auth & Actions */}
-          {role ? (
-            <ProfileDropdown userRole={role} />
+          {role && !showLoginButton ? (
+            <ProfileDropdown userRole={role} setShowLoginButton={setShowLoginButton} />
           ) : (
             <Link to="/login">
               <Button size="sm" variant="default" className="hover:cursor-pointer">

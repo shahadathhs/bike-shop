@@ -1,5 +1,4 @@
-import Cookies from 'js-cookie'
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useState } from 'react'
 import type { TAuthContext, TCookie } from '~/types/user'
 
 const AuthContext = createContext<TAuthContext>({
@@ -11,27 +10,11 @@ const AuthContext = createContext<TAuthContext>({
 })
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [cookie, setCookie] = useState<TCookie | null>(JSON.parse(Cookies.get('cookie') || 'null'))
+  const [cookie, setCookie] = useState<TCookie | null>(null)
 
   const setCookieToContext = (newCookie: TCookie | null) => {
     setCookie(newCookie)
-
-    if (newCookie) {
-      // preserve or update
-      Cookies.set('cookie', JSON.stringify(newCookie), { path: '/' })
-    } else {
-      // explicit removal
-      Cookies.remove('cookie', { path: '/' })
-    }
   }
-
-  useEffect(() => {
-    if (cookie) {
-      Cookies.set('cookie', JSON.stringify(cookie), { path: '/' })
-    } else {
-      Cookies.remove('cookie', { path: '/' })
-    }
-  }, [cookie])
 
   const value = {
     token: cookie?.token,

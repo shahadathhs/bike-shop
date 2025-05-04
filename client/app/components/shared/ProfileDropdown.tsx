@@ -14,13 +14,22 @@ import {
 } from '~/components/ui/dropdown-menu'
 import type { TCookie } from '~/types/user'
 
-export default function ProfileDropdown({ userRole }: { userRole: string }) {
+export default function ProfileDropdown({
+  userRole,
+  setShowLoginButton = () => {},
+}: {
+  userRole: string
+  setShowLoginButton?: React.Dispatch<React.SetStateAction<boolean>>
+}) {
   const { setCookieToContext } = useAuth()
 
   const fetcher = useFetcher()
 
   const handleLogout = () => {
     setCookieToContext(null as unknown as TCookie)
+    if (setShowLoginButton) {
+      setShowLoginButton(true)
+    }
     fetcher.submit(null, { method: 'post', action: '/api/logout' })
   }
 

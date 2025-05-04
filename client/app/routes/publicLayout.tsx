@@ -1,10 +1,30 @@
 import Footer from '~/components/shared/Footer'
 import NavBar from '~/components/shared/NavBar'
 import { useEffect, useState } from 'react'
-import { Outlet, useNavigation } from 'react-router'
+import { Outlet, useLoaderData, useNavigation, type LoaderFunction } from 'react-router'
 import Loading from '~/components/shared/Loading'
+import { authServices } from '~/services/auth.services'
+import type { TCookie } from '~/types/user'
+import { useAuth } from '~/context/AuthContext'
+
+export const loader: LoaderFunction = async ({ request }) => {
+  const cookie = await authServices.getCookie(request)
+
+  return { cookie: cookie ? cookie : null }
+}
 
 export default function PublicLayout() {
+  const { cookie } = useLoaderData<{ cookie: TCookie }>()
+
+  const { setCookieToContext } = useAuth()
+
+  // * Set cookie to context when cookie data changes
+  useEffect(() => {
+    if (cookie) {
+      setCookieToContext(cookie) // * don't set cookie to context if it's null
+    }
+  }, [cookie, setCookieToContext])
+
   const [isClient, setIsClient] = useState(false)
   const navigation = useNavigation()
   const isLoading = navigation.state === 'loading'
