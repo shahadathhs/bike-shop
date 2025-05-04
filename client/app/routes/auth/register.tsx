@@ -1,92 +1,82 @@
-import { useEffect } from "react";
-import toast from "react-hot-toast";
-import {
-  Link,
-  useFetcher,
-  useNavigate,
-  type ClientActionFunctionArgs,
-} from "react-router";
+import { useEffect } from 'react'
+import toast from 'react-hot-toast'
+import { Link, useFetcher, useNavigate, type ClientActionFunctionArgs } from 'react-router'
 
 export const clientAction = async ({ request }: ClientActionFunctionArgs) => {
-  const formData = await request.formData();
-  const name = formData.get("name");
-  const email = formData.get("email");
-  const password = formData.get("password");
-  const confirmPassword = formData.get("confirmPassword");
+  const formData = await request.formData()
+  const name = formData.get('name')
+  const email = formData.get('email')
+  const password = formData.get('password')
+  const confirmPassword = formData.get('confirmPassword')
 
-  if (typeof name !== "string" || !name.trim()) {
-    return { error: "Name is required" };
+  if (typeof name !== 'string' || !name.trim()) {
+    return { error: 'Name is required' }
   }
 
-  if (typeof email !== "string" || !email.trim()) {
-    return { error: "Email is required" };
+  if (typeof email !== 'string' || !email.trim()) {
+    return { error: 'Email is required' }
   }
 
-  if (typeof password !== "string" || !password.trim()) {
-    return { error: "Password is required" };
+  if (typeof password !== 'string' || !password.trim()) {
+    return { error: 'Password is required' }
   }
 
   if (password !== confirmPassword) {
-    return { error: "Passwords do not match" };
+    return { error: 'Passwords do not match' }
   }
 
   if (password.length < 6) {
-    return { error: "Password must be at least 6 characters long" };
+    return { error: 'Password must be at least 6 characters long' }
   }
 
-  const response = await fetch(
-    `${import.meta.env.VITE_API_URL}/auth/register`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ name, email, password }),
-    }
-  );
+  const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/register`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ name, email, password }),
+  })
 
-  const data = await response.json();
+  const data = await response.json()
 
   if (response.ok) {
     return {
       success: true,
-      message: "Registration successful",
+      message: 'Registration successful',
       data,
-    };
+    }
   } else {
-    console.error("Error registering user", data);
-    return { error: data.message, errorDetails: data };
+    console.error('Error registering user', data)
+    return { error: data.message, errorDetails: data }
   }
-};
+}
 
 export default function Register() {
-  const fetcher = useFetcher();
-  const isSubmitting = fetcher.state === "submitting";
+  const fetcher = useFetcher()
+  const isSubmitting = fetcher.state === 'submitting'
 
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
   useEffect(() => {
     const handleFetcherData = async () => {
       if (fetcher.data?.success) {
-        toast.dismiss();
-        toast.success(fetcher.data.message);
+        toast.dismiss()
+        toast.success(fetcher.data.message)
         //* wait for 1 second before redirecting
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        navigate("/auth/login");
+        await new Promise(resolve => setTimeout(resolve, 1000))
+        navigate('/auth/login')
       } else if (fetcher.data?.error) {
-        toast.dismiss();
-        toast.error(fetcher.data.error);
+        toast.dismiss()
+        toast.error(fetcher.data.error)
       }
-    };
+    }
 
-    handleFetcherData();
-  }, [fetcher.data, navigate]);
+    handleFetcherData()
+  }, [fetcher.data, navigate])
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4 text-center">
-        Register to our website
-      </h1>
+      <h1 className="text-2xl font-bold mb-4 text-center">Register to our website</h1>
 
       <fetcher.Form method="post" className="max-w-md mx-auto space-y-4">
         <div>
@@ -145,7 +135,7 @@ export default function Register() {
 
         {/* link to login page */}
         <div className="text-center">
-          Already have an account?{" "}
+          Already have an account?{' '}
           <Link to="/auth/login" className="link link-primary">
             Login
           </Link>
@@ -157,9 +147,9 @@ export default function Register() {
           disabled={isSubmitting}
           className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition-colors"
         >
-          {isSubmitting ? "Registering..." : "Register"}
+          {isSubmitting ? 'Registering...' : 'Register'}
         </button>
       </fetcher.Form>
     </div>
-  );
+  )
 }

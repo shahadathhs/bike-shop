@@ -1,5 +1,3 @@
 export default function Tracking() {
-  return (
-    <div>Tracking</div>
-  )
+  return <div>Tracking</div>
 }

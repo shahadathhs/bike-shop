@@ -1,4 +1,4 @@
-import { createContext, useContext } from "react";
+import { createContext, useContext } from 'react'
 
 export const AuthContext = createContext({
   user: null,
@@ -11,15 +11,15 @@ export const AuthContext = createContext({
   logout: () => {
     //* TODO: Implement logout functionality
   },
-});
+})
 
 export const useAuth = () => {
   return useContext(
     AuthContext as React.Context<{
-      user: any;
-      setUser: (user: any) => void;
-      login: (user: any) => void;
-      logout: () => void;
-    }>
-  );
-};
+      user: any
+      setUser: (user: any) => void
+      login: (user: any) => void
+      logout: () => void
+    }>,
+  )
+}

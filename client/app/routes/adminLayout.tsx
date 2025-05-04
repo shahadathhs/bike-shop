@@ -1,31 +1,31 @@
-import Cookies from "js-cookie";
-import { useAuth } from "provider/auth/AuthContext";
-import ThemeToggle from "provider/theme/ThemeToggle";
-import { Link, Outlet, redirect } from "react-router";
+import Cookies from 'js-cookie'
+import { useAuth } from '~/provider/auth/AuthContext'
+import ThemeToggle from '~/provider/theme/ThemeToggle'
+import { Link, Outlet, redirect } from 'react-router'
 
 export const clientLoader = ({ request }: { request: Request }) => {
-  const user = Cookies.get("user");
+  const user = Cookies.get('user')
   if (!user) {
-    return redirect("/auth/login");
+    return redirect('/auth/login')
   }
 
-  const parsedUser = JSON.parse(user);
-  if (parsedUser.role !== "admin") {
-    return redirect("/");
+  const parsedUser = JSON.parse(user)
+  if (parsedUser.role !== 'admin') {
+    return redirect('/')
   }
 
   const url = new URL(request.url)
   const pathname = url.pathname
   // console.log('pathname', pathname)
-  if (pathname === "/dashboard/admin") {
+  if (pathname === '/dashboard/admin') {
     return redirect('/dashboard/admin/analytics')
   }
 
-  return null;
-};
+  return null
+}
 
 export default function DashboardAdminLayout() {
-  const { logout } = useAuth();
+  const { logout } = useAuth()
 
   return (
     <main className="min-h-screen w-full flex justify-between">
@@ -37,10 +37,7 @@ export default function DashboardAdminLayout() {
 
           {/* button to open drawer in mobile view */}
           <div className="fixed top-4 right-4 z-50">
-            <label
-              htmlFor="my-drawer-2"
-              className="btn btn-primary drawer-button lg:hidden"
-            >
+            <label htmlFor="my-drawer-2" className="btn btn-primary drawer-button lg:hidden">
               Open Menu
             </label>
           </div>
@@ -56,12 +53,8 @@ export default function DashboardAdminLayout() {
           <ul className="menu bg-base-200 text-base-content min-h-full flex flex-col justify-between w-40 p-4">
             {/* Sidebar content here */}
             <li>
-              {navItems.map((item) => (
-                <Link
-                  key={item.label}
-                  to={item.route}
-                  className="btn btn-ghost text-md"
-                >
+              {navItems.map(item => (
+                <Link key={item.label} to={item.route} className="btn btn-ghost text-md">
                   {item.label}
                 </Link>
               ))}
@@ -81,13 +74,13 @@ export default function DashboardAdminLayout() {
         </div>
       </div>
     </main>
-  );
+  )
 }
 const navItems = [
-  { label: "Home", route: "/" },
+  { label: 'Home', route: '/' },
   // { label: "Admin", route: "/dashboard/admin" },
-  { label: "Users", route: "/dashboard/admin/users" },
-  { label: "Analytics", route: "/dashboard/admin/analytics" },
-  { label: "Orders", route: "/dashboard/admin/orders" },
-  { label: "Products", route: "/dashboard/admin/products" },
-];
+  { label: 'Users', route: '/dashboard/admin/users' },
+  { label: 'Analytics', route: '/dashboard/admin/analytics' },
+  { label: 'Orders', route: '/dashboard/admin/orders' },
+  { label: 'Products', route: '/dashboard/admin/products' },
+]

@@ -1,54 +1,51 @@
-import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
+import { useEffect, useState } from 'react'
+import toast from 'react-hot-toast'
 import {
   useFetcher,
   useLoaderData,
   useNavigate,
   type ActionFunctionArgs,
   type ClientLoaderFunctionArgs,
-} from "react-router";
-import { brands, categories, models } from "utils/bikeUtils";
-import { getToken } from "utils/getToken";
+} from 'react-router'
+import { brands, categories, models } from '~/utils/bikeUtils'
+import { getToken } from '~/utils/getToken'
 
 export const clientLoader = async ({ params }: ClientLoaderFunctionArgs) => {
-  const id = params.id;
-  const token = getToken();
+  const id = params.id
+  const token = getToken()
 
   try {
-    const response = await fetch(
-      `${import.meta.env.VITE_API_URL}/bikes/${id}`,
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/bikes/${id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
 
     if (response.ok) {
-      const data = await response.json();
-      return { success: true, product: data };
+      const data = await response.json()
+      return { success: true, product: data }
     } else {
-      throw new Error("Failed to fetch product");
+      throw new Error('Failed to fetch product')
     }
   } catch (err) {
-    console.error("Error fetching product:", err);
-    return { error: "Failed to fetch product", errorDetails: err };
+    console.error('Error fetching product:', err)
+    return { error: 'Failed to fetch product', errorDetails: err }
   }
-};
+}
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   // Instead of using a custom upload handler for Cloudinary, we simply read the base64 string
-  const formData = await request.formData();
-  const id = formData.get("id") as string;
-  const name = formData.get("name") as string;
-  const brand = formData.get("brand") as string;
-  const modelName = formData.get("modelName") as string;
-  const price = formData.get("price") as string;
-  const quantity = formData.get("quantity") as string;
-  const description = formData.get("description") as string;
-  const category = formData.get("category") as string;
-  const previousImage = formData.get("prev_image") as string;
+  const formData = await request.formData()
+  const id = formData.get('id') as string
+  const name = formData.get('name') as string
+  const brand = formData.get('brand') as string
+  const modelName = formData.get('modelName') as string
+  const price = formData.get('price') as string
+  const quantity = formData.get('quantity') as string
+  const description = formData.get('description') as string
+  const category = formData.get('category') as string
+  const previousImage = formData.get('prev_image') as string
   // "image" here is expected to be a base64 string (if provided) via our hidden input.
-  const image = formData.get("image") as string;
-  const token = formData.get("csrf_token") as string;
+  const image = formData.get('image') as string
+  const token = formData.get('csrf_token') as string
 
   const formDataObject = {
     name,
@@ -60,80 +57,77 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     category,
     // Use the new base64 image if provided; otherwise fall back to the previous image URL.
     image: image ? image : previousImage,
-  };
+  }
 
   try {
-    const response = await fetch(
-      `${import.meta.env.VITE_API_URL}/bikes/${id}`,
-      {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formDataObject),
-      }
-    );
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/bikes/${id}`, {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(formDataObject),
+    })
 
     if (response.ok) {
-      const data = await response.json();
-      return { success: true, data };
+      const data = await response.json()
+      return { success: true, data }
     } else {
-      const errorData = await response.json();
+      const errorData = await response.json()
       return {
         success: false,
         error: errorData.message,
         errorDetails: errorData,
-      };
+      }
     }
   } catch (err) {
-    console.error("Error updating product:", err);
-    return { error: "Failed to update product", errorDetails: err };
+    console.error('Error updating product:', err)
+    return { error: 'Failed to update product', errorDetails: err }
   }
-};
+}
 
 export default function UpdateProduct() {
-  const loaderData = useLoaderData();
-  const product = loaderData.product.data;
+  const loaderData = useLoaderData()
+  const product = loaderData.product.data
 
-  const fetcher = useFetcher();
-  const isSubmitting = fetcher.state === "submitting";
-  const token = getToken() as string;
-  const navigate = useNavigate();
+  const fetcher = useFetcher()
+  const isSubmitting = fetcher.state === 'submitting'
+  const token = getToken() as string
+  const navigate = useNavigate()
 
   useEffect(() => {
     if (fetcher.data?.success) {
-      toast.dismiss();
-      toast.success("Product Updated successfully");
+      toast.dismiss()
+      toast.success('Product Updated successfully')
       const timer = setTimeout(() => {
-        navigate("/dashboard/admin/products");
-      }, 1000);
-      return () => clearTimeout(timer);
+        navigate('/dashboard/admin/products')
+      }, 1000)
+      return () => clearTimeout(timer)
     } else if (fetcher.data?.error) {
-      toast.dismiss();
-      toast.error(fetcher.data.error);
+      toast.dismiss()
+      toast.error(fetcher.data.error)
     }
-  }, [fetcher.data, navigate]);
+  }, [fetcher.data, navigate])
 
   // "image" holds the base64 string if a new image is selected, or defaults to the existing image URL.
-  const [image, setImage] = useState(product.image);
+  const [image, setImage] = useState(product.image)
 
   // When a file is selected, convert it to a base64 string.
   const handleImageChange = (e: any) => {
-    const file = e.target.files[0];
+    const file = e.target.files[0]
     if (file) {
-      if (file.type === "image/jpeg" || file.type === "image/png") {
-        const reader = new FileReader();
+      if (file.type === 'image/jpeg' || file.type === 'image/png') {
+        const reader = new FileReader()
         reader.onload = () => {
-          setImage(reader.result as string);
-        };
-        reader.readAsDataURL(file);
+          setImage(reader.result as string)
+        }
+        reader.readAsDataURL(file)
       } else {
-        toast.dismiss();
-        toast.error("Please select a valid image file (JPEG or PNG)");
+        toast.dismiss()
+        toast.error('Please select a valid image file (JPEG or PNG)')
       }
     }
-  };
+  }
 
   return (
     <div className="container mx-auto p-4">
@@ -175,7 +169,7 @@ export default function UpdateProduct() {
             className="select select-bordered w-full"
             required
           >
-            {brands.map((brand) => (
+            {brands.map(brand => (
               <option key={brand.value} value={brand.value}>
                 {brand.label}
               </option>
@@ -194,7 +188,7 @@ export default function UpdateProduct() {
             className="select select-bordered w-full"
             required
           >
-            {models.map((model) => (
+            {models.map(model => (
               <option key={model.value} value={model.value}>
                 {model.label}
               </option>
@@ -229,7 +223,7 @@ export default function UpdateProduct() {
             className="select select-bordered w-full"
             required
           >
-            {categories.map((category) => (
+            {categories.map(category => (
               <option key={category.value} value={category.value}>
                 {category.label}
               </option>
@@ -279,11 +273,7 @@ export default function UpdateProduct() {
             accept="image/*"
           />
           {image && (
-            <img
-              src={image}
-              alt="Product Preview"
-              className="mt-2 w-32 h-32 object-contain"
-            />
+            <img src={image} alt="Product Preview" className="mt-2 w-32 h-32 object-contain" />
           )}
         </div>
 
@@ -292,9 +282,9 @@ export default function UpdateProduct() {
           disabled={isSubmitting}
           className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition-colors"
         >
-          {isSubmitting ? "Updating..." : "Update Product"}
+          {isSubmitting ? 'Updating...' : 'Update Product'}
         </button>
       </fetcher.Form>
     </div>
-  );
+  )
 }

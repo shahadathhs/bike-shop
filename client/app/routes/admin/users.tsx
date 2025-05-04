@@ -1,111 +1,105 @@
-import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
-import { useFetcher } from "react-router";
-import { getToken } from "utils/getToken";
+import { useEffect, useState } from 'react'
+import toast from 'react-hot-toast'
+import { useFetcher } from 'react-router'
+import { getToken } from '~/utils/getToken'
 
 export const action = async ({ request }: any) => {
-  const formData = await request.formData();
+  const formData = await request.formData()
 
-  const action = formData.get("action");
-  const token = formData.get("token");
+  const action = formData.get('action')
+  const token = formData.get('token')
 
   // * action the toggle user active status
-  if (action === "toggleActive") {
-    const userId = formData.get("userId");
+  if (action === 'toggleActive') {
+    const userId = formData.get('userId')
 
-    const response = await fetch(
-      `${import.meta.env.VITE_API_URL}/auth/${userId}/active`,
-      {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/${userId}/active`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    })
     if (!response.ok) {
-      const errData = await response.json();
-      throw new Error(errData.error || "Failed to update user status");
+      const errData = await response.json()
+      throw new Error(errData.error || 'Failed to update user status')
     }
   }
   // * action the toggle user role
-  if (action === "toggleRole") {
-    const id = formData.get("userId");
-    const response = await fetch(
-      `${import.meta.env.VITE_API_URL}/auth/${id}/role`,
-      {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+  if (action === 'toggleRole') {
+    const id = formData.get('userId')
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/${id}/role`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    })
     if (!response.ok) {
-      const errData = await response.json();
-      throw new Error(errData.error || "Failed to update user role");
+      const errData = await response.json()
+      throw new Error(errData.error || 'Failed to update user role')
     }
   }
-};
+}
 
 export default function Users() {
-  const [users, setUsers] = useState([]);
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
-  const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [emailFilter, setEmailFilter] = useState("");
+  const [users, setUsers] = useState([])
+  const [page, setPage] = useState(1)
+  const [limit, setLimit] = useState(10)
+  const [total, setTotal] = useState(0)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [emailFilter, setEmailFilter] = useState('')
 
-  const fetcher = useFetcher();
-  const isSubmitting = fetcher.state === "submitting";
+  const fetcher = useFetcher()
+  const isSubmitting = fetcher.state === 'submitting'
 
-  const token = getToken();
+  const token = getToken()
 
   // Fetch users with pagination and optional email filtering.
-  const fetchUsers = async (page = 1, limit = 10, email = "") => {
-    setLoading(true);
+  const fetchUsers = async (page = 1, limit = 10, email = '') => {
+    setLoading(true)
     try {
       const queryParams = new URLSearchParams({
         page: page.toString(),
         limit: limit.toString(),
-      });
+      })
       // Append the email query parameter if provided.
       if (email) {
-        queryParams.append("email", email);
+        queryParams.append('email', email)
       }
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/auth/getAll?${queryParams.toString()}`,
         {
           headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
           },
-        }
-      );
+        },
+      )
       if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.error || "Failed to fetch users");
+        const errData = await response.json()
+        throw new Error(errData.error || 'Failed to fetch users')
       }
-      const responseData = await response.json();
-      setUsers(responseData.data.users);
-      setTotal(responseData.data.metadata.total);
+      const responseData = await response.json()
+      setUsers(responseData.data.users)
+      setTotal(responseData.data.metadata.total)
     } catch (err: any) {
-      console.error(err);
-      setError(err.message || "Failed to fetch users");
-      toast.error(err.message || "Failed to fetch users");
+      console.error(err)
+      setError(err.message || 'Failed to fetch users')
+      toast.error(err.message || 'Failed to fetch users')
     }
-    setLoading(false);
-  };
+    setLoading(false)
+  }
 
   // Fetch users on state changes.
   useEffect(() => {
     if (token) {
-      fetchUsers(page, limit, emailFilter);
+      fetchUsers(page, limit, emailFilter)
     }
-  }, [token, page, limit, emailFilter, isSubmitting]);
+  }, [token, page, limit, emailFilter, isSubmitting])
 
-  const totalPages = Math.ceil(total / limit);
+  const totalPages = Math.ceil(total / limit)
 
   return (
     <div className="container mx-auto p-4">
@@ -116,9 +110,9 @@ export default function Users() {
         <input
           type="email"
           value={emailFilter}
-          onChange={(e) => {
-            setPage(1); // Reset to first page on filter change.
-            setEmailFilter(e.target.value);
+          onChange={e => {
+            setPage(1) // Reset to first page on filter change.
+            setEmailFilter(e.target.value)
           }}
           placeholder="Filter by email"
           className="input input-bordered"
@@ -146,33 +140,25 @@ export default function Users() {
                   <td>{user.name}</td>
                   <td>{user.email}</td>
                   <td>{user.role}</td>
-                  <td>{user.isActive ? "Active" : "Inactive"}</td>
+                  <td>{user.isActive ? 'Active' : 'Inactive'}</td>
                   <td className="flex gap-2">
                     {/* toggle user active status */}
                     <fetcher.Form method="post">
-                      <input
-                        type="hidden"
-                        name="token"
-                        value={token as string}
-                      />
+                      <input type="hidden" name="token" value={token as string} />
                       <input type="hidden" name="action" value="toggleActive" />
                       <input type="hidden" name="userId" value={user._id} />
                       <button className="btn btn-info btn-sm">
-                        {user.isActive ? "Deactivate" : "Activate"}
+                        {user.isActive ? 'Deactivate' : 'Activate'}
                       </button>
                     </fetcher.Form>
 
                     {/* toggle user role */}
                     <fetcher.Form method="post">
-                      <input
-                        type="hidden"
-                        name="token"
-                        value={token as string}
-                      />
+                      <input type="hidden" name="token" value={token as string} />
                       <input type="hidden" name="action" value="toggleRole" />
                       <input type="hidden" name="userId" value={user._id} />
                       <button className="btn btn-error btn-sm">
-                        Make {user.role === "customer" ? "Admin" : "Customer"}
+                        Make {user.role === 'customer' ? 'Admin' : 'Customer'}
                       </button>
                     </fetcher.Form>
                   </td>
@@ -186,7 +172,7 @@ export default function Users() {
       {/* Pagination Controls */}
       <div className="flex justify-end gap-4 items-center mt-4">
         <button
-          onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+          onClick={() => setPage(prev => Math.max(prev - 1, 1))}
           className="btn btn-outline btn-sm"
           disabled={page === 1}
         >
@@ -196,9 +182,7 @@ export default function Users() {
           Page {page} of {totalPages}
         </span>
         <button
-          onClick={() =>
-            setPage((prev) => (prev < totalPages ? prev + 1 : prev))
-          }
+          onClick={() => setPage(prev => (prev < totalPages ? prev + 1 : prev))}
           className="btn btn-outline btn-sm"
           disabled={page >= totalPages}
         >
@@ -207,9 +191,9 @@ export default function Users() {
         <div>
           <select
             value={limit}
-            onChange={(e) => {
-              setPage(1); // Reset page when limit changes.
-              setLimit(parseInt(e.target.value));
+            onChange={e => {
+              setPage(1) // Reset page when limit changes.
+              setLimit(parseInt(e.target.value))
             }}
             className="select select-bordered btn-sm"
           >
@@ -220,5 +204,5 @@ export default function Users() {
         </div>
       </div>
     </div>
-  );
+  )
 }

@@ -1,46 +1,44 @@
-import { useAuth } from "provider/auth/AuthContext";
-import ThemeToggle from "provider/theme/ThemeToggle";
-import { Link, NavLink } from "react-router";
-import logoImg from "assets/logo.png";
+import { useAuth } from '~/provider/auth/AuthContext'
+import ThemeToggle from '~/provider/theme/ThemeToggle'
+import { Link, NavLink } from 'react-router'
+import logoImg from 'assets/logo.png'
 
 function RouterNavLink({
   to,
   children,
-  className = "",
+  className = '',
 }: {
-  to: string;
-  children: React.ReactNode;
-  className?: string;
+  to: string
+  children: React.ReactNode
+  className?: string
 }) {
   return (
     <NavLink
       to={to}
-      className={({ isActive }) =>
-        `${className} ${isActive ? "btn btn-primary" : "btn btn-ghost"}`
-      }
+      className={({ isActive }) => `${className} ${isActive ? 'btn btn-primary' : 'btn btn-ghost'}`}
     >
       {children}
     </NavLink>
-  );
+  )
 }
 
 const navItems = [
   {
-    name: "Home",
-    to: "/",
+    name: 'Home',
+    to: '/',
   },
   {
-    name: "Products",
-    to: "/product",
+    name: 'Products',
+    to: '/product',
   },
   {
-    name: "About Us",
-    to: "/about",
+    name: 'About Us',
+    to: '/about',
   },
-];
+]
 
 export default function NavBar() {
-  const { user } = useAuth();
+  const { user } = useAuth()
 
   return (
     <div className="navbar bg-base-100 shadow-sm">
@@ -68,7 +66,7 @@ export default function NavBar() {
             tabIndex={0}
             className="menu menu-sm dropdown-content bg-base-100 rounded-box z-10 mt-3 w-52 p-2 shadow"
           >
-            {navItems.map((item) => (
+            {navItems.map(item => (
               <li key={item.name} className="my-1">
                 <RouterNavLink to={item.to}>{item.name}</RouterNavLink>
               </li>
@@ -84,7 +82,7 @@ export default function NavBar() {
       {/* Navbar Center */}
       <div className="navbar-center hidden lg:flex">
         <ul className="menu menu-horizontal px-1">
-          {navItems.map((item) => (
+          {navItems.map(item => (
             <li key={item.name} className="mx-1">
               <RouterNavLink to={item.to}>{item.name}</RouterNavLink>
             </li>
@@ -96,15 +94,12 @@ export default function NavBar() {
       <div className="navbar-end flex items-center gap-3">
         {/* Dashboard or login Link */}
         {user ? (
-          user.role === "admin" ? (
+          user.role === 'admin' ? (
             <Link to="/dashboard/admin" className="btn btn-primary btn-outline">
               Dashboard
             </Link>
           ) : (
-            <Link
-              to="/dashboard/customer"
-              className="btn btn-primary btn-outline"
-            >
+            <Link to="/dashboard/customer" className="btn btn-primary btn-outline">
               Dashboard
             </Link>
           )
@@ -118,5 +113,5 @@ export default function NavBar() {
         <ThemeToggle />
       </div>
     </div>
-  );
+  )
 }

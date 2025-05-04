@@ -1,5 +1,3 @@
 export default function Customer() {
-  return (
-    <div>Customer</div>
-  )
+  return <div>Customer</div>
 }

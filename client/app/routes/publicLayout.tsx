@@ -1,15 +1,15 @@
-import Footer from "components/shared/Footer";
-import NavBar from "components/shared/NavBar";
-import { useEffect, useState } from "react";
-import { Outlet } from "react-router";
+import Footer from '~/components/shared/Footer'
+import NavBar from '~/components/shared/NavBar'
+import { useEffect, useState } from 'react'
+import { Outlet } from 'react-router'
 
 export default function PublicLayout() {
-  const [isClient, setIsClient] = useState(false);
+  const [isClient, setIsClient] = useState(false)
   useEffect(() => {
-    setIsClient(true);
-  }, []);
+    setIsClient(true)
+  }, [])
 
-  if (!isClient) return <div>Loading...</div>;
+  if (!isClient) return <div>Loading...</div>
 
   return (
     <main className="container mx-auto">
@@ -19,5 +19,5 @@ export default function PublicLayout() {
       </div>
       <Footer />
     </main>
-  );
+  )
 }

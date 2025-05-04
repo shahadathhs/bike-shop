@@ -1,5 +1,5 @@
-import { Link } from "react-router";
-import logoImg from "assets/logo.png";
+import { Link } from 'react-router'
+import logoImg from 'assets/logo.png'
 
 export default function Footer() {
   return (
@@ -76,5 +76,5 @@ export default function Footer() {
         </div>
       </div>
     </footer>
-  );
+  )
 }

@@ -1,38 +1,28 @@
-import {
-  Links,
-  Meta,
-  Outlet,
-  Scripts,
-  ScrollRestoration,
-  useRouteError,
-} from "react-router";
+import { Links, Meta, Outlet, Scripts, ScrollRestoration, useRouteError } from 'react-router'
 
-import "./app.css";
-import type { Route } from "./+types/root";
-import { ThemeProvider } from "provider/theme/ThemeProvider";
-import { AuthProvider } from "provider/auth/AuthProvider";
-import { Toaster } from "react-hot-toast";
-import { useEffect, useState } from "react";
-import { ErrorBoundaryComponent } from "components/error/ErrorBoundaryComponent";
+import './app.css'
+import type { Route } from './+types/root'
+import { ThemeProvider } from '~/provider/theme/ThemeProvider'
+import { AuthProvider } from '~/provider/auth/AuthProvider'
+import { Toaster } from 'react-hot-toast'
+import { useEffect, useState } from 'react'
+import { ErrorBoundaryComponent } from '~/components/error/ErrorBoundaryComponent'
 
 export const links: Route.LinksFunction = () => [
-  { rel: "preconnect", href: "https://fonts.googleapis.com" },
+  { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
   {
-    rel: "preconnect",
-    href: "https://fonts.gstatic.com",
-    crossOrigin: "anonymous",
+    rel: 'preconnect',
+    href: 'https://fonts.gstatic.com',
+    crossOrigin: 'anonymous',
   },
   {
-    rel: "stylesheet",
-    href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap",
+    rel: 'stylesheet',
+    href: 'https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap',
   },
-];
+]
 
 export function meta({}: Route.MetaArgs) {
-  return [
-    { title: "Bike Store" },
-    { name: "description", content: "Welcome to Bike Store" },
-  ];
+  return [{ title: 'Bike Store' }, { name: 'description', content: 'Welcome to Bike Store' }]
 }
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -44,11 +34,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
 
-        <link
-          rel="icon"
-          href={`/favicon.ico?v=${Date.now()}`}
-          type="image/x-icon"
-        />
+        <link rel="icon" href={`/favicon.ico?v=${Date.now()}`} type="image/x-icon" />
       </head>
       <body>
         <Toaster position="top-center" />
@@ -57,18 +43,18 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Scripts />
       </body>
     </html>
-  );
+  )
 }
 
 export default function App() {
-  const [isClient, setIsClient] = useState(false);
+  const [isClient, setIsClient] = useState(false)
   useEffect(() => {
-    setIsClient(true);
-  }, []);
+    setIsClient(true)
+  }, [])
 
   //* show a loading indicator while the app is initializing
   if (!isClient) {
-    return <div>Loading...</div>;
+    return <div>Loading...</div>
   }
 
   return (
@@ -77,10 +63,10 @@ export default function App() {
         <Outlet />
       </ThemeProvider>
     </AuthProvider>
-  );
+  )
 }
 
 export function ErrorBoundary() {
-  const error = useRouteError();
-  return <ErrorBoundaryComponent error={error} />;
+  const error = useRouteError()
+  return <ErrorBoundaryComponent error={error} />
 }

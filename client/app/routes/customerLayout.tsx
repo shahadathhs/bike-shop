@@ -1,31 +1,31 @@
-import Cookies from "js-cookie";
-import { useAuth } from "provider/auth/AuthContext";
-import ThemeToggle from "provider/theme/ThemeToggle";
-import { Link, Outlet, redirect } from "react-router";
+import Cookies from 'js-cookie'
+import { useAuth } from '~/provider/auth/AuthContext'
+import ThemeToggle from '~/provider/theme/ThemeToggle'
+import { Link, Outlet, redirect } from 'react-router'
 
 export const clientLoader = ({ request }: { request: Request }) => {
-  const user = Cookies.get("user");
+  const user = Cookies.get('user')
   if (!user) {
-    return redirect("/auth/login");
+    return redirect('/auth/login')
   }
 
-  const parsedUser = JSON.parse(user);
-  if (parsedUser.role !== "customer") {
-    return redirect("/");
+  const parsedUser = JSON.parse(user)
+  if (parsedUser.role !== 'customer') {
+    return redirect('/')
   }
 
   const url = new URL(request.url)
   const pathname = url.pathname
   // console.log('pathname', pathname)
-  if (pathname === "/dashboard/customer") {
-    return redirect("/dashboard/customer/orders")
+  if (pathname === '/dashboard/customer') {
+    return redirect('/dashboard/customer/orders')
   }
 
-  return null;
-};
+  return null
+}
 
 export default function DashboardCustomerLayout() {
-  const { logout } = useAuth();
+  const { logout } = useAuth()
 
   return (
     <main className="min-h-screen w-full flex justify-between">
@@ -37,10 +37,7 @@ export default function DashboardCustomerLayout() {
 
           {/* button to open drawer in mobile view */}
           <div className="fixed top-4 right-4 z-50">
-            <label
-              htmlFor="my-drawer-2"
-              className="btn btn-primary drawer-button lg:hidden"
-            >
+            <label htmlFor="my-drawer-2" className="btn btn-primary drawer-button lg:hidden">
               Open Menu
             </label>
           </div>
@@ -56,12 +53,8 @@ export default function DashboardCustomerLayout() {
           <ul className="menu bg-base-200 text-base-content min-h-full flex flex-col justify-between w-40 p-4">
             {/* Sidebar content here */}
             <li>
-              {navItems.map((item) => (
-                <Link
-                  key={item.label}
-                  to={item.route}
-                  className="btn btn-ghost text-md"
-                >
+              {navItems.map(item => (
+                <Link key={item.label} to={item.route} className="btn btn-ghost text-md">
                   {item.label}
                 </Link>
               ))}
@@ -81,12 +74,12 @@ export default function DashboardCustomerLayout() {
         </div>
       </div>
     </main>
-  );
+  )
 }
 const navItems = [
-  { label: "Home", route: "/" },
+  { label: 'Home', route: '/' },
   // { label: "Customer", route: "/dashboard/customer" },
-  { label: "Orders", route: "/dashboard/customer/orders" },
-  { label: "Profile", route: "/dashboard/customer/profile" },
+  { label: 'Orders', route: '/dashboard/customer/orders' },
+  { label: 'Profile', route: '/dashboard/customer/profile' },
   // { label: "Orders Tracking", route: "/dashboard/customer/tracking" },
-];
+]

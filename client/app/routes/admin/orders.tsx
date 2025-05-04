@@ -1,183 +1,172 @@
-import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
-import { useFetcher } from "react-router";
-import { getToken } from "utils/getToken";
+import { useEffect, useState } from 'react'
+import toast from 'react-hot-toast'
+import { useFetcher } from 'react-router'
+import { getToken } from '~/utils/getToken'
 
 export async function action({ request }: { request: Request }) {
-  const formData = await request.formData();
+  const formData = await request.formData()
 
-  const action = formData.get("action") as string;
-  const token = formData.get("token") as string;
+  const action = formData.get('action') as string
+  const token = formData.get('token') as string
 
-  if (action === "delete") {
-    const orderId = formData.get("orderId") as string;
+  if (action === 'delete') {
+    const orderId = formData.get('orderId') as string
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/orders/${orderId}`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/orders/${orderId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      })
 
       if (response.ok) {
-        const data = await response.json();
+        const data = await response.json()
         return {
           success: true,
-          message: "Order deleted successfully",
+          message: 'Order deleted successfully',
           data: data,
-        };
+        }
       } else {
-        const errorData = await response.json();
+        const errorData = await response.json()
         return {
-          error: errorData.message || "Failed to delete order",
+          error: errorData.message || 'Failed to delete order',
           errorDetails: errorData,
-        };
+        }
       }
     } catch (err: any) {
-      console.error(err);
+      console.error(err)
       return {
-        error: err.message || "Failed to delete order",
-      };
+        error: err.message || 'Failed to delete order',
+      }
     }
   }
 
-  if (action === "markAsDelivered") {
-    const orderId = formData.get("orderId") as string;
+  if (action === 'markAsDelivered') {
+    const orderId = formData.get('orderId') as string
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/orders/${orderId}/status`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ status: "delivered" }),
-        }
-      );
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/orders/${orderId}/status`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ status: 'delivered' }),
+      })
 
       if (response.ok) {
-        const data = await response.json();
+        const data = await response.json()
         return {
           success: true,
-          message: "Order marked as delivered successfully",
+          message: 'Order marked as delivered successfully',
           data: data,
-        };
+        }
       } else {
-        const errorData = await response.json();
+        const errorData = await response.json()
         return {
-          error: errorData.message || "Failed to mark order as delivered",
+          error: errorData.message || 'Failed to mark order as delivered',
           errorDetails: errorData,
-        };
+        }
       }
     } catch (err: any) {
-      console.error(err);
+      console.error(err)
       return {
-        error: err.message || "Failed to mark order as delivered",
-      };
+        error: err.message || 'Failed to mark order as delivered',
+      }
     }
   }
 
-  if (action === "cancel") {
-    const orderId = formData.get("orderId") as string;
+  if (action === 'cancel') {
+    const orderId = formData.get('orderId') as string
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/orders/${orderId}/cancel`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/orders/${orderId}/cancel`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      })
       if (response.ok) {
-        const data = await response.json();
+        const data = await response.json()
         return {
           success: true,
-          message: "Order canceled successfully",
+          message: 'Order canceled successfully',
           data: data,
-        };
+        }
       } else {
-        const errorData = await response.json();
+        const errorData = await response.json()
         return {
-          error: errorData.message || "Failed to cancel order",
+          error: errorData.message || 'Failed to cancel order',
           errorDetails: errorData,
-        };
+        }
       }
     } catch (err: any) {
-      console.error(err);
+      console.error(err)
       return {
-        error: err.message || "Failed to cancel order",
-      };
+        error: err.message || 'Failed to cancel order',
+      }
     }
   }
 
-  return null;
+  return null
 }
 
 export default function Orders() {
-  const [orders, setOrders] = useState([]);
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
-  const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
+  const [orders, setOrders] = useState([])
+  const [page, setPage] = useState(1)
+  const [limit, setLimit] = useState(10)
+  const [total, setTotal] = useState(0)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [searchTerm, setSearchTerm] = useState('')
 
-  const fetcher = useFetcher();
+  const fetcher = useFetcher()
 
-  const token = getToken();
+  const token = getToken()
 
   // Fetch orders with pagination and optional filtering.
-  const fetchOrders = async (page = 1, limit = 10, search = "") => {
-    setLoading(true);
+  const fetchOrders = async (page = 1, limit = 10, search = '') => {
+    setLoading(true)
     try {
       const queryParams = new URLSearchParams({
         page: page.toString(),
         limit: limit.toString(),
-      });
+      })
       if (search) {
-        queryParams.append("searchTerm", search);
+        queryParams.append('searchTerm', search)
       }
 
       const response = await fetch(
-        `${
-          import.meta.env.VITE_API_URL
-        }/orders/admin/getAll?${queryParams.toString()}`,
+        `${import.meta.env.VITE_API_URL}/orders/admin/getAll?${queryParams.toString()}`,
         {
           headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
           },
-        }
-      );
+        },
+      )
       if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.error || "Failed to fetch orders");
+        const errData = await response.json()
+        throw new Error(errData.error || 'Failed to fetch orders')
       }
-      const responseData = await response.json();
-      setOrders(responseData.data.orders);
-      setTotal(responseData.data.metadata.total);
+      const responseData = await response.json()
+      setOrders(responseData.data.orders)
+      setTotal(responseData.data.metadata.total)
     } catch (err: any) {
-      console.error(err);
-      setError(err.message || "Failed to fetch orders");
-      toast.error(err.message || "Failed to fetch orders");
+      console.error(err)
+      setError(err.message || 'Failed to fetch orders')
+      toast.error(err.message || 'Failed to fetch orders')
     }
-    setLoading(false);
-  };
+    setLoading(false)
+  }
 
   useEffect(() => {
     if (token) {
-      fetchOrders(page, limit, searchTerm);
+      fetchOrders(page, limit, searchTerm)
     }
-  }, [token, page, limit, searchTerm, fetcher.state]);
+  }, [token, page, limit, searchTerm, fetcher.state])
 
-  const totalPages = Math.ceil(total / limit);
+  const totalPages = Math.ceil(total / limit)
 
   return (
     <div className="container mx-auto p-4">
@@ -188,9 +177,9 @@ export default function Orders() {
         <input
           type="text"
           value={searchTerm}
-          onChange={(e) => {
-            setPage(1);
-            setSearchTerm(e.target.value);
+          onChange={e => {
+            setPage(1)
+            setSearchTerm(e.target.value)
           }}
           placeholder="Search orders by name, category, or brand"
           className="input input-bordered max-w--xl"
@@ -223,19 +212,11 @@ export default function Orders() {
                   <td>{order?.status}</td>
                   <td className="flex gap-2">
                     {/* mark as delivered */}
-                    {order?.status !== "delivered" && !order?.isDeleted && (
+                    {order?.status !== 'delivered' && !order?.isDeleted && (
                       <fetcher.Form method="patch">
                         <input type="hidden" name="orderId" value={order._id} />
-                        <input
-                          type="hidden"
-                          name="action"
-                          value="markAsDelivered"
-                        />
-                        <input
-                          type="hidden"
-                          name="token"
-                          value={token as string}
-                        />
+                        <input type="hidden" name="action" value="markAsDelivered" />
+                        <input type="hidden" name="token" value={token as string} />
                         <button type="submit" className="btn btn-info btn-sm">
                           Mark as Delivered
                         </button>
@@ -243,15 +224,11 @@ export default function Orders() {
                     )}
 
                     {/* delete order */}
-                    {(order?.status === "delivered" || order?.isDeleted) && (
+                    {(order?.status === 'delivered' || order?.isDeleted) && (
                       <fetcher.Form method="delete">
                         <input type="hidden" name="orderId" value={order._id} />
                         <input type="hidden" name="action" value="delete" />
-                        <input
-                          type="hidden"
-                          name="token"
-                          value={token as string}
-                        />
+                        <input type="hidden" name="token" value={token as string} />
                         <button type="submit" className="btn btn-info btn-sm">
                           Delete Order
                         </button>
@@ -259,15 +236,11 @@ export default function Orders() {
                     )}
 
                     {/* cancel order */}
-                    {order?.status !== "delivered" && !order?.isDeleted && (
+                    {order?.status !== 'delivered' && !order?.isDeleted && (
                       <fetcher.Form method="patch">
                         <input type="hidden" name="orderId" value={order._id} />
                         <input type="hidden" name="action" value="cancel" />
-                        <input
-                          type="hidden"
-                          name="token"
-                          value={token as string}
-                        />
+                        <input type="hidden" name="token" value={token as string} />
                         <button type="submit" className="btn btn-info btn-sm">
                           Cancel Order
                         </button>
@@ -284,7 +257,7 @@ export default function Orders() {
       {/* Pagination Controls */}
       <div className="flex justify-end gap-4 items-center mt-4">
         <button
-          onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+          onClick={() => setPage(prev => Math.max(prev - 1, 1))}
           className="btn btn-outline btn-sm"
           disabled={page === 1}
         >
@@ -294,9 +267,7 @@ export default function Orders() {
           Page {page} of {totalPages}
         </span>
         <button
-          onClick={() =>
-            setPage((prev) => (prev < totalPages ? prev + 1 : prev))
-          }
+          onClick={() => setPage(prev => (prev < totalPages ? prev + 1 : prev))}
           className="btn btn-outline btn-sm"
           disabled={page >= totalPages}
         >
@@ -305,9 +276,9 @@ export default function Orders() {
         <div>
           <select
             value={limit}
-            onChange={(e) => {
-              setPage(1);
-              setLimit(parseInt(e.target.value));
+            onChange={e => {
+              setPage(1)
+              setLimit(parseInt(e.target.value))
             }}
             className="select select-bordered btn-sm"
           >
@@ -318,5 +289,5 @@ export default function Orders() {
         </div>
       </div>
     </div>
-  );
+  )
 }

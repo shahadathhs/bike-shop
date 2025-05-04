@@ -1,226 +1,212 @@
-import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
-import {
-  Link,
-  useFetcher,
-  useLoaderData,
-  type ClientActionFunctionArgs,
-} from "react-router";
-import { brands, categories, models } from "utils/bikeUtils";
-import { useDebounce } from "utils/debounce";
-import { getToken } from "utils/getToken";
+import { useEffect, useState } from 'react'
+import toast from 'react-hot-toast'
+import { Link, useFetcher, useLoaderData, type ClientActionFunctionArgs } from 'react-router'
+import { brands, categories, models } from '~/utils/bikeUtils'
+import { useDebounce } from '~/utils/debounce'
+import { getToken } from '~/utils/getToken'
 
 export const clientLoader = async () => {
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/bikes`);
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/bikes`)
 
     if (response.ok) {
-      const data = await response.json();
+      const data = await response.json()
       return {
         success: true,
         products: data,
-      };
+      }
     } else {
-      throw new Error("Failed to fetch products");
+      throw new Error('Failed to fetch products')
     }
   } catch (err) {
-    console.error("Error fetching products:", err);
+    console.error('Error fetching products:', err)
     return {
-      error: "Failed to fetch products",
+      error: 'Failed to fetch products',
       products: [],
       errorDetails: err,
-    };
+    }
   }
-};
+}
 
 export const clientAction = async ({ request }: ClientActionFunctionArgs) => {
-  const formData = await request.formData();
-  const action = formData.get("action");
+  const formData = await request.formData()
+  const action = formData.get('action')
 
-  const token = getToken();
+  const token = getToken()
 
-  if (action === "delete") {
-    const productId = formData.get("id");
+  if (action === 'delete') {
+    const productId = formData.get('id')
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/bikes/${productId}`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/bikes/${productId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      })
 
       if (response.ok) {
         return {
           success: true,
-          message: "Product deleted successfully",
-        };
+          message: 'Product deleted successfully',
+        }
       } else {
-        const errorData = await response.json();
+        const errorData = await response.json()
         return {
-          error: errorData.message || "Failed to delete product",
+          error: errorData.message || 'Failed to delete product',
           errorDetails: errorData,
-        };
+        }
       }
     } catch (err: any) {
-      console.error("Error deleting product:", err);
+      console.error('Error deleting product:', err)
       return {
-        error: err.message || "Failed to delete product",
+        error: err.message || 'Failed to delete product',
         errorDetails: err,
-      };
+      }
     }
   }
 
-  if (action === "restock") {
-    const productId = formData.get("id");
-    const newQuantity = formData.get("quantity");
+  if (action === 'restock') {
+    const productId = formData.get('id')
+    const newQuantity = formData.get('quantity')
 
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/bikes/${productId}/restock`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ quantity: newQuantity }),
-        }
-      );
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/bikes/${productId}/restock`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ quantity: newQuantity }),
+      })
 
       if (response.ok) {
         return {
           success: true,
-          message: "Product restocked successfully",
-        };
+          message: 'Product restocked successfully',
+        }
       } else {
-        const errorData = await response.json();
+        const errorData = await response.json()
         return {
-          error: errorData.message || "Failed to restock product",
+          error: errorData.message || 'Failed to restock product',
           errorDetails: errorData,
-        };
+        }
       }
     } catch (err: any) {
-      console.error("Error restocking product:", err);
+      console.error('Error restocking product:', err)
       return {
-        error: err.message || "Failed to restock product",
+        error: err.message || 'Failed to restock product',
         errorDetails: err,
-      };
+      }
     }
   }
-};
+}
 
 export default function Products() {
-  const loaderData = useLoaderData();
-  const [products, setProducts] = useState(loaderData.products.data.bikes);
+  const loaderData = useLoaderData()
+  const [products, setProducts] = useState(loaderData.products.data.bikes)
 
-  const fetcher = useFetcher();
-  const isSubmitting = fetcher.state === "submitting";
+  const fetcher = useFetcher()
+  const isSubmitting = fetcher.state === 'submitting'
 
   // State for products and metadata (for pagination)
-  const [metadata, setMetadata] = useState({ total: 0, page: 1, limit: 10 });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [metadata, setMetadata] = useState({ total: 0, page: 1, limit: 10 })
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   // Local state for the input value
-  const [inputValue, setInputValue] = useState("");
+  const [inputValue, setInputValue] = useState('')
   // Actual search term that drives data fetching
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState('')
 
   // Debounce the input value with a delay of 100ms
-  const debouncedInput = useDebounce(inputValue, 100);
+  const debouncedInput = useDebounce(inputValue, 100)
 
   // Update the actual search term whenever the debounced value changes
   useEffect(() => {
-    setSearchTerm(debouncedInput);
-    setPage(1); // Reset to first page whenever search changes
-  }, [debouncedInput]);
+    setSearchTerm(debouncedInput)
+    setPage(1) // Reset to first page whenever search changes
+  }, [debouncedInput])
 
   // Query/filter state variables
-  const [priceRange, setPriceRange] = useState("all"); // Options: "all", "under300", "300to500", "500to800", "above800"
-  const [model, setModel] = useState("all"); // "all" or specific values like "Sport", etc.
-  const [category, setCategory] = useState("all"); // "all", "Mountain", "Road", etc.
-  const [brand, setBrand] = useState("all"); // "all", "Trek", "Cannondale", etc.
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const [priceRange, setPriceRange] = useState('all') // Options: "all", "under300", "300to500", "500to800", "above800"
+  const [model, setModel] = useState('all') // "all" or specific values like "Sport", etc.
+  const [category, setCategory] = useState('all') // "all", "Mountain", "Road", etc.
+  const [brand, setBrand] = useState('all') // "all", "Trek", "Cannondale", etc.
+  const [page, setPage] = useState(1)
+  const [limit, setLimit] = useState(10)
 
-  const token = getToken();
+  const token = getToken()
 
   // Helper to convert priceRange value to min and max values.
   const getPriceRangeValues = (range: string) => {
     switch (range) {
-      case "under300":
-        return { minPrice: undefined, maxPrice: 300 };
-      case "300to500":
-        return { minPrice: 300, maxPrice: 500 };
-      case "500to800":
-        return { minPrice: 500, maxPrice: 800 };
-      case "above800":
-        return { minPrice: 800, maxPrice: undefined };
+      case 'under300':
+        return { minPrice: undefined, maxPrice: 300 }
+      case '300to500':
+        return { minPrice: 300, maxPrice: 500 }
+      case '500to800':
+        return { minPrice: 500, maxPrice: 800 }
+      case 'above800':
+        return { minPrice: 800, maxPrice: undefined }
       default:
-        return { minPrice: undefined, maxPrice: undefined };
+        return { minPrice: undefined, maxPrice: undefined }
     }
-  };
+  }
 
   // Fetch products function: constructs query parameters from state.
   const fetchProducts = async () => {
-    setLoading(true);
-    setError("");
+    setLoading(true)
+    setError('')
     try {
-      const { minPrice, maxPrice } = getPriceRangeValues(priceRange);
-      const params = new URLSearchParams();
+      const { minPrice, maxPrice } = getPriceRangeValues(priceRange)
+      const params = new URLSearchParams()
 
-      if (searchTerm) params.append("searchTerm", searchTerm);
-      if (minPrice !== undefined) params.append("minPrice", String(minPrice));
-      if (maxPrice !== undefined) params.append("maxPrice", String(maxPrice));
-      if (model !== "all") params.append("model", model);
-      if (category !== "all") params.append("category", category);
-      if (brand !== "all") params.append("brand", brand);
-      params.append("page", String(page));
-      params.append("limit", String(limit));
+      if (searchTerm) params.append('searchTerm', searchTerm)
+      if (minPrice !== undefined) params.append('minPrice', String(minPrice))
+      if (maxPrice !== undefined) params.append('maxPrice', String(maxPrice))
+      if (model !== 'all') params.append('model', model)
+      if (category !== 'all') params.append('category', category)
+      if (brand !== 'all') params.append('brand', brand)
+      params.append('page', String(page))
+      params.append('limit', String(limit))
 
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/bikes?${params.toString()}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/bikes?${params.toString()}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
 
       if (response.ok) {
-        const data = await response.json();
-        setProducts(data.data.bikes);
-        setMetadata(data.data.metadata);
+        const data = await response.json()
+        setProducts(data.data.bikes)
+        setMetadata(data.data.metadata)
       } else {
-        const errorData = await response.json();
-        setError(errorData.data.error || "Failed to fetch products");
-        toast.error(errorData.data.error || "Failed to fetch products");
+        const errorData = await response.json()
+        setError(errorData.data.error || 'Failed to fetch products')
+        toast.error(errorData.data.error || 'Failed to fetch products')
       }
     } catch (err) {
-      console.error("Error fetching products:", err);
-      setError("Error fetching products");
-      toast.error("Error fetching products");
+      console.error('Error fetching products:', err)
+      setError('Error fetching products')
+      toast.error('Error fetching products')
     }
-    setLoading(false);
-  };
+    setLoading(false)
+  }
 
   // Fetch products when any filter or pagination state changes
   useEffect(() => {
-    fetchProducts();
-  }, [searchTerm, priceRange, model, category, brand, page, limit]);
+    fetchProducts()
+  }, [searchTerm, priceRange, model, category, brand, page, limit])
 
   // Pagination controls
   const handlePrevPage = () => {
-    if (page > 1) setPage((prev: any) => prev - 1);
-  };
+    if (page > 1) setPage((prev: any) => prev - 1)
+  }
 
   const handleNextPage = () => {
-    if (metadata.total > page * limit) setPage((prev: any) => prev + 1);
-  };
+    if (metadata.total > page * limit) setPage((prev: any) => prev + 1)
+  }
 
   return (
     <div className="container mx-auto p-4">
@@ -237,16 +223,16 @@ export default function Products() {
           type="text"
           placeholder="Search by name, brand, or category..."
           value={searchTerm}
-          onChange={(e) => setInputValue(e.target.value)}
+          onChange={e => setInputValue(e.target.value)}
           className="input input-bordered w-full md:max-w-lg lg:flex-1"
         />
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {/* Price Range filter */}
           <select
             value={priceRange}
-            onChange={(e) => {
-              setPriceRange(e.target.value);
-              setPage(1);
+            onChange={e => {
+              setPriceRange(e.target.value)
+              setPage(1)
             }}
             className="select select-bordered w-full"
           >
@@ -260,14 +246,14 @@ export default function Products() {
           {/* Model Filter */}
           <select
             value={model}
-            onChange={(e) => {
-              setModel(e.target.value);
-              setPage(1);
+            onChange={e => {
+              setModel(e.target.value)
+              setPage(1)
             }}
             className="select select-bordered w-full"
           >
             <option value="all">All Models</option>
-            {models.map((model) => (
+            {models.map(model => (
               <option key={model.value} value={model.value}>
                 {model.label}
               </option>
@@ -277,14 +263,14 @@ export default function Products() {
           {/* Category Filter */}
           <select
             value={category}
-            onChange={(e) => {
-              setCategory(e.target.value);
-              setPage(1);
+            onChange={e => {
+              setCategory(e.target.value)
+              setPage(1)
             }}
             className="select select-bordered w-full"
           >
             <option value="all">All Categories</option>
-            {categories.map((category) => (
+            {categories.map(category => (
               <option key={category.value} value={category.value}>
                 {category.label}
               </option>
@@ -294,14 +280,14 @@ export default function Products() {
           {/* Brand Filter */}
           <select
             value={brand}
-            onChange={(e) => {
-              setBrand(e.target.value);
-              setPage(1);
+            onChange={e => {
+              setBrand(e.target.value)
+              setPage(1)
             }}
             className="select select-bordered w-full"
           >
             <option value="all">All Brands</option>
-            {brands.map((brand) => (
+            {brands.map(brand => (
               <option key={brand.value} value={brand.value}>
                 {brand.label}
               </option>
@@ -311,7 +297,7 @@ export default function Products() {
       </div>
 
       {/* loading state */}
-      {fetcher.state === "submitting" ||
+      {fetcher.state === 'submitting' ||
         (loading && (
           <div className="flex justify-center items-center">
             <span className="loading loading-spinner loading-lg"></span>
@@ -319,7 +305,7 @@ export default function Products() {
         ))}
 
       {/* Table */}
-      {fetcher.state !== "submitting" && !loading && error === "" && (
+      {fetcher.state !== 'submitting' && !loading && error === '' && (
         <div className="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
           <table className=" w-full table table-zebra">
             {products?.length > 0 ? (
@@ -358,9 +344,7 @@ export default function Products() {
                           className="btn btn-info btn-sm"
                           onClick={() =>
                             (
-                              document.getElementById(
-                                "restock-modal"
-                              ) as HTMLDialogElement
+                              document.getElementById('restock-modal') as HTMLDialogElement
                             )?.showModal()
                           }
                         >
@@ -370,24 +354,11 @@ export default function Products() {
                         {/* Restock Modal */}
                         <dialog id="restock-modal" className="modal">
                           <div className="modal-box">
-                            <fetcher.Form
-                              method="post"
-                              className="flex flex-col gap-4"
-                            >
-                              <input
-                                type="hidden"
-                                name="action"
-                                value="restock"
-                              />
-                              <input
-                                type="hidden"
-                                name="id"
-                                value={product._id}
-                              />
+                            <fetcher.Form method="post" className="flex flex-col gap-4">
+                              <input type="hidden" name="action" value="restock" />
+                              <input type="hidden" name="id" value={product._id} />
                               <div className="text-left">
-                                <label className="label mb-2">
-                                  Quantity to restock:
-                                </label>
+                                <label className="label mb-2">Quantity to restock:</label>
                                 <input
                                   type="number"
                                   id="quantity"
@@ -403,7 +374,7 @@ export default function Products() {
                                   disabled={isSubmitting}
                                   className="btn btn-info btn-sm"
                                 >
-                                  {isSubmitting ? "Restocking..." : "Restock"}
+                                  {isSubmitting ? 'Restocking...' : 'Restock'}
                                 </button>
                               </div>
                             </fetcher.Form>
@@ -420,11 +391,8 @@ export default function Products() {
                         <fetcher.Form method="delete">
                           <input type="hidden" name="action" value="delete" />
                           <input type="hidden" name="id" value={product._id} />
-                          <button
-                            type="submit"
-                            className="btn btn-error btn-sm"
-                          >
-                            {isSubmitting ? "Deleting..." : "Delete"}
+                          <button type="submit" className="btn btn-error btn-sm">
+                            {isSubmitting ? 'Deleting...' : 'Delete'}
                           </button>
                         </fetcher.Form>
                       </td>
@@ -447,11 +415,7 @@ export default function Products() {
 
       {/* Pagination Controls */}
       <div className="flex justify-end items-center space-x-4 mt-4">
-        <button
-          onClick={handlePrevPage}
-          className="btn btn-outline btn-sm"
-          disabled={page === 1}
-        >
+        <button onClick={handlePrevPage} className="btn btn-outline btn-sm" disabled={page === 1}>
           Previous
         </button>
         <span className="text-secondary">
@@ -469,9 +433,9 @@ export default function Products() {
         <div>
           <select
             value={limit}
-            onChange={(e) => {
-              setLimit(parseInt(e.target.value));
-              setPage(1);
+            onChange={e => {
+              setLimit(parseInt(e.target.value))
+              setPage(1)
             }}
             className="select select-bordered"
           >
@@ -482,5 +446,5 @@ export default function Products() {
         </div>
       </div>
     </div>
-  );
+  )
 }

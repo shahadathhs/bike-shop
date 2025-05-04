@@ -1,22 +1,22 @@
-import { useAuth } from "provider/auth/AuthContext";
-import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
+import { useAuth } from '~/provider/auth/AuthContext'
+import { useEffect, useState } from 'react'
+import toast from 'react-hot-toast'
 
 export default function CustomerOrders() {
-  const { user } = useAuth();
-  const [orders, setOrders] = useState([]);
-  const [metadata, setMetadata] = useState({ total: 0, page: 1, limit: 10 });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const { user } = useAuth()
+  const [orders, setOrders] = useState([])
+  const [metadata, setMetadata] = useState({ total: 0, page: 1, limit: 10 })
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   // Pagination state
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const [page, setPage] = useState(1)
+  const [limit, setLimit] = useState(10)
 
   // Fetch orders for the logged in user with pagination
   useEffect(() => {
     const fetchOrders = async () => {
-      setLoading(true);
+      setLoading(true)
       try {
         const response = await fetch(
           `${import.meta.env.VITE_API_URL}/orders/myOrders/${
@@ -26,26 +26,26 @@ export default function CustomerOrders() {
             headers: {
               Authorization: `Bearer ${user.token}`,
             },
-          }
-        );
-        const responseData = await response.json();
-        setOrders(responseData.data.orders);
-        setMetadata(responseData.data.metadata);
+          },
+        )
+        const responseData = await response.json()
+        setOrders(responseData.data.orders)
+        setMetadata(responseData.data.metadata)
       } catch (err) {
-        console.error("Error fetching orders:", err);
-        setError("Failed to fetch orders");
-        toast.error("Failed to fetch orders");
+        console.error('Error fetching orders:', err)
+        setError('Failed to fetch orders')
+        toast.error('Failed to fetch orders')
       }
-      setLoading(false);
-    };
+      setLoading(false)
+    }
 
     if (user && user.token) {
-      fetchOrders();
+      fetchOrders()
     }
-  }, [user, page, limit]);
+  }, [user, page, limit])
 
   // Calculate total pages from metadata.total and limit.
-  const totalPages = Math.ceil(metadata.total / limit);
+  const totalPages = Math.ceil(metadata.total / limit)
 
   return (
     <div className="container mx-auto p-4">
@@ -70,9 +70,7 @@ export default function CustomerOrders() {
                 <tr key={order._id}>
                   <td>{order.product.name}</td>
                   <td>{order._id}</td>
-                  <td>
-                    {new Date(order.createdAt).toLocaleDateString()}
-                  </td>
+                  <td>{new Date(order.createdAt).toLocaleDateString()}</td>
                   <td>{order.status}</td>
                   <td>${order.totalPrice}</td>
                 </tr>
@@ -85,7 +83,7 @@ export default function CustomerOrders() {
       {/* Pagination Controls */}
       <div className="flex justify-end items-center space-x-4 mt-4">
         <button
-          onClick={() => setPage((prev) => prev - 1)}
+          onClick={() => setPage(prev => prev - 1)}
           className="btn btn-outline btn-sm"
           disabled={page <= 1}
         >
@@ -95,7 +93,7 @@ export default function CustomerOrders() {
           Page {page} of {totalPages}
         </span>
         <button
-          onClick={() => setPage((prev) => prev + 1)}
+          onClick={() => setPage(prev => prev + 1)}
           className="btn btn-outline btn-sm"
           disabled={page >= totalPages}
         >
@@ -104,9 +102,9 @@ export default function CustomerOrders() {
         <div>
           <select
             value={limit}
-            onChange={(e) => {
-              setLimit(parseInt(e.target.value));
-              setPage(1);
+            onChange={e => {
+              setLimit(parseInt(e.target.value))
+              setPage(1)
             }}
             className="select select-bordered btn-sm"
           >
@@ -117,5 +115,5 @@ export default function CustomerOrders() {
         </div>
       </div>
     </div>
-  );
+  )
 }

@@ -1,39 +1,39 @@
-import { Link, redirect, useLoaderData } from "react-router";
-import { getToken } from "utils/getToken";
-import type { Route } from "./+types/productDetails";
+import { Link, redirect, useLoaderData } from 'react-router'
+import { getToken } from '~/utils/getToken'
+import type { Route } from './+types/productDetails'
 
 export function meta({}: Route.MetaArgs) {
   return [
     { title: 'Bike Store - Product Details' },
-    { name: "description", content: "Explore our wide range of bikes and find the perfect one for you!" },
-  ];
+    {
+      name: 'description',
+      content: 'Explore our wide range of bikes and find the perfect one for you!',
+    },
+  ]
 }
 
 export const clientLoader = async ({ params }: { params: { id: string } }) => {
-  const token = getToken();
+  const token = getToken()
 
-  const productId = params.id;
-  if (!productId) return redirect("/product");
+  const productId = params.id
+  if (!productId) return redirect('/product')
 
-  const product = await fetch(
-    `${import.meta.env.VITE_API_URL}/bikes/${productId}`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
+  const product = await fetch(`${import.meta.env.VITE_API_URL}/bikes/${productId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
 
-  if (!product.ok) return redirect("/product");
+  if (!product.ok) return redirect('/product')
 
-  const productData = await product.json();
+  const productData = await product.json()
 
-  return productData;
-};
+  return productData
+}
 
 export default function ProductDetailsPage() {
-  const loaderData = useLoaderData();
-  const product = loaderData.data;
+  const loaderData = useLoaderData()
+  const product = loaderData.data
 
   return (
     <div className="container mx-auto p-4">
@@ -63,16 +63,12 @@ export default function ProductDetailsPage() {
             <span className="font-semibold">Price:</span> ${product.price}
           </p>
           <p className="mb-2 text-gray-600">
-            <span className="font-semibold">Available Quantity:</span>{" "}
-            {product.quantity}
+            <span className="font-semibold">Available Quantity:</span> {product.quantity}
           </p>
           <p className="mb-4 text-gray-700">{product.description}</p>
 
           <div className="flex flex-col sm:flex-row gap-4">
-            <Link
-              to={`/product/${product._id}/checkout`}
-              className="btn btn-primary"
-            >
+            <Link to={`/product/${product._id}/checkout`} className="btn btn-primary">
               Buy Now
             </Link>
             <Link to="/product" className="btn btn-secondary">
@@ -82,5 +78,5 @@ export default function ProductDetailsPage() {
         </div>
       </div>
     </div>
-  );
+  )
 }

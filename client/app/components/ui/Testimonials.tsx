@@ -1,35 +1,35 @@
-import c1 from "assets/customer/john.png";
-import c2 from "assets/customer/jane.png";
-import c3 from "assets/customer/mark.png";
+import c1 from 'assets/customer/john.png'
+import c2 from 'assets/customer/jane.png'
+import c3 from 'assets/customer/mark.png'
 
 export default function Testimonials() {
   const testimonials = [
     {
       id: 1,
-      name: "John Doe",
-      text: "Amazing service! I found exactly what I needed and the shopping experience was fantastic.",
+      name: 'John Doe',
+      text: 'Amazing service! I found exactly what I needed and the shopping experience was fantastic.',
       image: c1,
     },
     {
       id: 2,
-      name: "Jane Smith",
+      name: 'Jane Smith',
       text: "Love the quality of the products! I'll definitely be shopping here again.",
       image: c2,
     },
     {
       id: 3,
-      name: "Mark Lee",
-      text: "Great prices and fast shipping! Highly recommend this store.",
+      name: 'Mark Lee',
+      text: 'Great prices and fast shipping! Highly recommend this store.',
       image: c3,
     },
-  ];
+  ]
 
   return (
     <div className="py-16">
       <div className="max-w-screen-xl mx-auto text-center">
         <h2 className="text-3xl font-bold mb-6">What Our Customers Say</h2>
         <div className="flex flex-wrap justify-center gap-8">
-          {testimonials.map((testimonial) => (
+          {testimonials.map(testimonial => (
             <div key={testimonial.id} className="w-full sm:w-1/3 p-4 border rounded-lg shadow-lg">
               <div className="flex justify-center mb-4">
                 <img
@@ -45,5 +45,5 @@ export default function Testimonials() {
         </div>
       </div>
     </div>
-  );
+  )
 }

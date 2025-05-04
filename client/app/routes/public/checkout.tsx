@@ -1,70 +1,64 @@
-import { loadStripe } from "@stripe/stripe-js";
-import { useState } from "react";
-import Cookies from "js-cookie";
-import type { IUser } from "provider/auth/AuthProvider";
-import { redirect, useFetcher, useLoaderData } from "react-router";
-import { getToken } from "utils/getToken";
-import type { Route } from "./+types/checkoutCancel";
+import { loadStripe } from '@stripe/stripe-js'
+import { useState } from 'react'
+import Cookies from 'js-cookie'
+import type { IUser } from '~/provider/auth/AuthProvider'
+import { redirect, useFetcher, useLoaderData } from 'react-router'
+import { getToken } from '~/utils/getToken'
+import type { Route } from './+types/checkoutCancel'
 
 // * Initialize Stripe
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY)
 
 export function meta({}: Route.MetaArgs) {
-  return [
-    { title: "Bike Store - Checkout" },
-    { name: "description", content: "Checkout page" },
-  ];
+  return [{ title: 'Bike Store - Checkout' }, { name: 'description', content: 'Checkout page' }]
 }
 
 export const clientLoader = async ({ params }: { params: { id: string } }) => {
-  const user = Cookies.get("user");
+  const user = Cookies.get('user')
   if (!user) {
-    return redirect("/auth/login");
+    return redirect('/auth/login')
   }
 
-  const parsedUser: IUser = JSON.parse(user);
-  const token = parsedUser.token;
+  const parsedUser: IUser = JSON.parse(user)
+  const token = parsedUser.token
 
-  const productId = params.id;
-  if (!productId) return redirect("/product");
+  const productId = params.id
+  if (!productId) return redirect('/product')
 
-  const product = await fetch(
-    `${import.meta.env.VITE_API_URL}/bikes/${productId}`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
+  const product = await fetch(`${import.meta.env.VITE_API_URL}/bikes/${productId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
 
-  if (!product.ok) return redirect("/product");
+  if (!product.ok) return redirect('/product')
 
-  const productData = await product.json();
+  const productData = await product.json()
 
   return {
     product: productData.data,
     user: parsedUser,
-  };
-};
+  }
+}
 
 export const clientAction = async ({ request }: { request: Request }) => {
-  const formData = await request.formData();
-  const quantity = Number(formData.get("quantity"));
-  const price = Number(formData.get("price"));
-  const productId = formData.get("productId") as string;
-  const productName = formData.get("productName") as string;
-  const email = formData.get("email") as string;
+  const formData = await request.formData()
+  const quantity = Number(formData.get('quantity'))
+  const price = Number(formData.get('price'))
+  const productId = formData.get('productId') as string
+  const productName = formData.get('productName') as string
+  const email = formData.get('email') as string
 
-  const token = getToken();
+  const token = getToken()
 
   try {
     // * Create session using the API
     const response = await fetch(
       `${import.meta.env.VITE_API_URL}/payments/create-checkout-session`,
       {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
@@ -74,51 +68,48 @@ export const clientAction = async ({ request }: { request: Request }) => {
           productName,
           email,
         }),
-      }
-    );
+      },
+    )
 
     if (!response.ok) {
-      return { error: "Failed to create checkout session" }; 
+      return { error: 'Failed to create checkout session' }
     }
 
-    const responseData = await response.json();
-    const { session } = responseData;
+    const responseData = await response.json()
+    const { session } = responseData
 
     // * Redirect to checkout
-    const stripe = await stripePromise;
-    if (!stripe) throw new Error("Stripe not loaded");
+    const stripe = await stripePromise
+    if (!stripe) throw new Error('Stripe not loaded')
 
     const result = await stripe.redirectToCheckout({
       sessionId: session.id,
-    });
+    })
 
     if (result.error) {
-      throw new Error(result.error.message);
+      throw new Error(result.error.message)
     }
   } catch (err: any) {
-    console.error("Payment error:", err);
-    return { error: err.message };
+    console.error('Payment error:', err)
+    return { error: err.message }
   }
-};
+}
 
 export default function CheckoutPage() {
-  const { product, user } = useLoaderData();
+  const { product, user } = useLoaderData()
 
-  const [quantity, setQuantity] = useState(1);
-  const [total, setTotal] = useState(product.price);
+  const [quantity, setQuantity] = useState(1)
+  const [total, setTotal] = useState(product.price)
 
-  const fetcher = useFetcher();
-  const isSubmitting = fetcher.state === "submitting";
-  const error = fetcher.data?.error;
+  const fetcher = useFetcher()
+  const isSubmitting = fetcher.state === 'submitting'
+  const error = fetcher.data?.error
 
   return (
     <div className="container max-w-lg mx-auto p-4">
       <h1 className="text-3xl font-bold mb-4">Checkout</h1>
 
-      <fetcher.Form
-        method="POST"
-        className=" rounded-lg shadow-md p-6 mb-6"
-      >
+      <fetcher.Form method="POST" className=" rounded-lg shadow-md p-6 mb-6">
         <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
         <div className="flex justify-between mb-4">
           <span>Product:</span>
@@ -134,9 +125,9 @@ export default function CheckoutPage() {
             required
             min={1}
             className="input input-bordered w-full max-w-xs"
-            onChange={(e) => {
-              setQuantity(parseInt(e.target.value));
-              setTotal(product.price * parseInt(e.target.value));
+            onChange={e => {
+              setQuantity(parseInt(e.target.value))
+              setTotal(product.price * parseInt(e.target.value))
             }}
           />
         </div>
@@ -151,20 +142,12 @@ export default function CheckoutPage() {
           <span>${total}</span>
         </div>
 
-        {error && (
-          <div className="bg-red-100 text-red-700 p-3 rounded mb-4">
-            {error}
-          </div>
-        )}
+        {error && <div className="bg-red-100 text-red-700 p-3 rounded mb-4">{error}</div>}
 
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="btn btn-primary w-full"
-        >
-          {isSubmitting ? "Processing..." : "Proceed to Payment"}
+        <button type="submit" disabled={isSubmitting} className="btn btn-primary w-full">
+          {isSubmitting ? 'Processing...' : 'Proceed to Payment'}
         </button>
       </fetcher.Form>
     </div>
-  );
+  )
 }

@@ -1,0 +1,6 @@
+node_modules
+build
+.react-router
+.vercel
+pnpm-lock.yaml
+eslint.config.cjs
