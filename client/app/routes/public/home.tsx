@@ -35,8 +35,8 @@ export default function Home() {
   return (
     <div>
       <Banner />
+      {products && <Product />}
       <PaymentProcess />
-      {products && <Product products={products} />}
       <WhyChooseUs />
       <Testimonials />
       <FAQ />
