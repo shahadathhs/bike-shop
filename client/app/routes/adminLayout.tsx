@@ -16,7 +16,6 @@ export const loader = async ({ request }: { request: Request }) => {
   if (pathname === 'admin') return redirect('admin/analytics')
 
   const cookie = await authServices.getCookie(request)
-  console.log('cookie', cookie)
 
   return { cookie }
 }

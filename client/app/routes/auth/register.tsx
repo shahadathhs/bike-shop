@@ -67,7 +67,7 @@ export default function Register() {
   }, [fetcher.data, navigate])
 
   return (
-    <div className="h-[500px] flex flex-col lg:flex-row pt-10">
+    <div className="min-h-[500px] flex flex-col lg:flex-row mt-10">
       {/* Left: Welcome Panel */}
       <div className="hidden lg:flex lg:w-1/2 items-center justify-center p-10 border-r">
         <div className="space-y-6">
@@ -84,8 +84,8 @@ export default function Register() {
       </div>
 
       {/* Right: Registration Form */}
-      <div className="flex w-full lg:w-1/2 items-center justify-center p-6">
-        <Card className="w-full max-w-md">
+      <div className="flex w-full lg:w-1/2 items-center justify-center md:p-6">
+        <Card className="w-full md:max-w-md">
           <CardHeader className="pb-2">
             <CardTitle className="text-2xl text-center">Join Us</CardTitle>
           </CardHeader>

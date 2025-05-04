@@ -17,11 +17,11 @@ export default function PublicLayout() {
   if (!isClient || isLoading) return <Loading />
 
   return (
-    <main className="container mx-auto px-2 md:px-0">
-      <div className="sticky top-2 left-0 right-0 z-10 container mx-auto px-2 md:px-0">
+    <main className="container mx-auto px-3 md:px-0">
+      <div className="sticky top-2 left-0 right-0 z-10 container mx-auto">
         <NavBar />
       </div>
-      <div className="min-h-[500px] mb-10">
+      <div className="min-h-[400px] mb-10">
         <Outlet />
       </div>
       <Footer />

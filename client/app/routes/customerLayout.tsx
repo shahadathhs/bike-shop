@@ -1,29 +1,36 @@
-import Cookies from 'js-cookie'
-import { Link, Outlet, redirect } from 'react-router'
+import { useEffect } from 'react'
+import { Link, Outlet, redirect, useLoaderData } from 'react-router'
 import { customerNavItems } from '~/constant/navigationLinks'
+import { useAuth } from '~/context/AuthContext'
+import { authServices } from '~/services/auth.services'
+import type { TCookie } from '~/types/user'
 
-export const loader = ({ request }: { request: Request }) => {
-  const user = Cookies.get('user')
-  if (!user) {
-    return redirect('/auth/login')
-  }
-
-  const parsedUser = JSON.parse(user)
-  if (parsedUser.role !== 'customer') {
-    return redirect('/')
-  }
+export const loader = async ({ request }: { request: Request }) => {
+  // * This ensures only authenticated users can access the dashboard
+  await authServices.requireUserSession(request)
 
   const url = new URL(request.url)
   const pathname = url.pathname
 
-  if (pathname === '/dashboard/customer') {
-    return redirect('/dashboard/customer/orders')
-  }
+  if (pathname === '/customer') return redirect('/customer/orders')
 
-  return null
+  const cookie = await authServices.getCookie(request)
+
+  return { cookie }
 }
 
 export default function DashboardCustomerLayout() {
+  const { cookie } = useLoaderData<{ cookie: TCookie }>()
+
+  const { setCookieToContext } = useAuth()
+
+  // * Set cookie to context when cookie data changes
+  useEffect(() => {
+    if (cookie) {
+      setCookieToContext(cookie) // * don't set cookie to context if it's null
+    }
+  }, [cookie, setCookieToContext])
+
   return (
     <main className="min-h-screen w-full flex justify-between">
       <div className="drawer lg:drawer-open">

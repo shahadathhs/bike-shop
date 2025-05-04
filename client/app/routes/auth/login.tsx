@@ -68,7 +68,7 @@ export default function Login() {
   }, [fetcher.data])
 
   return (
-    <div className="flex flex-col lg:flex-row h-[500px] items-center pt-10">
+    <div className="flex flex-col lg:flex-row h-[400px] items-center mt-10">
       {/* Welcome Column */}
       <div className="hidden lg:flex lg:w-1/2 items-center justify-center p-10 border-r">
         <div className="space-y-6">
@@ -85,8 +85,8 @@ export default function Login() {
       </div>
 
       {/* Form Column */}
-      <div className="flex w-full lg:w-1/2 items-center justify-center p-6">
-        <Card className="w-full max-w-md">
+      <div className="flex w-full lg:w-1/2 items-center justify-center md:p-6">
+        <Card className="w-full md:max-w-md">
           <CardHeader>
             <CardTitle className="text-2xl text-center">Login to your account</CardTitle>
           </CardHeader>

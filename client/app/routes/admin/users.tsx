@@ -85,7 +85,7 @@ export default function Users() {
       const responseData = await response.json()
       setUsers(responseData.data.users)
       setTotal(responseData.data.metadata.total)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     } catch (err: any) {
       console.error(err)
       setError(err.message || 'Failed to fetch users')

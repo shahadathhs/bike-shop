@@ -24,9 +24,6 @@ export default [
     // * Auth routes
     route('register', 'routes/auth/register.tsx'),
     route('login', 'routes/auth/login.tsx'),
-
-    // * `/dashboard` path
-    route('/dashboard', 'routes/dashboard.tsx'),
   ]),
 
   // * Admin routes
