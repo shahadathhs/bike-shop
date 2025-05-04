@@ -1,49 +1,65 @@
-import c1 from 'assets/customer/john.png'
-import c2 from 'assets/customer/jane.png'
-import c3 from 'assets/customer/mark.png'
+import { Swiper, SwiperSlide } from 'swiper/react'
+import { Autoplay, Navigation, Pagination, EffectCoverflow } from 'swiper/modules'
+import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
+import { Quote } from 'lucide-react'
+import { testimonialsData } from '~/constant/testtimonials'
+import { nanoid } from 'nanoid'
+import { BorderBeam } from '../magicui/border-beam'
 
 export default function Testimonials() {
-  const testimonials = [
-    {
-      id: 1,
-      name: 'John Doe',
-      text: 'Amazing service! I found exactly what I needed and the shopping experience was fantastic.',
-      image: c1,
-    },
-    {
-      id: 2,
-      name: 'Jane Smith',
-      text: "Love the quality of the products! I'll definitely be shopping here again.",
-      image: c2,
-    },
-    {
-      id: 3,
-      name: 'Mark Lee',
-      text: 'Great prices and fast shipping! Highly recommend this store.',
-      image: c3,
-    },
-  ]
-
   return (
-    <div className="py-16">
-      <div className="max-w-screen-xl mx-auto text-center">
-        <h2 className="text-3xl font-bold mb-6">What Our Customers Say</h2>
-        <div className="flex flex-wrap justify-center gap-8">
-          {testimonials.map(testimonial => (
-            <div key={testimonial.id} className="w-full sm:w-1/3 p-4 border rounded-lg shadow-lg">
-              <div className="flex justify-center mb-4">
-                <img
-                  src={testimonial.image}
-                  alt={testimonial.name}
-                  className="w-16 h-16 rounded-full object-cover"
-                />
-              </div>
-              <p className="text-lg italic text-gray-400 mb-4">"{testimonial.text}"</p>
-              <p className="text-md font-semibold">{testimonial.name}</p>
-            </div>
-          ))}
-        </div>
+    <section className="relative py-10 border overflow-hidden rounded bg-gradient-to-br from-white via-gray-50 to-green-50">
+      <div className="max-w-3xl mx-auto text-center mb-12">
+        <h2 className="text-4xl font-bold">What Our Customers Say</h2>
+        <p className="mt-4 text-muted-foreground">
+          Real feedback from people who love our products as much as we do.
+        </p>
       </div>
-    </div>
+
+      <Swiper
+        modules={[Autoplay, Pagination, Navigation, EffectCoverflow]}
+        effect="coverflow"
+        grabCursor
+        centeredSlides
+        slidesPerView={1.2}
+        coverflowEffect={{
+          rotate: 0,
+          stretch: 0,
+          depth: 100,
+          modifier: 2,
+          slideShadows: false,
+        }}
+        loop
+        autoplay={{ delay: 4000, disableOnInteraction: false }}
+        navigation
+        pagination={{ clickable: true }}
+        className="max-w-5xl mx-auto"
+      >
+        {testimonialsData.map(({ name, text, image }) => (
+          <SwiperSlide key={nanoid()}>
+            <Card className="p-6 bg-white/80 backdrop-blur rounded-xl shadow-lg transition-transform hover:scale-[1.03]">
+              <CardHeader className="flex flex-col items-center space-y-4">
+                <div className="relative w-24 h-24 rounded-full ring-4 ring-indigo-100 overflow-hidden">
+                  <img src={image} alt={name} className="w-full h-full object-cover" />
+                </div>
+                <CardTitle className="flex items-center space-x-2 text-xl font-semibold">
+                  <Quote className="h-5 w-5 text-indigo-500" />
+                  <span>{name}</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="mt-2 text-center text-gray-700 italic">{text}</p>
+              </CardContent>
+            </Card>
+          </SwiperSlide>
+        ))}
+      </Swiper>
+
+      <BorderBeam
+        duration={30}
+        size={300}
+        className="from-transparent via-green-500 to-transparent"
+      />
+    </section>
   )
 }

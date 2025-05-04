@@ -1,5 +1,11 @@
-import { Links, Meta, Outlet, Scripts, ScrollRestoration, useRouteError } from 'react-router'
 import './app.css'
+
+import 'swiper/css'
+import 'swiper/css/navigation'
+import 'swiper/css/pagination'
+import 'swiper/css/effect-coverflow'
+
+import { Links, Meta, Outlet, Scripts, ScrollRestoration, useRouteError } from 'react-router'
 import type { Route } from './+types/root'
 import { AuthProvider } from '~/provider/auth/AuthProvider'
 import { useEffect, useState } from 'react'
