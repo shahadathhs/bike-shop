@@ -14,9 +14,9 @@ const socialLinks = [
 export default function Footer() {
   return (
     <footer className="border-t bg-background text-muted-foreground">
-      <div className="container mx-auto grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-8 py-4">
+      <div className="container mx-auto grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-8 p-4">
         {/* About Section */}
-        <div className="md:col-span-2 lg:col-span-3 space-y-3">
+        <div className="col-span-2 lg:col-span-3 space-y-3">
           <div>
             <Link to="/" aria-label="Home">
               <img src={logoImg} alt="Bike Shop Logo" className="h-10 w-auto" />
@@ -42,6 +42,8 @@ export default function Footer() {
             ))}
           </div>
         </div>
+
+        <Separator className="md:hidden col-span-2" />
 
         {/* Quick Links */}
         <div className="space-y-2 flex flex-col">
