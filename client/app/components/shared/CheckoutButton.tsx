@@ -1,11 +1,11 @@
-// CheckoutButton.jsx
-import React from 'react'
 import { loadStripe } from '@stripe/stripe-js'
-import toast from 'react-hot-toast'
+import type { Product } from '~/types/product'
+import { Button } from '../ui/button'
+import { toast } from 'sonner'
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY)
 
-export default function CheckoutButton({ orderId, items }: { orderId: string; items: any[] }) {
+export default function CheckoutButton({ orderId, items }: { orderId: string; items: Product[] }) {
   const handleCheckout = async () => {
     try {
       // Call your backend to create a checkout session
@@ -27,19 +27,25 @@ export default function CheckoutButton({ orderId, items }: { orderId: string; it
           sessionId: data.sessionId,
         })
         if (error) {
-          toast.error(error?.message || 'Failed to redirect to Stripe')
+          toast.error(error?.message || 'Failed to redirect to Stripe', {
+            duration: 5000,
+            description: 'Please try again later.',
+          })
         }
       } else {
         throw new Error('Stripe failed to load')
       }
     } catch (error) {
       console.error('Checkout error:', error)
-      toast.error('Checkout failed. Please try again.')
+      toast.error('Checkout failed. Please try again.', {
+        duration: 5000,
+        description: 'Please try again later.',
+      })
     }
   }
   return (
-    <button onClick={handleCheckout} className="btn btn-primary">
+    <Button onClick={handleCheckout} variant="outline" size="lg">
       Checkout
-    </button>
+    </Button>
   )
 }

@@ -2,10 +2,10 @@ import { Links, Meta, Outlet, Scripts, ScrollRestoration, useRouteError } from '
 import './app.css'
 import type { Route } from './+types/root'
 import { AuthProvider } from '~/provider/auth/AuthProvider'
-import { Toaster } from 'react-hot-toast'
 import { useEffect, useState } from 'react'
 import { ErrorBoundaryComponent } from '~/components/error/ErrorBoundaryComponent'
 import Loading from './components/shared/Loading'
+import { Toaster } from './components/ui/sonner'
 
 export const links: Route.LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -36,7 +36,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <link rel="icon" href={`/favicon.ico?v=${Date.now()}`} type="image/x-icon" />
       </head>
       <body>
-        <Toaster position="top-center" />
+        <Toaster />
         {children}
         <ScrollRestoration />
         <Scripts />
