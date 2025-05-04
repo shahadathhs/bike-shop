@@ -20,14 +20,14 @@ export const legalLinks = [
 
 export const adminNavItems = [
   { label: 'Home', route: '/' },
-  { label: 'Users', route: '/dashboard/admin/users' },
-  { label: 'Analytics', route: '/dashboard/admin/analytics' },
-  { label: 'Orders', route: '/dashboard/admin/orders' },
-  { label: 'Products', route: '/dashboard/admin/products' },
+  { label: 'Users', route: '/admin/users' },
+  { label: 'Analytics', route: '/admin/analytics' },
+  { label: 'Orders', route: '/admin/orders' },
+  { label: 'Products', route: '/admin/products' },
 ]
 
 export const customerNavItems = [
   { label: 'Home', route: '/' },
-  { label: 'Orders', route: '/dashboard/customer/orders' },
-  { label: 'Profile', route: '/dashboard/customer/profile' },
+  { label: 'Orders', route: '/customer/orders' },
+  { label: 'Profile', route: '/customer/profile' },
 ]

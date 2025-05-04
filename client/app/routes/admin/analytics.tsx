@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
 import toast from 'react-hot-toast'
-import { getToken } from '~/utils/getToken'
+import { useToken } from '~/context/AuthContext'
 
 interface IRevenueSummary {
   totalRevenue: number
@@ -33,10 +33,11 @@ export default function Analytics() {
   const [error, setError] = useState<string>('')
   const navigate = useNavigate()
 
-  const token = getToken()
+  const token = useToken()
 
   useEffect(() => {
     if (!token) {
+      console.log("token", token);
       toast.error('Authentication required')
       navigate('/auth/login')
       return
@@ -56,6 +57,7 @@ export default function Analytics() {
         }
         const data = await response.json()
         setAnalytics(data.data)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (err: any) {
         console.error('Error fetching analytics:', err)
         setError(err.message || 'Failed to fetch analytics data')

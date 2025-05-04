@@ -13,19 +13,16 @@ export type TUser = {
 }
 
 export type TCookie = {
-  userId: string
   token: string
   email: string
   name: string
-  user: TUser
+  role: TRole
 }
 
 export type TAuthContext = {
   token: string | undefined
-  userId: string | undefined
   email: string | undefined
   name: string | undefined
-  user: TUser | undefined
+  role: TRole | undefined
   setCookieToContext: (cookie: TCookie) => void
-  logout: () => void
 }

@@ -1,5 +1,4 @@
 import Cookies from 'js-cookie'
-import { useAuth } from '~/provider/auth/AuthContext'
 import { Link, Outlet, redirect } from 'react-router'
 import { customerNavItems } from '~/constant/navigationLinks'
 
@@ -25,8 +24,6 @@ export const loader = ({ request }: { request: Request }) => {
 }
 
 export default function DashboardCustomerLayout() {
-  const { logout } = useAuth()
-
   return (
     <main className="min-h-screen w-full flex justify-between">
       <div className="drawer lg:drawer-open">
@@ -63,9 +60,9 @@ export default function DashboardCustomerLayout() {
             {/* Logout button and Theme toggle */}
             <li>
               {/* Logout button */}
-              <button onClick={logout} className="btn btn-error mb-2">
+              {/* <button onClick={logout} className="btn btn-error mb-2">
                 Logout
-              </button>
+              </button> */}
             </li>
           </ul>
         </div>

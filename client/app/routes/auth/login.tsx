@@ -1,8 +1,9 @@
 import { useEffect } from 'react'
-import toast from 'react-hot-toast'
-import { useFetcher, useNavigate, type ClientActionFunctionArgs } from 'react-router'
+import { useFetcher, useNavigate, type ActionFunction } from 'react-router'
+import { toast } from 'sonner'
+import { authServices } from '~/services/auth.services'
 
-export const clientAction = async ({ request }: ClientActionFunctionArgs) => {
+export const action: ActionFunction = async ({ request }) => {
   const formData = await request.formData()
   const email = formData.get('email')
   const password = formData.get('password')
@@ -26,12 +27,19 @@ export const clientAction = async ({ request }: ClientActionFunctionArgs) => {
   const data = await response.json()
 
   if (response.ok) {
-    return {
-      success: true,
-      message: 'Login successful',
-      user: data.data,
-      data,
-    }
+    const user = data?.data
+    const role = user?.role
+
+    // * create user session based on role
+    return authServices.createUserSession(
+      {
+        token: user?.token,
+        email: user?.email,
+        name: user?.name,
+        role: user?.role,
+      },
+      role,
+    )
   } else {
     console.error('Error logging in', data)
     return { error: data.message, errorDetails: data }
@@ -48,13 +56,10 @@ export default function Login() {
   useEffect(() => {
     const handleFetcherData = async () => {
       if (fetcher.data?.success) {
-        toast.dismiss()
-        toast.success(fetcher.data.message)
-
-        // * login the user
-
-        //* wait for 1 second before redirecting
-        await new Promise(resolve => setTimeout(resolve, 1000))
+        toast.success(fetcher.data.message || 'Login successful', {
+          duration: 2000,
+          description: 'Redirecting to dashboard...',
+        })
 
         if (user.role === 'admin') {
           navigate('/dashboard/admin/analytics')
@@ -62,8 +67,9 @@ export default function Login() {
           navigate('/dashboard/customer/orders')
         }
       } else if (fetcher.data?.error) {
-        toast.dismiss()
-        toast.error(fetcher.data.error)
+        toast.error(fetcher.data.error, {
+          description: fetcher.data.errorDetails?.message,
+        })
       }
     }
 

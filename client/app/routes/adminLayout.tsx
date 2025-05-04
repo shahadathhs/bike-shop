@@ -1,31 +1,40 @@
 import Cookies from 'js-cookie'
-import { useAuth } from '~/provider/auth/AuthContext'
-import { Link, Outlet, redirect } from 'react-router'
+import { useEffect } from 'react'
+import { Link, Outlet, redirect, useLoaderData } from 'react-router'
 import { adminNavItems } from '~/constant/navigationLinks'
+import { useAuth } from '~/context/AuthContext'
+import { authServices } from '~/services/auth.services'
+import type { TCookie } from '~/types/user'
 
-export const loader = ({ request }: { request: Request }) => {
-  const user = Cookies.get('user')
-  if (!user) {
-    return redirect('/auth/login')
-  }
-
-  const parsedUser = JSON.parse(user)
-  if (parsedUser.role !== 'admin') {
-    return redirect('/')
-  }
+export const loader = async ({ request }: { request: Request }) => {
+  // * This ensures only authenticated users can access the dashboard
+  await authServices.requireUserSession(request)
 
   const url = new URL(request.url)
   const pathname = url.pathname
 
-  if (pathname === '/dashboard/admin') {
-    return redirect('/dashboard/admin/analytics')
-  }
+  // * redirect to analytics page if the user is on the dashboard route
+  if (pathname === 'admin') return redirect('admin/analytics')
 
-  return null
+  const cookie = await authServices.getCookie(request)
+  console.log('cookie', cookie)
+
+  return { cookie }
 }
 
 export default function DashboardAdminLayout() {
-  const { logout } = useAuth()
+  const { cookie } = useLoaderData<{ cookie: TCookie }>()
+
+  const { setCookieToContext } = useAuth()
+
+  // * Set cookie to context when cookie data changes
+  useEffect(() => {
+    if (cookie) {
+      console.log('cookie', cookie)
+      Cookies.set('role', cookie.role)
+      setCookieToContext(cookie) // * don't set cookie to context if it's null
+    }
+  }, [cookie, setCookieToContext])
 
   return (
     <main className="min-h-screen w-full flex justify-between">
@@ -63,11 +72,9 @@ export default function DashboardAdminLayout() {
             {/* Logout button and Theme toggle */}
             <li>
               {/* Logout button */}
-              <button onClick={logout} className="btn btn-error mb-2">
+              {/* <button onClick={logout} className="btn btn-error mb-2">
                 Logout
-              </button>
-
-           
+              </button> */}
             </li>
           </ul>
         </div>

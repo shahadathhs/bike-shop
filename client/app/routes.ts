@@ -22,13 +22,16 @@ export default [
     route('/checkout/cancel', 'routes/public/checkoutCancel.tsx'),
 
     // * Auth routes
-    route('/auth/register', 'routes/auth/register.tsx'),
-    route('/auth/login', 'routes/auth/login.tsx'),
+    route('register', 'routes/auth/register.tsx'),
+    route('login', 'routes/auth/login.tsx'),
+
+    // * `/dashboard` path
+    route('/dashboard', 'routes/dashboard.tsx'),
   ]),
 
   // * Admin routes
   layout('routes/adminLayout.tsx', [
-    ...prefix('dashboard/admin', [
+    ...prefix('admin', [
       index('routes/admin/admin.tsx'),
       route('/users', 'routes/admin/users.tsx'),
       route('/analytics', 'routes/admin/analytics.tsx'),
@@ -41,7 +44,7 @@ export default [
 
   // * customer routes
   layout('routes/customerLayout.tsx', [
-    ...prefix('dashboard/customer', [
+    ...prefix('customer', [
       index('routes/customer/customer.tsx'),
       route('/orders', 'routes/customer/orders.tsx'),
       route('/profile', 'routes/customer/profile.tsx'),
