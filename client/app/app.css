@@ -2,11 +2,11 @@
 @import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
-@plugin "daisyui" {
+/* @plugin "daisyui" {
   themes:
     light --default,
     dark --prefersdark;
-}
+} */
 
 @theme {
   --font-sans:

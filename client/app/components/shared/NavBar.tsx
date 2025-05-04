@@ -1,7 +1,16 @@
 import { useAuth } from '~/provider/auth/AuthContext'
-import ThemeToggle from '~/provider/theme/ThemeToggle'
 import { Link, NavLink } from 'react-router'
 import logoImg from 'assets/logo.png'
+import { navLinks } from '~/constant/navigationLinks'
+import { Sheet, SheetContent, SheetTrigger } from '~/components/ui/sheet'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '~/components/ui/dropdown-menu'
+import { Button } from '~/components/ui/button'
+import { Menu } from 'lucide-react'
 
 function RouterNavLink({
   to,
@@ -15,103 +24,84 @@ function RouterNavLink({
   return (
     <NavLink
       to={to}
-      className={({ isActive }) => `${className} ${isActive ? 'btn btn-primary' : 'btn btn-ghost'}`}
+      className={({ isActive }) =>
+        `${className} text-sm font-medium transition-colors ${
+          isActive ? 'text-primary' : 'text-muted-foreground hover:text-primary'
+        }`
+      }
     >
       {children}
     </NavLink>
   )
 }
 
-const navItems = [
-  {
-    name: 'Home',
-    to: '/',
-  },
-  {
-    name: 'Products',
-    to: '/product',
-  },
-  {
-    name: 'About Us',
-    to: '/about',
-  },
-]
-
 export default function NavBar() {
-  const { user } = useAuth()
+  const { user, logout } = useAuth()
 
   return (
-    <div className="navbar bg-base-100 shadow-sm">
-      {/* Navbar Start */}
-      <div className="navbar-start">
-        {/* Mobile Dropdown Menu */}
-        <div className="dropdown">
-          <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M4 6h16M4 12h16M4 18h16"
-              />
-            </svg>
-          </div>
-          <ul
-            tabIndex={0}
-            className="menu menu-sm dropdown-content bg-base-100 rounded-box z-10 mt-3 w-52 p-2 shadow"
-          >
-            {navItems.map(item => (
-              <li key={item.name} className="my-1">
-                <RouterNavLink to={item.to}>{item.name}</RouterNavLink>
-              </li>
-            ))}
-          </ul>
+    <header className="border bg-background p-4 my-2 rounded shadow-sm">
+      <div className="container flex items-center justify-between">
+        {/* Left: Logo & Mobile Nav */}
+        <div className="flex items-center gap-4">
+          <Button asChild variant="ghost">
+            <Link to="/">
+              <img src={logoImg} alt="Bike Shop Logo" className="h-10" />
+            </Link>
+          </Button>
+          {/* Mobile Nav */}
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="lg:hidden">
+                <Menu className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left">
+              <nav className="flex flex-col gap-4 mt-6">
+                {navLinks.map(link => (
+                  <RouterNavLink key={link.to} to={link.to}>
+                    {link.name}
+                  </RouterNavLink>
+                ))}
+              </nav>
+            </SheetContent>
+          </Sheet>
         </div>
-        {/* Logo */}
-        <Link to="/">
-          <img src={logoImg} alt="logo" className="max-h-16" />
-        </Link>
-      </div>
 
-      {/* Navbar Center */}
-      <div className="navbar-center hidden lg:flex">
-        <ul className="menu menu-horizontal px-1">
-          {navItems.map(item => (
-            <li key={item.name} className="mx-1">
-              <RouterNavLink to={item.to}>{item.name}</RouterNavLink>
-            </li>
-          ))}
-        </ul>
-      </div>
+        {/* Right: Auth & Actions & Desktop Nav */}
+        <div className="flex items-center gap-4">
+          {/* Desktop Nav */}
+          <nav className="hidden lg:flex gap-6">
+            {navLinks.map(link => (
+              <RouterNavLink key={link.to} to={link.to}>
+                {link.name}
+              </RouterNavLink>
+            ))}
+          </nav>
 
-      {/* Navbar End */}
-      <div className="navbar-end flex items-center gap-3">
-        {/* Dashboard or login Link */}
-        {user ? (
-          user.role === 'admin' ? (
-            <Link to="/dashboard/admin" className="btn btn-primary btn-outline">
-              Dashboard
-            </Link>
+          {/* Auth & Actions */}
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline">Dashboard</Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem asChild>
+                  <Link to={user.role === 'admin' ? '/dashboard/admin' : '/dashboard/customer'}>
+                    Go to Dashboard
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={logout}>Logout</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           ) : (
-            <Link to="/dashboard/customer" className="btn btn-primary btn-outline">
-              Dashboard
+            <Link to="/auth/login">
+              <Button variant="default" className="hover:cursor-pointer">
+                Login
+              </Button>
             </Link>
-          )
-        ) : (
-          <Link to="/auth/login" className="btn btn-primary btn-outline">
-            Login
-          </Link>
-        )}
-
-        {/* Theme Toggle */}
-        <ThemeToggle />
+          )}
+        </div>
       </div>
-    </div>
+    </header>
   )
 }
