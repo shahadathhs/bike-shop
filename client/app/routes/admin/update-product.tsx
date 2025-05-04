@@ -113,6 +113,7 @@ export default function UpdateProduct() {
   const [image, setImage] = useState(product.image)
 
   // When a file is selected, convert it to a base64 string.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleImageChange = (e: any) => {
     const file = e.target.files[0]
     if (file) {

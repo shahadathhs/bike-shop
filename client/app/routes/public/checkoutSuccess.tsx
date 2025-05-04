@@ -10,7 +10,7 @@ export function meta() {
   ]
 }
 
-export const clientLoader = async () => {
+export const loader = async () => {
   const token = getToken()
 
   if (!token) return redirect('/auth/login')
@@ -18,7 +18,7 @@ export const clientLoader = async () => {
   return null
 }
 
-export const clientAction = async ({ request }: { request: Request }) => {
+export const action = async ({ request }: { request: Request }) => {
   const token = getToken()
 
   if (!token) return redirect('/auth/login')

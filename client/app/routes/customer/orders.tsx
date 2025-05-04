@@ -1,6 +1,7 @@
-import { useAuth } from '~/provider/auth/AuthContext'
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
+import { useAuth } from '~/context/AuthContext'
 
 export default function CustomerOrders() {
   const { user } = useAuth()
@@ -20,11 +21,11 @@ export default function CustomerOrders() {
       try {
         const response = await fetch(
           `${import.meta.env.VITE_API_URL}/orders/myOrders/${
-            user.email
+            user?.email
           }?page=${page}&limit=${limit}`,
           {
             headers: {
-              Authorization: `Bearer ${user.token}`,
+              Authorization: `Bearer ${user?.token}`,
             },
           },
         )

@@ -1,6 +1,4 @@
-import type { Route } from './+types/termsOfService'
-
-export function meta({}: Route.MetaArgs) {
+export function meta() {
   return [
     { title: 'Bike Store - Terms of Service' },
     { name: 'description', content: 'Know more about our terms of service' },

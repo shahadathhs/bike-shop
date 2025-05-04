@@ -1,25 +1,24 @@
 import { loadStripe } from '@stripe/stripe-js'
 import { useState } from 'react'
 import Cookies from 'js-cookie'
-import type { IUser } from '~/provider/auth/AuthProvider'
 import { redirect, useFetcher, useLoaderData } from 'react-router'
 import { getToken } from '~/utils/getToken'
-import type { Route } from './+types/checkoutCancel'
+import type { TUser } from '~/types/user'
 
 // * Initialize Stripe
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY)
 
-export function meta({}: Route.MetaArgs) {
+export function meta() {
   return [{ title: 'Bike Store - Checkout' }, { name: 'description', content: 'Checkout page' }]
 }
 
-export const clientLoader = async ({ params }: { params: { id: string } }) => {
+export const loader = async ({ params }: { params: { id: string } }) => {
   const user = Cookies.get('user')
   if (!user) {
     return redirect('/auth/login')
   }
 
-  const parsedUser: IUser = JSON.parse(user)
+  const parsedUser: TUser = JSON.parse(user)
   const token = parsedUser.token
 
   const productId = params.id
@@ -89,6 +88,7 @@ export const clientAction = async ({ request }: { request: Request }) => {
     if (result.error) {
       throw new Error(result.error.message)
     }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     console.error('Payment error:', err)
     return { error: err.message }

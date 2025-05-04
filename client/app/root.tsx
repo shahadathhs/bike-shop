@@ -7,11 +7,11 @@ import 'swiper/css/effect-coverflow'
 
 import { Links, Meta, Outlet, Scripts, ScrollRestoration, useRouteError } from 'react-router'
 import type { Route } from './+types/root'
-import { AuthProvider } from '~/provider/auth/AuthProvider'
 import { useEffect, useState } from 'react'
 import { ErrorBoundaryComponent } from '~/components/error/ErrorBoundaryComponent'
 import Loading from './components/shared/Loading'
 import { Toaster } from './components/ui/sonner'
+import { AuthProvider } from './context/AuthContext'
 
 export const links: Route.LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },

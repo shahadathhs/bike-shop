@@ -1,4 +1,3 @@
-import { useAuth } from '~/provider/auth/AuthContext'
 import { Link, NavLink } from 'react-router'
 import logoImg from 'assets/logo.png'
 import { navLinks } from '~/constant/navigationLinks'
@@ -12,6 +11,7 @@ import {
 import { Button } from '~/components/ui/button'
 import { Menu } from 'lucide-react'
 import { useState } from 'react'
+import { useAuth } from '~/context/AuthContext'
 
 function RouterNavLink({
   to,

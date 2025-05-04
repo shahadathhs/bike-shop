@@ -1,4 +1,3 @@
-import { useAuth } from '~/provider/auth/AuthContext'
 import { useEffect } from 'react'
 import toast from 'react-hot-toast'
 import { useFetcher, useNavigate, type ClientActionFunctionArgs } from 'react-router'
@@ -44,7 +43,6 @@ export default function Login() {
   const user = fetcher.data?.user
   const isSubmitting = fetcher.state === 'submitting'
 
-  const { login } = useAuth()
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -54,7 +52,6 @@ export default function Login() {
         toast.success(fetcher.data.message)
 
         // * login the user
-        login(user)
 
         //* wait for 1 second before redirecting
         await new Promise(resolve => setTimeout(resolve, 1000))
@@ -71,7 +68,7 @@ export default function Login() {
     }
 
     handleFetcherData()
-  }, [fetcher.data, login, navigate])
+  }, [fetcher.data, navigate])
 
   return (
     <div className="container mx-auto p-4">
@@ -114,7 +111,7 @@ export default function Login() {
         </div>
       </fetcher.Form>
       <div className="text-center mt-4">
-        Don't have an account?{' '}
+        Don&apos;t have an account?{' '}
         <a href="/auth/register" className="link link-primary">
           Register here
         </a>

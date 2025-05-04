@@ -1,13 +1,13 @@
 import React, { useState } from 'react'
-import { useAuth } from '~/provider/auth/AuthContext'
 import toast from 'react-hot-toast'
 import Cookies from 'js-cookie'
-import type { IUser } from '~/provider/auth/AuthProvider'
+import { useAuth } from '~/context/AuthContext'
+import type { TUser } from '~/types/user'
 
 export default function CustomerProfile() {
-  const { user, login } = useAuth()
+  const { user } = useAuth()
   const cookieUser = Cookies.get('user')
-  const parsedUser: IUser = JSON.parse(cookieUser || '{}')
+  const parsedUser: TUser = JSON.parse(cookieUser || '{}')
 
   const [name, setName] = useState(user?.name || parsedUser.name || '')
   const [email, setEmail] = useState(user?.email || parsedUser.email || '')
@@ -26,15 +26,16 @@ export default function CustomerProfile() {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/update-profile`, {
         method: 'PATCH',
         headers: {
-          Authorization: `Bearer ${user.token}`,
+          Authorization: `Bearer ${user?.token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ name, email }),
       })
       const responseData = await response.json()
       console.log('responseData', responseData)
-      login({ ...user, name })
+
       toast.success('Profile updated successfully!')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error('Error updating profile:', error)
       toast.error(error.response?.data?.error || 'Failed to update profile')
@@ -54,7 +55,7 @@ export default function CustomerProfile() {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/update-password`, {
         method: 'PATCH',
         headers: {
-          Authorization: `Bearer ${user.token}`,
+          Authorization: `Bearer ${user?.token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ currentPassword, newPassword }),
@@ -67,6 +68,7 @@ export default function CustomerProfile() {
       setCurrentPassword('')
       setNewPassword('')
       setConfirmPassword('')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       toast.error(error.response?.data?.error || 'Failed to update password')
     }

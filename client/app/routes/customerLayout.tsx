@@ -1,9 +1,9 @@
 import Cookies from 'js-cookie'
 import { useAuth } from '~/provider/auth/AuthContext'
-import ThemeToggle from '~/provider/theme/ThemeToggle'
 import { Link, Outlet, redirect } from 'react-router'
+import { customerNavItems } from '~/constant/navigationLinks'
 
-export const clientLoader = ({ request }: { request: Request }) => {
+export const loader = ({ request }: { request: Request }) => {
   const user = Cookies.get('user')
   if (!user) {
     return redirect('/auth/login')
@@ -16,7 +16,7 @@ export const clientLoader = ({ request }: { request: Request }) => {
 
   const url = new URL(request.url)
   const pathname = url.pathname
-  // console.log('pathname', pathname)
+
   if (pathname === '/dashboard/customer') {
     return redirect('/dashboard/customer/orders')
   }
@@ -53,7 +53,7 @@ export default function DashboardCustomerLayout() {
           <ul className="menu bg-base-200 text-base-content min-h-full flex flex-col justify-between w-40 p-4">
             {/* Sidebar content here */}
             <li>
-              {navItems.map(item => (
+              {customerNavItems.map(item => (
                 <Link key={item.label} to={item.route} className="btn btn-ghost text-md">
                   {item.label}
                 </Link>
@@ -66,9 +66,6 @@ export default function DashboardCustomerLayout() {
               <button onClick={logout} className="btn btn-error mb-2">
                 Logout
               </button>
-
-              {/* Theme toggle */}
-              <ThemeToggle />
             </li>
           </ul>
         </div>
@@ -76,10 +73,3 @@ export default function DashboardCustomerLayout() {
     </main>
   )
 }
-const navItems = [
-  { label: 'Home', route: '/' },
-  // { label: "Customer", route: "/dashboard/customer" },
-  { label: 'Orders', route: '/dashboard/customer/orders' },
-  { label: 'Profile', route: '/dashboard/customer/profile' },
-  // { label: "Orders Tracking", route: "/dashboard/customer/tracking" },
-]

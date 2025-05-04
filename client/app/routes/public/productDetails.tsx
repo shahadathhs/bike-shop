@@ -1,8 +1,7 @@
 import { Link, redirect, useLoaderData } from 'react-router'
 import { getToken } from '~/utils/getToken'
-import type { Route } from './+types/productDetails'
 
-export function meta({}: Route.MetaArgs) {
+export function meta() {
   return [
     { title: 'Bike Store - Product Details' },
     {

@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
-import { useFetcher } from 'react-router'
+import { useFetcher, type ActionFunction } from 'react-router'
 import { getToken } from '~/utils/getToken'
 
-export const action = async ({ request }: any) => {
+export const action: ActionFunction = async ({ request }) => {
   const formData = await request.formData()
 
   const action = formData.get('action')
@@ -84,6 +85,7 @@ export default function Users() {
       const responseData = await response.json()
       setUsers(responseData.data.users)
       setTotal(responseData.data.metadata.total)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error(err)
       setError(err.message || 'Failed to fetch users')

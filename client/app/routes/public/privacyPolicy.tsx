@@ -1,6 +1,4 @@
-import type { Route } from './+types/privacyPolicy'
-
-export function meta({}: Route.MetaArgs) {
+export function meta() {
   return [
     { title: 'Bike Store - Privacy Policy' },
     { name: 'description', content: 'Know more about our privacy policy' },

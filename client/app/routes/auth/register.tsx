@@ -1,8 +1,8 @@
 import { useEffect } from 'react'
 import toast from 'react-hot-toast'
-import { Link, useFetcher, useNavigate, type ClientActionFunctionArgs } from 'react-router'
+import { Link, useFetcher, useNavigate, type ActionFunctionArgs } from 'react-router'
 
-export const clientAction = async ({ request }: ClientActionFunctionArgs) => {
+export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData()
   const name = formData.get('name')
   const email = formData.get('email')

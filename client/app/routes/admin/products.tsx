@@ -1,11 +1,12 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
-import { Link, useFetcher, useLoaderData, type ClientActionFunctionArgs } from 'react-router'
+import { Link, useFetcher, useLoaderData, type ActionFunctionArgs } from 'react-router'
 import { brands, categories, models } from '~/utils/bikeUtils'
 import { useDebounce } from '~/utils/debounce'
 import { getToken } from '~/utils/getToken'
 
-export const clientLoader = async () => {
+export const loader = async () => {
   try {
     const response = await fetch(`${import.meta.env.VITE_API_URL}/bikes`)
 
@@ -28,7 +29,7 @@ export const clientLoader = async () => {
   }
 }
 
-export const clientAction = async ({ request }: ClientActionFunctionArgs) => {
+export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData()
   const action = formData.get('action')
 

@@ -96,6 +96,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         errorDetails: errorData,
       }
     }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error('Error creating product:', error)
     return {
@@ -133,6 +134,7 @@ export default function CreateProduct() {
   const [image, setImage] = useState('')
 
   // * Convert selected image to base64 string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleImageChange = (e: any) => {
     const file = e.target.files[0]
     if (file) {
