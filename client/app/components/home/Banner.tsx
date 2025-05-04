@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Autoplay, Navigation, Pagination, EffectFade, Thumbs } from 'swiper/modules'
@@ -14,11 +14,30 @@ import { banners } from '~/constant/bannerData'
 
 export default function Banner() {
   const [thumbsSwiper, setThumbsSwiper] = useState<SwiperCore | null>(null)
+  const [isMobile, setIsMobile] = useState(false)
+
+  const handleResize = () => {
+    if (window !== undefined) {
+      if (window.innerWidth <= 768) {
+        setIsMobile(true)
+      } else {
+        setIsMobile(false)
+      }
+    }
+  }
+
+  useEffect(() => {
+    handleResize()
+    window.addEventListener('resize', handleResize)
+    return () => {
+      window.removeEventListener('resize', handleResize)
+    }
+  }, [])
 
   return (
     <div>
       {/* Main Slider */}
-      <div className="relative w-full h-[500px]">
+      <div className="relative w-full h-[400px]">
         <Swiper
           modules={[Navigation, Pagination, Autoplay, EffectFade, Thumbs]}
           thumbs={{ swiper: thumbsSwiper }}
@@ -66,21 +85,19 @@ export default function Banner() {
           onSwiper={setThumbsSwiper}
           modules={[Thumbs]}
           spaceBetween={10}
-          slidesPerView={Math.min(banners.length, 6)}
+          slidesPerView={isMobile ? 3 : 6}
           watchSlidesProgress
           className="h-20"
         >
-          <div className='grid grid-cols-3'>
-            {banners.map(b => (
-              <SwiperSlide key={`thumb-${b.id}`}>
-                <img
-                  src={b.image}
-                  alt={b.title}
-                  className="h-full w-full object-cover cursor-pointer opacity-60 hover:opacity-100 transition-opacity rounded"
-                />
-              </SwiperSlide>
-            ))}
-          </div>
+          {banners.map(b => (
+            <SwiperSlide key={`thumb-${b.id}`}>
+              <img
+                src={b.image}
+                alt={b.title}
+                className="h-full w-full object-cover cursor-pointer opacity-60 hover:opacity-100 transition-opacity rounded"
+              />
+            </SwiperSlide>
+          ))}
         </Swiper>
       </div>
     </div>
