@@ -5,6 +5,7 @@ import { Button } from '~/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { paymentSteps } from '~/constant/paymentSteps'
 import { cn } from '~/lib/utils'
+import { BorderBeam } from '../magicui/border-beam'
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -25,7 +26,7 @@ const itemVariants = {
 export default function PaymentProcess() {
   return (
     <motion.section
-      className="py-16 px-4 sm:px-6 lg:px-8"
+      className="relative md:py-10 md:border md:rounded overflow-hidden"
       initial="hidden"
       animate="visible"
       variants={containerVariants}
@@ -47,7 +48,7 @@ export default function PaymentProcess() {
               variants={itemVariants}
               className={cn(
                 index === paymentSteps.length - 1 ? 'sm:col-span-2' : '',
-                'transition-transform transform hover:scale-105',
+                'transition-transform transform md:hover:scale-105',
               )}
             >
               <Card className="h-full">
@@ -64,12 +65,19 @@ export default function PaymentProcess() {
 
         <motion.div className="mt-10" variants={itemVariants}>
           <Link to="/product">
-            <Button size="lg" variant={'outline'} className='cursor-pointer'>
+            <Button size="lg" variant={'outline'} className="cursor-pointer">
               Start Shopping
             </Button>
           </Link>
         </motion.div>
       </div>
+
+      <BorderBeam
+        duration={50}
+        size={300}
+        reverse
+        className="opacity-0 md:opacity-100 from-transparent via-green-500 to-transparent"
+      />
     </motion.section>
   )
 }

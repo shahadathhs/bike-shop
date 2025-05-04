@@ -33,7 +33,7 @@ export default function Home() {
   const loaderData = useLoaderData()
   const products = loaderData?.data?.bikes
   return (
-    <div>
+    <div className="space-y-10">
       <Banner />
       {products && <Product />}
       <PaymentProcess />
