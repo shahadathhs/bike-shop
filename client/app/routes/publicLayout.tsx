@@ -18,7 +18,7 @@ export default function PublicLayout() {
       <div className="sticky top-2 left-0 right-0 z-10 container mx-auto">
         <NavBar />
       </div>
-      <div className="min-h-screen py-2">
+      <div className="min-h-screen">
         <Outlet />
       </div>
       <Footer />
