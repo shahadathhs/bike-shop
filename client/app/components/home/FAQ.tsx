@@ -1,45 +1,102 @@
+import { useState, useMemo } from 'react'
+import { faqData, type FAQ } from '~/constant/faqData'
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from '~/components/ui/accordion'
+import { Input } from '~/components/ui/input'
+import { Search } from 'lucide-react'
+import { motion } from 'motion/react'
+import { nanoid } from 'nanoid'
+import { BorderBeam } from '../magicui/border-beam'
+
 export default function FAQ() {
-  const faqData = [
-    {
-      question: 'How do I place an order?',
-      answer:
-        'To place an order, simply browse our products, select the quantity, and proceed to checkout. From there, you can enter your payment details and finalize your order.',
-    },
-    {
-      question: 'What payment methods do you accept?',
-      answer:
-        'We accept all major credit cards via Stripe, as well as other secure online payment methods. You can choose your preferred method during checkout.',
-    },
-    {
-      question: 'Can I cancel my order after purchasing?',
-      answer:
-        'Orders can only be canceled within 24 hours after purchase. Please contact our support team as soon as possible to process your cancellation.',
-    },
-    {
-      question: 'Do you offer international shipping?',
-      answer:
-        'Yes, we offer international shipping to most countries. Shipping fees and delivery times will vary based on your location, which you can check during checkout.',
-    },
-    {
-      question: 'How can I contact customer support?',
-      answer:
-        "You can reach out to our customer support team via email, phone, or our live chat feature on the website. We're happy to assist you with any inquiries!",
-    },
-  ]
+  const [search, setSearch] = useState('')
+  const filtered = useMemo<FAQ[]>(() => {
+    const q = search.trim().toLowerCase()
+    if (!q) return faqData
+    return faqData.filter(
+      f => f.question.toLowerCase().includes(q) || f.answer.toLowerCase().includes(q),
+    )
+  }, [search])
 
   return (
-    <div className="py-16 ">
-      <div className="max-w-screen-xl mx-auto ">
-        <h2 className="text-3xl font-bold mb-8 text-center">Frequently Asked Questions</h2>
-        <div className="space-y-6">
-          {faqData.map(item => (
-            <div key={item.question} className="border p-6 rounded-lg shadow-md">
-              <h3 className="text-xl font-semibold mb-2">{item.question}</h3>
-              <p>{item.answer}</p>
-            </div>
-          ))}
+    <section className="relative md:py-10 md:border md:rounded overflow-hidden">
+      <div className="max-w-3xl mx-auto text-center mb-8">
+        <motion.h2
+          className="text-4xl font-bold"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          Frequently Asked Questions
+        </motion.h2>
+        <motion.p
+          className="mt-2 text-muted-foreground"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1, transition: { delay: 0.1 } }}
+        >
+          Can’t find what you’re looking for? Try searching below.
+        </motion.p>
+
+        <div className="relative mt-6">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <Input
+            placeholder="Search FAQs..."
+            value={search}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearch(e.target.value)}
+            className="pl-10"
+          />
         </div>
       </div>
-    </div>
+
+      <motion.div
+        className="max-w-3xl mx-auto"
+        initial="hidden"
+        animate="visible"
+        variants={{
+          hidden: {},
+          visible: { transition: { staggerChildren: 0.05 } },
+        }}
+      >
+        <Accordion type="single" collapsible>
+          {filtered.map((f, idx) => (
+            <AccordionItem
+              key={nanoid()}
+              value={`item-${idx}`}
+              className="border-b last:border-none"
+            >
+              <motion.div
+                variants={{
+                  hidden: { opacity: 0, y: 10 },
+                  visible: { opacity: 1, y: 0 },
+                }}
+              >
+                <AccordionTrigger className="py-4 text-lg font-medium">
+                  {f.question}
+                </AccordionTrigger>
+                <AccordionContent className="pb-4 text-muted-foreground">
+                  {f.answer}
+                </AccordionContent>
+              </motion.div>
+            </AccordionItem>
+          ))}
+        </Accordion>
+
+        {filtered.length === 0 && (
+          <p className="mt-6 text-center text-gray-500">
+            No results found for &quot;{search}&quot;.
+          </p>
+        )}
+      </motion.div>
+
+      <BorderBeam
+        duration={30}
+        size={300}
+        reverse
+        className="opacity-0 md:opacity-100 from-transparent via-green-500 to-transparent"
+      />
+    </section>
   )
 }
