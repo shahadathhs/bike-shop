@@ -18,7 +18,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '~/components/ui/select'
-import { Input } from '~/components/ui/input'
 import { Badge } from '~/components/ui/badge'
 import {
   redirect,
@@ -52,15 +51,12 @@ export const loader: LoaderFunction = async ({ request }) => {
   const url = new URL(request.url)
   const page = Number(url.searchParams.get('page') ?? 1)
   const limit = Number(url.searchParams.get('limit') ?? 6)
-  const search = url.searchParams.get('search') ?? undefined
-  const status = url.searchParams.get('status') ?? undefined
+  const status = url.searchParams.get('status') ?? ''
 
   try {
     const res = await fetch(
       `${import.meta.env.VITE_API_URL}/orders/myOrders/${cookie.email}` +
-        `?page=${page}&limit=${limit}` +
-        (search ? `&search=${encodeURIComponent(search)}` : '') +
-        (status ? `&status=${encodeURIComponent(status)}` : ''),
+        `?page=${page}&limit=${limit}&status=${status}`,
       {
         headers: { Authorization: `Bearer ${cookie.token}` },
       },
@@ -68,6 +64,7 @@ export const loader: LoaderFunction = async ({ request }) => {
     if (!res.ok) throw new Error('Fetch failed')
 
     const { data } = await res.json()
+    console.log('data', data)
     return {
       orders: data.orders,
       metadata: data.metadata,
@@ -88,7 +85,6 @@ export default function CustomerOrders() {
   const page = metadata.page
   const limit = metadata.limit
   const totalPages = Math.ceil(metadata.total / limit)
-  const currentSearch = searchParams.get('search') ?? ''
   const currentStatus = searchParams.get('status') ?? ''
 
   // helper to build new URLSearchParams string
@@ -108,13 +104,6 @@ export default function CustomerOrders() {
 
       {/* Search & Status Filter */}
       <div className="flex flex-wrap gap-4 items-center">
-        <Input
-          placeholder="Search by product name"
-          value={currentSearch}
-          onChange={e => go({ search: e.target.value, page: 1 })}
-          className="w-60"
-        />
-
         <Select
           value={currentStatus}
           onValueChange={v => go({ status: v === 'all' ? undefined : v, page: 1 })}

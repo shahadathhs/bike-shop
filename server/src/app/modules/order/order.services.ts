@@ -65,14 +65,26 @@ const getOrderByIdService = async (id: string): Promise<IOrder | null> => {
 const getMyOrdersService = async (
   email: string,
   page: number = 1,
-  limit: number = 10
+  limit: number = 10,
+  status: string = ''
 ): Promise<{ orders: IOrder[]; metadata: { total: number; page: number; limit: number } }> => {
   const skip = (page - 1) * limit
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const filter: any = {}
+
+  if (status) {
+    filter.status = status
+  }
+
+  if (email) {
+    filter.email = email
+  }
+
   // Retrieve the paginated orders and populate the 'product' field.
-  const orders = await Order.find({ email }).populate('product').skip(skip).limit(limit)
+  const orders = await Order.find(filter).populate('product').skip(skip).limit(limit)
 
   // Count the total number of orders for the given email.
-  const total = await Order.countDocuments({ email })
+  const total = await Order.countDocuments(filter)
 
   return {
     orders,

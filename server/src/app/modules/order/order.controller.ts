@@ -44,7 +44,8 @@ const getMyOrders = async (req: Request, res: Response, next: NextFunction) => {
     const result = await orderServices.getMyOrdersService(
       req.params.email,
       Number(req.query.page),
-      Number(req.query.limit)
+      Number(req.query.limit),
+      req.query.status as string
     )
 
     sendResponse(res, {
