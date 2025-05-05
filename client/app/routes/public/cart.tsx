@@ -17,7 +17,6 @@ import type { TBike } from '~/types/product'
 import { motion } from 'motion/react'
 import { BorderBeam } from '~/components/magicui/border-beam'
 
-// Server-side auth loader
 export const loader: LoaderFunction = async ({ request }) => {
   const cookie = await getCookie(request)
 
@@ -55,7 +54,7 @@ export default function CartPage() {
       navigate('/login')
     } else {
       // proceed to checkout flow
-      navigate('/checkout')
+      navigate('/cart/checkout')
     }
   }
 

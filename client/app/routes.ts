@@ -25,7 +25,7 @@ export default [
     route('/return-policy', 'routes/public/returnPolicy.tsx'),
 
     // * Protected routes
-    route('/product/:id/checkout', 'routes/public/checkout.tsx'),
+    route('/cart/checkout', 'routes/public/checkout.tsx'),
     route('/checkout/success', 'routes/public/checkoutSuccess.tsx'),
     route('/checkout/cancel', 'routes/public/checkoutCancel.tsx'),
 
