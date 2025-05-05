@@ -21,6 +21,7 @@ import {
 } from '~/components/ui/select'
 import { Badge } from '~/components/ui/badge'
 import { Link, redirect, useLoaderData, useSearchParams, type LoaderFunction } from 'react-router'
+import { ArrowBigLeft, ArrowBigRight } from 'lucide-react'
 
 interface LoaderData {
   orders: Array<{
@@ -86,9 +87,7 @@ export default function CustomerOrders() {
     <div className="container mx-auto p-4 space-y-6">
       <h1 className="text-3xl font-semibold">My Orders</h1>
 
-      {orders.length === 0 ? (
-        <p className="text-center text-muted-foreground">No orders found.</p>
-      ) : (
+      <div className="overflow-x-auto border rounded">
         <Table>
           <TableHeader>
             <TableRow>
@@ -99,65 +98,77 @@ export default function CustomerOrders() {
               <TableHead>Total Price</TableHead>
             </TableRow>
           </TableHeader>
+
           <TableBody>
-            {orders.map(order => (
-              <TableRow key={order._id}>
-                <TableCell>{order.product.name}</TableCell>
-                <TableCell>{order._id}</TableCell>
-                <TableCell>{new Date(order.createdAt).toLocaleDateString('en-US')}</TableCell>
-                <TableCell>
-                  <Badge variant="outline">{order.status}</Badge>
+            {orders.length > 0 ? (
+              orders.map(order => (
+                <TableRow key={order._id}>
+                  <TableCell>{order.product.name}</TableCell>
+                  <TableCell>{order._id}</TableCell>
+                  <TableCell>{new Date(order.createdAt).toLocaleDateString('en-US')}</TableCell>
+                  <TableCell>
+                    <Badge variant="outline">{order.status}</Badge>
+                  </TableCell>
+                  <TableCell>${order.totalPrice.toFixed(2)}</TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center py-4">
+                  No orders found.
                 </TableCell>
-                <TableCell>${order.totalPrice.toFixed(2)}</TableCell>
               </TableRow>
-            ))}
+            )}
           </TableBody>
+
           <TableFooter>
+            {/* Total row (won't show any meaningful sum when orders is empty) */}
             <TableRow>
               <TableHead colSpan={4}>Total</TableHead>
-              <TableHead>
-                ${orders.reduce((acc, order) => acc + order.totalPrice, 0).toFixed(2)}
-              </TableHead>
+              <TableHead>${orders.reduce((acc, o) => acc + o.totalPrice, 0).toFixed(2)}</TableHead>
             </TableRow>
 
+            {/* Pagination controls always visible */}
             <TableRow>
-              {/* Pagination & Limit Controls */}
-              <div className="flex flex-wrap items-center justify-between space-y-2">
-                <div className="space-x-2">
-                  <Button size="sm" asChild disabled={page <= 1}>
-                    <Link to={makeLink(page - 1)}>Previous</Link>
-                  </Button>
-                  <span>
-                    Page <strong>{page}</strong> of <strong>{totalPages}</strong>
-                  </span>
-                  <Button size="sm" asChild disabled={page >= totalPages}>
-                    <Link to={makeLink(page + 1)}>Next</Link>
-                  </Button>
-                </div>
-
+              <TableHead>
                 <div className="flex items-center space-x-2">
-                  <span>Per page:</span>
-                  <Select
-                    value={String(limit)}
-                    onValueChange={val => window.location.replace(makeLink(1, Number(val)))}
-                  >
-                    <SelectTrigger className="w-[80px]">
-                      <SelectValue placeholder="Limit" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {[8, 16, 24].map(n => (
-                        <SelectItem key={n} value={String(n)}>
-                          {n}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Button size="sm" asChild disabled={page <= 1}>
+                    <Link to={makeLink(page - 1)}>
+                      <ArrowBigLeft />
+                    </Link>
+                  </Button>
+                  <Button size="sm" variant="ghost">
+                    <strong>{page}</strong> of <strong>{totalPages}</strong>
+                  </Button>
+                  <Button size="sm" asChild disabled={page >= totalPages}>
+                    <Link to={makeLink(page + 1)}>
+                      <ArrowBigRight />
+                    </Link>
+                  </Button>
                 </div>
-              </div>
+              </TableHead>
+
+              <TableHead colSpan={4}>
+                <Select
+                  value={String(limit)}
+                  onValueChange={val => window.location.replace(makeLink(1, Number(val)))}
+                >
+                  <SelectTrigger className="w-[80px]">
+                    <SelectValue placeholder="Limit" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[8, 16, 24].map(n => (
+                      <SelectItem key={n} value={String(n)}>
+                        {n}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </TableHead>
             </TableRow>
           </TableFooter>
         </Table>
-      )}
+      </div>
     </div>
   )
 }
