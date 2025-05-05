@@ -1,44 +1,81 @@
+import { Card, CardHeader, CardContent } from "~/components/ui/card"
+import { Separator } from "~/components/ui/separator"
+import { Badge } from "~/components/ui/badge"
+
 export function meta() {
   return [
-    { title: 'Bike Store - Return Policy' },
-    { name: 'description', content: 'Know more about our return policy' },
+    { title: "Bike Store - Return Policy" },
+    { name: "description", content: "Know more about our return policy" },
   ]
 }
 
 export default function ReturnPolicy() {
   return (
-    <div className="container mx-auto py-10">
-      <h1 className="text-4xl font-bold mb-4">Return Policy</h1>
-      <p className="text-lg mb-6">
-        At Bike Store, we want you to be completely satisfied with your purchase. If you are not
-        happy with your purchase, we offer a return and exchange policy.
-      </p>
+    <main className="container py-10 space-y-10">
+      <div className="text-center space-y-2">
+        <h1 className="text-4xl font-bold tracking-tight text-primary">Return Policy</h1>
+        <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+          Your satisfaction is our priority. Here’s how returns and refunds work at Bike Store.
+        </p>
+      </div>
 
-      <h2 className="text-2xl font-semibold mb-2">Return Eligibility</h2>
-      <p className="mb-4">
-        Items can be returned within 30 days of purchase, provided they are unused, in original
-        packaging, and with a receipt.
-      </p>
+      <Card>
+        <CardHeader>
+          <h2 className="text-2xl font-semibold">Return Eligibility</h2>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground leading-relaxed">
+            Items can be returned within 30 days of purchase, provided they are unused, in original
+            packaging, and with a receipt.
+          </p>
+        </CardContent>
+      </Card>
 
-      <h2 className="text-2xl font-semibold mb-2">How to Return an Item</h2>
-      <p className="mb-4">
-        To initiate a return, please contact our support team via email or phone. Once your return
-        request is approved, we will send you instructions on how to return the item.
-      </p>
+      <Separator />
 
-      <h2 className="text-2xl font-semibold mb-2">Refund Process</h2>
-      <p className="mb-4">
-        Once we receive the returned item, we will process your refund to the original payment
-        method within 7-10 business days.
-      </p>
+      <Card>
+        <CardHeader>
+          <h2 className="text-2xl font-semibold">How to Return an Item</h2>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground leading-relaxed">
+            To initiate a return, please contact our support team via email or phone. Once your
+            return request is approved, we will send you instructions on how to return the item.
+          </p>
+        </CardContent>
+      </Card>
 
-      <h2 className="text-2xl font-semibold mb-2">Non-Returnable Items</h2>
-      <p className="mb-4">
-        Some items, such as customized or sale items, may not be eligible for return. Please check
-        with our support team for more details.
-      </p>
+      <Separator />
 
-      <p className="mt-6">Last updated: January 2025</p>
-    </div>
+      <Card>
+        <CardHeader>
+          <h2 className="text-2xl font-semibold">Refund Process</h2>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground leading-relaxed">
+            Once we receive the returned item, we will process your refund to the original payment
+            method within 7–10 business days.
+          </p>
+        </CardContent>
+      </Card>
+
+      <Separator />
+
+      <Card>
+        <CardHeader>
+          <h2 className="text-2xl font-semibold">Non-Returnable Items</h2>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground leading-relaxed">
+            Some items, such as customized or sale items, may not be eligible for return. Please
+            check with our support team for more details.
+          </p>
+        </CardContent>
+      </Card>
+
+      <div className="text-center mt-12">
+        <Badge variant="secondary">Last updated: January 2025</Badge>
+      </div>
+    </main>
   )
 }
