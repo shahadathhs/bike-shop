@@ -16,6 +16,9 @@ import {
   useSearchParams,
   type LoaderFunction,
 } from 'react-router'
+import { useEffect, useState } from 'react'
+import { useDebounce } from '~/utils/debounce'
+import NoProductsFound from '~/components/shared/NoProductsFound'
 
 export const meta = () => [
   { title: 'Bike Store - Products' },
@@ -93,6 +96,20 @@ export default function ALLProductPage() {
   const navigation = useNavigation()
   const isLoading = navigation.state === 'loading'
 
+  // Local state for debounced search
+  const [inputValue, setInputValue] = useState(filters.searchTerm)
+  const debouncedSearch = useDebounce(inputValue, 300)
+
+  // Update URL when debounced value changes
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams)
+    params.set('searchTerm', debouncedSearch)
+    // reset to first page on search
+    params.set('page', '1')
+    setSearchParams(params)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedSearch])
+
   // Helper to update a single param (resets page to 1 unless updating page)
   const updateParam = (key: string, value: string, resetPage = true) => {
     const params = new URLSearchParams(searchParams)
@@ -114,8 +131,8 @@ export default function ALLProductPage() {
       <div className="flex flex-col lg:flex-row lg:justify-between gap-4 mb-6">
         <Input
           placeholder="Search by name, brand, or category..."
-          value={filters.searchTerm}
-          onChange={e => updateParam('searchTerm', e.target.value)}
+          value={inputValue}
+          onChange={e => setInputValue(e.target.value)}
           className="flex-1"
         />
 
@@ -182,7 +199,7 @@ export default function ALLProductPage() {
           <span className="loading loading-spinner loading-lg"></span>
         </div>
       ) : bikes.length === 0 ? (
-        <p className="text-center">No products found.</p>
+        <NoProductsFound />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {bikes.map(product => (
