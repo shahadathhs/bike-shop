@@ -208,7 +208,7 @@ export default function ALLProductPage() {
                 <img
                   src={product.image}
                   alt={product.name}
-                  className="object-cover h-48 w-full rounded"
+                  className="object-cover h-48 w-full rounded border"
                 />
                 <h3 className="text-lg font-semibold pt-2">{product.name}</h3>
                 <p className="mt-2">{product.description.substring(0, 100)}...</p>

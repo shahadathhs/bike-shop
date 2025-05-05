@@ -5,6 +5,7 @@ import { Card, CardHeader, CardContent } from '~/components/ui/card'
 import { Separator } from '~/components/ui/separator'
 import { Mail, Phone, MapPin } from 'lucide-react'
 import { BorderBeam } from '~/components/magicui/border-beam'
+import { toast } from 'sonner'
 
 export function meta() {
   return [
@@ -14,6 +15,14 @@ export function meta() {
 }
 
 export default function Contact() {
+  const handleSubmit = () => {
+    toast.success('Thanks for checking out this feature!', {
+      duration: 5000,
+      icon: '👋',
+      position: 'top-center',
+      description: 'But we are still working on it. Backend is under development.',
+    })
+  }
   return (
     <main className="relative overflow-hidden py-10 mt-10 xl:border xl:rounded">
       <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10">
@@ -26,7 +35,13 @@ export default function Contact() {
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
-            <form className="space-y-4">
+            <form
+              onSubmit={e => {
+                e.preventDefault()
+                handleSubmit()
+              }}
+              className="space-y-4"
+            >
               <Input type="text" placeholder="Your Name" required />
               <Input type="email" placeholder="Your Email" required />
               <Textarea placeholder="Your Message..." rows={5} required />

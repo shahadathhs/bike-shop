@@ -16,7 +16,7 @@ export default [
 
     // * blogs routes
     route('/blogs', 'routes/public/blogs.tsx'),
-    route('/blogs/:id', 'routes/public/blogDetails.tsx'),
+    route('/blogs/:slug', 'routes/public/blogDetails.tsx'),
 
     // * Legal routes
     route('/terms-of-service', 'routes/public/termsOfService.tsx'),
