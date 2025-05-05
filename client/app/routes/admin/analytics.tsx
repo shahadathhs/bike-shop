@@ -1,7 +1,5 @@
-import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router'
-import toast from 'react-hot-toast'
-import {useToken } from '~/context/AuthContext'
+import { redirect, useLoaderData, type LoaderFunction } from 'react-router'
+import { getCookie } from '~/services/auth.services'
 
 interface IRevenueSummary {
   totalRevenue: number
@@ -27,59 +25,42 @@ interface IAnalytics {
   orderAnalytics: IOrderAnalytics
 }
 
+export const loader: LoaderFunction = async ({ request }) => {
+  const cookie = await getCookie(request)
+
+  if (!cookie.token) return redirect('/login')
+
+  try {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/orders/admin/analytics`, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${cookie.token}`,
+      },
+    })
+
+    const data = await response.json()
+    return {
+      success: true,
+      analytics: data.data,
+      message: 'Analytics fetched successfully',
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (err: any) {
+    console.error('Error fetching analytics:', err)
+    return {
+      success: false,
+      analytics: null,
+      message: err.message || 'Failed to fetch analytics data',
+    }
+  }
+}
+
 export default function Analytics() {
-  const [analytics, setAnalytics] = useState<IAnalytics | null>(null)
-  const [loading, setLoading] = useState<boolean>(false)
-  const [error, setError] = useState<string>('')
-  const navigate = useNavigate()
-
-  const token = useToken()
-
-  useEffect(() => {
-    if (!token) {
-      console.log("token", token);
-      toast.error('Authentication required')
-      navigate('/login')
-      return
-    }
-
-    const fetchAnalytics = async () => {
-      setLoading(true)
-      try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/orders/admin/analytics`, {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        if (!response.ok) {
-          throw new Error('Failed to fetch analytics data')
-        }
-        const data = await response.json()
-        setAnalytics(data.data)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } catch (err: any) {
-        console.error('Error fetching analytics:', err)
-        setError(err.message || 'Failed to fetch analytics data')
-        toast.error(err.message || 'Failed to fetch analytics data')
-      }
-      setLoading(false)
-    }
-
-    fetchAnalytics()
-  }, [token, navigate])
+  const { analytics } = useLoaderData<{ analytics: IAnalytics }>()
 
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-3xl font-bold mb-6 text-center">Analytics Dashboard</h1>
-
-      {loading && (
-        <div className="flex justify-center items-center">
-          <span className="loading loading-spinner loading-lg"></span>
-        </div>
-      )}
-
-      {error && <p className="text-red-500 text-center">{error}</p>}
 
       {analytics && (
         <div className="space-y-8">
