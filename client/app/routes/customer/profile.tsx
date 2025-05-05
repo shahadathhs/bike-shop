@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import {
   type ActionFunction,
   type LoaderFunction,
@@ -11,6 +12,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '~/components/ui/card'
 import { Label } from '~/components/ui/label'
 import { Input } from '~/components/ui/input'
 import { Button } from '~/components/ui/button'
+import { Eye, EyeOff } from 'lucide-react'
 import Loading from '~/components/shared/Loading'
 import type { TCookie } from '~/types/user'
 import { authServices, getCookie } from '~/services/auth.services'
@@ -55,6 +57,13 @@ export const action: ActionFunction = async ({ request }) => {
   } else if (actionType === 'password') {
     const currentPassword = formData.get('currentPassword')
     const newPassword = formData.get('newPassword')
+    const confirmPassword = formData.get('confirmPassword')
+
+    // Client-side validation is also done in the component
+    if (newPassword !== confirmPassword) {
+      return { error: 'Passwords do not match' }
+    }
+
     apiRes = await fetch(`${import.meta.env.VITE_API_URL}/auth/update-password`, {
       method: 'PATCH',
       headers: {
@@ -84,6 +93,26 @@ export default function CustomerProfile() {
   const { cookie } = useLoaderData<{ cookie: TCookie }>()
   const actionData = useActionData<{ error?: string }>()
   const navigation = useNavigation()
+
+  // Password visibility states
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false)
+  const [showNewPassword, setShowNewPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+
+  // Password values for real-time validation
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [passwordsMatch, setPasswordsMatch] = useState(true)
+
+  // Check if passwords match whenever either password changes
+  const validatePasswords = (newPwd: string, confirmPwd: string) => {
+    if (confirmPwd === '') {
+      // Don't show error when confirm field is empty
+      setPasswordsMatch(true)
+      return
+    }
+    setPasswordsMatch(newPwd === confirmPwd)
+  }
 
   if (!cookie.email || !cookie.name) {
     return <Loading />
@@ -140,15 +169,119 @@ export default function CustomerProfile() {
             <CardContent>
               <Form method="post" replace className="space-y-4">
                 <input type="hidden" name="_action" value="password" />
+
+                {/* Current Password Field */}
                 <div className="space-y-2">
                   <Label htmlFor="currentPassword">Current Password</Label>
-                  <Input id="currentPassword" name="currentPassword" type="password" required />
+                  <div className="relative">
+                    <Input
+                      id="currentPassword"
+                      name="currentPassword"
+                      type={showCurrentPassword ? 'text' : 'password'}
+                      required
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8"
+                      onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                    >
+                      {showCurrentPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                      <span className="sr-only">
+                        {showCurrentPassword ? 'Hide password' : 'Show password'}
+                      </span>
+                    </Button>
+                  </div>
                 </div>
+
+                {/* New Password Field */}
                 <div className="space-y-2">
                   <Label htmlFor="newPassword">New Password</Label>
-                  <Input id="newPassword" name="newPassword" type="password" required />
+                  <div className="relative">
+                    <Input
+                      id="newPassword"
+                      name="newPassword"
+                      type={showNewPassword ? 'text' : 'password'}
+                      required
+                      value={newPassword}
+                      onChange={e => {
+                        const value = e.target.value
+                        setNewPassword(value)
+                        validatePasswords(value, confirmPassword)
+                      }}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8"
+                      onClick={() => setShowNewPassword(!showNewPassword)}
+                    >
+                      {showNewPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                      <span className="sr-only">
+                        {showNewPassword ? 'Hide password' : 'Show password'}
+                      </span>
+                    </Button>
+                  </div>
                 </div>
-                <Button type="submit" variant="secondary" disabled={isSubmittingPassword}>
+
+                {/* Confirm Password Field */}
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">Confirm Password</Label>
+                  <div className="relative">
+                    <Input
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      required
+                      value={confirmPassword}
+                      onChange={e => {
+                        const value = e.target.value
+                        setConfirmPassword(value)
+                        validatePasswords(newPassword, value)
+                      }}
+                      className={!passwordsMatch ? 'border-red-500 focus-visible:ring-red-500' : ''}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    >
+                      {showConfirmPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                      <span className="sr-only">
+                        {showConfirmPassword ? 'Hide password' : 'Show password'}
+                      </span>
+                    </Button>
+                  </div>
+                  {!passwordsMatch && (
+                    <p className="text-sm text-red-500 mt-1">Passwords do not match</p>
+                  )}
+                </div>
+
+                <Button
+                  type="submit"
+                  variant="secondary"
+                  disabled={
+                    isSubmittingPassword ||
+                    !passwordsMatch ||
+                    (newPassword !== '' && confirmPassword === '')
+                  }
+                >
                   {isSubmittingPassword ? 'Updating...' : 'Update Password'}
                 </Button>
               </Form>
