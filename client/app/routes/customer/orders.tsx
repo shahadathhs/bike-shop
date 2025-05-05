@@ -1,135 +1,163 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect, useState } from 'react'
-import { redirect, type LoaderFunction } from 'react-router'
 import { toast } from 'sonner'
-import { useAuth } from '~/context/AuthContext'
 import { getCookie } from '~/services/auth.services'
+import type { TCookie } from '~/types/user'
+
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '~/components/ui/table'
+import { Button } from '~/components/ui/button'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '~/components/ui/select'
+import { Badge } from '~/components/ui/badge'
+import { Link, redirect, useLoaderData, useSearchParams, type LoaderFunction } from 'react-router'
+
+interface LoaderData {
+  orders: Array<{
+    _id: string
+    product: { name: string }
+    createdAt: string
+    status: string
+    totalPrice: number
+  }>
+  metadata: { total: number; page: number; limit: number }
+  cookie: TCookie
+}
 
 export const loader: LoaderFunction = async ({ request }) => {
-  const cookies = await getCookie(request)
-  const token = cookies.token
+  const cookie = await getCookie(request)
 
-  if (!token) {
-    return redirect('/login')
-  } else {
-    return null
+  if (!cookie.token) return redirect('/login')
+
+  const url = new URL(request.url)
+  const page = Number(url.searchParams.get('page') ?? 1)
+  const limit = Number(url.searchParams.get('limit') ?? 8)
+
+  try {
+    const res = await fetch(
+      `${import.meta.env.VITE_API_URL}/orders/myOrders/${cookie.email}?page=${page}&limit=${limit}`,
+      {
+        headers: { Authorization: `Bearer ${cookie.token}` },
+      },
+    )
+    if (!res.ok) throw new Error('Fetch failed')
+
+    const { data } = await res.json()
+    return {
+      orders: data.orders,
+      metadata: data.metadata,
+      cookie,
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (err: any) {
+    console.error('Error fetching orders:', err)
+    // You might surface this in the UI via useCatch()/CatchBoundary
+    toast.error('Failed to load orders. Please try again.', { duration: 5000 })
+    return { orders: [], metadata: { total: 0, page, limit }, cookie }
   }
 }
 
 export default function CustomerOrders() {
-  const { token, email } = useAuth()
-  const [orders, setOrders] = useState([])
-  const [metadata, setMetadata] = useState({ total: 0, page: 1, limit: 10 })
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+  const { orders, metadata } = useLoaderData<LoaderData>()
+  const [searchParams] = useSearchParams()
 
-  // Pagination state
-  const [page, setPage] = useState(1)
-  const [limit, setLimit] = useState(10)
-
-  // Fetch orders for the logged in user with pagination
-  useEffect(() => {
-    const fetchOrders = async () => {
-      setLoading(true)
-      try {
-        const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/orders/myOrders/${email}?page=${page}&limit=${limit}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          },
-        )
-        const responseData = await response.json()
-        console.log('responseData', responseData)
-        setOrders(responseData.data.orders)
-        setMetadata(responseData.data.metadata)
-      } catch (err) {
-        console.error('Error fetching orders:', err)
-        setError('Failed to fetch orders')
-        toast.error('Failed to fetch orders', {
-          duration: 5000,
-          description: 'Please try again later.',
-        })
-      }
-      setLoading(false)
-    }
-
-    if (token) {
-      fetchOrders()
-    }
-  }, [page, limit])
-
-  // Calculate total pages from metadata.total and limit.
+  const page = metadata.page
+  const limit = metadata.limit
   const totalPages = Math.ceil(metadata.total / limit)
 
-  return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-4">My Orders</h1>
-      {loading && <p>Loading orders...</p>}
-      {error && <p className="text-red-500">{error}</p>}
-      {!loading && orders.length === 0 && <p>No orders found.</p>}
-      {!loading && orders.length > 0 && (
-        <div className="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
-          <table className=" w-full table table-zebra">
-            <thead>
-              <tr>
-                <th>Product Name</th>
-                <th>Order ID</th>
-                <th>Date</th>
-                <th>Status</th>
-                <th>Total Price</th>
-              </tr>
-            </thead>
-            <tbody>
-              {orders.map((order: any) => (
-                <tr key={order._id}>
-                  <td>{order.product.name}</td>
-                  <td>{order._id}</td>
-                  <td>{new Date(order.createdAt).toLocaleDateString()}</td>
-                  <td>{order.status}</td>
-                  <td>${order.totalPrice}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+  const makeLink = (newPage: number, newLimit = limit) => {
+    const params = new URLSearchParams(searchParams)
+    params.set('page', String(newPage))
+    params.set('limit', String(newLimit))
+    return `?${params.toString()}`
+  }
 
-      {/* Pagination Controls */}
-      <div className="flex justify-end items-center space-x-4 mt-4">
-        <button
-          onClick={() => setPage(prev => prev - 1)}
-          className="btn btn-outline btn-sm"
-          disabled={page <= 1}
-        >
-          Previous
-        </button>
-        <span className="text-secondary">
-          Page {page} of {totalPages}
-        </span>
-        <button
-          onClick={() => setPage(prev => prev + 1)}
-          className="btn btn-outline btn-sm"
-          disabled={page >= totalPages}
-        >
-          Next
-        </button>
-        <div>
-          <select
-            value={limit}
-            onChange={e => {
-              setLimit(parseInt(e.target.value))
-              setPage(1)
-            }}
-            className="select select-bordered btn-sm"
-          >
-            <option value="10">10 per page</option>
-            <option value="20">20 per page</option>
-            <option value="50">50 per page</option>
-          </select>
-        </div>
-      </div>
+  return (
+    <div className="container mx-auto p-4 space-y-6">
+      <h1 className="text-3xl font-semibold">My Orders</h1>
+
+      {orders.length === 0 ? (
+        <p className="text-center text-muted-foreground">No orders found.</p>
+      ) : (
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Product Name</TableHead>
+              <TableHead>Order ID</TableHead>
+              <TableHead>Date</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Total Price</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {orders.map(order => (
+              <TableRow key={order._id}>
+                <TableCell>{order.product.name}</TableCell>
+                <TableCell>{order._id}</TableCell>
+                <TableCell>{new Date(order.createdAt).toLocaleDateString('en-US')}</TableCell>
+                <TableCell>
+                  <Badge variant="outline">{order.status}</Badge>
+                </TableCell>
+                <TableCell>${order.totalPrice.toFixed(2)}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+          <TableFooter>
+            <TableRow>
+              <TableHead colSpan={4}>Total</TableHead>
+              <TableHead>
+                ${orders.reduce((acc, order) => acc + order.totalPrice, 0).toFixed(2)}
+              </TableHead>
+            </TableRow>
+
+            <TableRow>
+              {/* Pagination & Limit Controls */}
+              <div className="flex flex-wrap items-center justify-between space-y-2">
+                <div className="space-x-2">
+                  <Button size="sm" asChild disabled={page <= 1}>
+                    <Link to={makeLink(page - 1)}>Previous</Link>
+                  </Button>
+                  <span>
+                    Page <strong>{page}</strong> of <strong>{totalPages}</strong>
+                  </span>
+                  <Button size="sm" asChild disabled={page >= totalPages}>
+                    <Link to={makeLink(page + 1)}>Next</Link>
+                  </Button>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <span>Per page:</span>
+                  <Select
+                    value={String(limit)}
+                    onValueChange={val => window.location.replace(makeLink(1, Number(val)))}
+                  >
+                    <SelectTrigger className="w-[80px]">
+                      <SelectValue placeholder="Limit" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[8, 16, 24].map(n => (
+                        <SelectItem key={n} value={String(n)}>
+                          {n}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </TableRow>
+          </TableFooter>
+        </Table>
+      )}
     </div>
   )
 }
