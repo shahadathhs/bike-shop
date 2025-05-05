@@ -3,7 +3,7 @@ import logoImg from 'assets/logo.png'
 import { navLinks } from '~/constant/navigationLinks'
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '~/components/ui/sheet'
 import { Button } from '~/components/ui/button'
-import { Menu } from 'lucide-react'
+import { Menu, ShoppingBag } from 'lucide-react'
 import { useState } from 'react'
 import { ModeToggle } from './ModeToggle'
 import ProfileDropdown from './ProfileDropdown'
@@ -74,9 +74,9 @@ export default function NavBar() {
         </div>
 
         {/* Right: Auth & Actions & Desktop Nav */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
           {/* Desktop Nav */}
-          <nav className="hidden lg:flex gap-6">
+          <nav className="hidden lg:flex gap-6 mr-4">
             {navLinks.map(link => (
               <RouterNavLink key={link.to} to={link.to}>
                 {link.name}
@@ -88,11 +88,20 @@ export default function NavBar() {
             <ProfileDropdown userRole={role} setShowLoginButton={setShowLoginButton} />
           ) : (
             <Link to="/login">
-              <Button size="sm" variant="default" className="hover:cursor-pointer">
+              <Button size="sm" className="hover:cursor-pointer">
                 Login
               </Button>
             </Link>
           )}
+
+          {/* Cart */}
+          <Link to="/cart">
+            <Button size="icon" variant="ghost" className="hover:cursor-pointer">
+              <ShoppingBag className="h-5 w-5" />
+            </Button>
+          </Link>
+
+          {/* Mode Toggle */}
           <ModeToggle />
         </div>
       </div>

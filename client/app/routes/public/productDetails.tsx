@@ -1,4 +1,4 @@
-import { redirect, useLoaderData, type LoaderFunction, type MetaFunction } from 'react-router'
+import { Link, redirect, useLoaderData, type LoaderFunction, type MetaFunction } from 'react-router'
 import { useEffect, useState } from 'react'
 import { Card, CardContent, CardTitle, CardDescription } from '~/components/ui/card'
 import { Button } from '~/components/ui/button'
@@ -127,6 +127,15 @@ export default function ProductDetailsPage() {
           >
             {inCart ? 'Remove from Cart' : 'Add to Cart'}
           </Button>
+
+          {/* if in cart then show button to go to cart */}
+          {inCart && (
+            <Link to="/cart">
+              <Button className="hover:shadow hover:cursor-pointer ml-4" variant="default">
+                Go to Cart
+              </Button>
+            </Link>
+          )}
         </CardContent>
       </Card>
     </div>

@@ -9,6 +9,7 @@ export default [
     // * products routes
     route('/product', 'routes/public/product.tsx'),
     route('/product/:id', 'routes/public/productDetails.tsx'),
+    route('/cart', 'routes/public/cart.tsx'),
 
     // * about routes
     route('/about', 'routes/public/about.tsx'),
