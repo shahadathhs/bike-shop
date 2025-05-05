@@ -334,7 +334,10 @@ function PaymentForm({ total, cartItems, customer, cookie, onRemoveItem }: Payme
               <CheckCircle2 className="h-6 w-6 text-green-600" />
               <div>
                 <h3 className="font-medium text-green-800">Payment Successful!</h3>
-                <p className="text-green-700 text-sm">Your order has been placed successfully.</p>
+                <p className="text-green-700 text-sm">Your orders are processing successfully.</p>
+                <p className="text-red-700 text-sm">
+                  Please, don&apos;t close this page or refresh.
+                </p>
               </div>
             </div>
           ) : (
