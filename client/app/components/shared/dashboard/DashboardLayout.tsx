@@ -7,7 +7,11 @@ import { Outlet } from 'react-router'
 import Loading from '../Loading'
 
 export function DashboardLayout({ userRole = 'customer' }: { userRole?: 'admin' | 'customer' }) {
-  const pathname = useLocation().pathname
+  const location = useLocation()
+  const pathname = location.pathname
+  
+  const navigation = useNavigation()
+
   const [currentPath, setCurrentPath] = useState<string>('')
 
   useEffect(() => {
@@ -22,8 +26,22 @@ export function DashboardLayout({ userRole = 'customer' }: { userRole?: 'admin' 
     }
   }, [pathname])
 
-  const navigation = useNavigation()
-  const isLoading = navigation.state === 'loading'
+
+  // * Check if we are doing an "internal" transition (only search changes) or moving to a new route.
+  const isInternalTransition =
+    navigation.location?.pathname === location.pathname
+
+  // * Show spinner only if we’re navigating (state === 'loading') and moving to a different route.
+  const showSpinner = navigation.state === 'loading' && !isInternalTransition
+
+  // * Scroll to top when loading starts
+  useEffect(() => {
+    if (showSpinner) {
+      if (window !== undefined) {
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      }
+    }
+  }, [showSpinner])
 
   return (
     <SidebarProvider>
@@ -32,7 +50,7 @@ export function DashboardLayout({ userRole = 'customer' }: { userRole?: 'admin' 
         <SidebarInset>
           <DashboardNavbar currentPath={currentPath} userRole={userRole} />
           <main className="w-full p-3">
-            {isLoading ? <Loading className="h-[calc(100vh-88px)]" /> : <Outlet />}
+            {showSpinner ? <Loading className="h-[calc(100vh-88px)]" /> : <Outlet />}
           </main>
         </SidebarInset>
       </div>
