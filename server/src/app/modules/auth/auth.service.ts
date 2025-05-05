@@ -61,17 +61,32 @@ const deactivateUser = async (id: string): Promise<IUser> => {
   return updatedUser
 }
 
-const updateProfile = async (id: string, payload: Partial<IUser>): Promise<IUser> => {
+const updateProfile = async (id: string, payload: Partial<IUser>): Promise<{ token: string; name: string; email: string; role: string }> => {
   const updatedUser = await User.findByIdAndUpdate(id, payload, { new: true })
   if (!updatedUser) {
     throw new AppError(httpStatusCode.NOT_FOUND, 'User not found')
   }
-  return updatedUser
+
+  // * Generate token payload
+  const jwtPayload: TJwtPayload = {
+    email: updatedUser.email,
+    userId: updatedUser._id as mongoose.Types.ObjectId,
+    role: updatedUser.role
+  }
+  // * Generate token
+  const token = createToken(jwtPayload)
+
+  return  {
+    token,
+    name: updatedUser.name,
+    email: updatedUser.email,
+    role: updatedUser.role
+  }
 }
 const updatePassword = async (
   id: string,
   payload: { currentPassword: string; newPassword: string }
-): Promise<IUser> => {
+): Promise<{ token: string; name: string; email: string; role: string }>  => {
   const { currentPassword, newPassword } = payload
   const user = await User.findById(id).select('+password')
   if (!user) {
@@ -97,7 +112,22 @@ const updatePassword = async (
   if (!passwordMatch) {
     throw new AppError(httpStatusCode.INTERNAL_SERVER_ERROR, 'Password update failed')
   }
-  return updatedUser
+
+  // * Generate token payload
+   const jwtPayload: TJwtPayload = {
+    email: updatedUser.email,
+    userId: updatedUser._id as mongoose.Types.ObjectId,
+    role: updatedUser.role
+  }
+  // * Generate token
+  const token = createToken(jwtPayload)
+
+  return  {
+    token,
+    name: updatedUser.name,
+    email: updatedUser.email,
+    role: updatedUser.role
+  }
 }
 const getAllUsers = async (
   queryOptions: { email?: string; page?: number; limit?: number } = {}

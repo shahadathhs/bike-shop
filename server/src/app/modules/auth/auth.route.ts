@@ -15,20 +15,18 @@ router.post(
   AuthController.registerUser
 )
 
-router.post('/login', 
-  // validateRequest(AuthValidation.loginUserZodSchema), 
-  AuthController.loginUser)
+router.post('/login', AuthController.loginUser)
 
 router.post('/deactivate/:id', Authentication(UserRole.ADMIN), AuthController.deactivateUser)
 
 router.patch(
   '/update-profile',
-  Authentication(UserRole.CUSTOMER),
+  Authentication(UserRole.CUSTOMER, UserRole.ADMIN),
   validateRequest(AuthValidation.updateProfileZodSchema),
   AuthController.updateProfile
 )
 
-router.patch('/update-password', Authentication(UserRole.CUSTOMER), AuthController.updatePassword)
+router.patch('/update-password', Authentication(UserRole.CUSTOMER, UserRole.ADMIN), AuthController.updatePassword)
 
 router.get('/getAll', Authentication(UserRole.ADMIN), AuthController.getAllUsers)
 

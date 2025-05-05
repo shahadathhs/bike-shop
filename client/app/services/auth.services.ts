@@ -75,10 +75,23 @@ async function logout(request: Request) {
   })
 }
 
+async function updateNameInSession(name: string, request: Request, redirectTo: string) {
+  const session = await getUserSession(request)
+
+  session.set('name', name)
+
+  return redirect(redirectTo, {
+    headers: {
+      'Set-Cookie': await sessionStorage.commitSession(session),
+    },
+  })
+}
+
 export const authServices = {
   createUserSession,
   requireUserSession,
   logout,
+  updateNameInSession,
   getCookie,
   getUserSession,
   sessionStorage,
