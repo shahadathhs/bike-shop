@@ -22,7 +22,7 @@ export default function BlogsPage() {
         {sortedPosts.map(post => (
           <div
             key={post.slug}
-            className="bg-white rounded-lg overflow-hidden  transition-all duration-300 hover:shadow border border-gray-100"
+            className="rounded-lg overflow-hidden transition-all duration-300 hover:shadow border "
           >
             <div className="relative h-56 w-full">
               <img

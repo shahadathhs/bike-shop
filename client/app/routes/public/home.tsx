@@ -6,6 +6,9 @@ import WhyChooseUs from '~/components/home/WhyChooseUs'
 import PaymentProcess from '~/components/home/PaymentProcess'
 import FAQ from '~/components/home/FAQ'
 import FeaturedBlogs from '~/components/home/FeaturedBlogs'
+import HomeStats from '~/components/home/HomeStats'
+import ShopByModel from '~/components/home/ShopByModel'
+import LatestUpdates from '~/components/home/LatestUpdates'
 
 export function meta() {
   return [{ title: 'Bike Store - Home' }, { name: 'description', content: 'Welcome to Bike Store' }]
@@ -36,12 +39,15 @@ export default function Home() {
   return (
     <div className="space-y-10">
       <Banner />
+      <HomeStats />
       {products && <Product />}
       <PaymentProcess />
       <WhyChooseUs />
       <Testimonials />
+      <ShopByModel />
       <FAQ />
       <FeaturedBlogs />
+      <LatestUpdates />
     </div>
   )
 }
