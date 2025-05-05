@@ -1,3 +1,5 @@
+import placeholderImage from 'assets/placeholder.png'
+
 export interface BlogPost {
   id: string
   title: string
@@ -7,7 +9,7 @@ export interface BlogPost {
   excerpt: string
   readTime: number
   coverImage: string
-  content: string[] // Array of paragraphs for now, will be replaced with TipTap content
+  content: string[]
   tags: string[]
 }
 
@@ -21,7 +23,7 @@ export const blogPosts: BlogPost[] = [
     excerpt:
       'Learn how to keep your mountain bike in top condition with our comprehensive maintenance guide covering everything from basic cleaning to advanced repairs.',
     readTime: 8,
-    coverImage: '/assets/placeholder.png?height=600&width=800',
+    coverImage: placeholderImage,
     content: [
       "Regular maintenance is crucial for keeping your mountain bike performing at its best and ensuring your safety on the trails. In this comprehensive guide, we'll cover everything you need to know about maintaining your mountain bike, from basic cleaning routines to more advanced repairs.",
       "First, let's talk about cleaning. After every ride, especially muddy ones, you should clean your bike thoroughly. Start by rinsing off any mud or debris with a gentle stream of water. Avoid using high-pressure water as it can force water into sensitive components like bearings and seals.",
@@ -43,7 +45,7 @@ export const blogPosts: BlogPost[] = [
     excerpt:
       'With so many options available, finding the perfect road bike can be overwhelming. This guide will help you understand the key factors to consider when making your choice.',
     readTime: 6,
-    coverImage: '/assets/placeholder.png?height=600&width=800',
+    coverImage: placeholderImage,
     content: [
       'Choosing the right road bike is a crucial decision that can significantly impact your cycling experience. With numerous brands, models, and specifications available, the process can be overwhelming. This guide aims to simplify the decision-making process by highlighting the key factors to consider.',
       "First, determine your budget. Road bikes can range from a few hundred to several thousand dollars. While it's tempting to go for the cheapest option, remember that a quality road bike is an investment that can provide years of enjoyment and health benefits.",
@@ -65,7 +67,7 @@ export const blogPosts: BlogPost[] = [
     excerpt:
       'Electric bikes are revolutionizing the cycling world. Discover the many benefits they offer and why they might be the perfect choice for your next bike purchase.',
     readTime: 5,
-    coverImage: '/assets/placeholder.png?height=600&width=800',
+    coverImage: placeholderImage,
     content: [
       'Electric bikes, or e-bikes, have been gaining popularity in recent years, and for good reason. These innovative machines combine the health benefits of traditional cycling with the convenience of motorized transportation, offering a unique and versatile riding experience.',
       'One of the primary benefits of e-bikes is their ability to make cycling more accessible. The electric motor provides assistance when pedaling, making it easier to tackle hills, ride longer distances, or keep up with faster riders. This can be particularly beneficial for older riders, those with physical limitations, or anyone who wants to enjoy cycling without the full physical exertion.',
@@ -87,7 +89,7 @@ export const blogPosts: BlogPost[] = [
     excerpt:
       'New to cycling? This guide covers all the essential gear you need to get started safely and comfortably, from helmets to bike lights and everything in between.',
     readTime: 7,
-    coverImage: '/assets/placeholder.png?height=600&width=800',
+    coverImage: placeholderImage,
     content: [
       "Starting your cycling journey is an exciting time, but it can also be overwhelming when you consider all the gear that's available. This guide will help you navigate the essentials, ensuring you're safe, comfortable, and ready to enjoy your rides.",
       "First and foremost, a quality helmet is non-negotiable. It's your most important piece of safety equipment, protecting your head in case of a fall or collision. Look for a helmet that meets safety standards, fits well, and is comfortable to wear. Many modern helmets also feature MIPS (Multi-directional Impact Protection System) technology for enhanced protection.",
@@ -110,7 +112,7 @@ export const blogPosts: BlogPost[] = [
     excerpt:
       'Gravel biking has exploded in popularity in recent years. Discover what makes this versatile discipline so appealing and why it might be the perfect cycling style for you.',
     readTime: 6,
-    coverImage: '/assets/placeholder.png?height=600&width=800',
+    coverImage: placeholderImage,
     content: [
       "Gravel biking, a discipline that combines elements of road cycling and mountain biking, has seen an exponential rise in popularity over the past few years. This trend isn't just a passing fad; it represents a fundamental shift in how many cyclists approach the sport, offering a blend of adventure, versatility, and accessibility that appeals to a wide range of riders.",
       'At its core, gravel biking is about exploration and freedom. Unlike road cycling, which is confined to paved surfaces, or mountain biking, which requires technical trails, gravel biking opens up a vast network of unpaved roads, forest service roads, and mild trails. This expanded terrain allows riders to create routes that avoid heavy traffic, discover new landscapes, and enjoy a more peaceful riding experience.',

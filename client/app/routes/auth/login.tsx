@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useFetcher, useNavigation, type ActionFunction } from 'react-router'
 import { toast } from 'sonner'
+import { Copy } from 'lucide-react'
 import { authServices } from '~/services/auth.services'
 import { Input } from '~/components/ui/input'
 import { Button } from '~/components/ui/button'
@@ -67,8 +68,18 @@ export default function Login() {
     }
   }, [fetcher.data])
 
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      toast.success('Copied to clipboard')
+    } catch (err) {
+      console.error('Error copying to clipboard:', err)
+      toast.error('Failed to copy')
+    }
+  }
+
   return (
-    <div className="flex flex-col lg:flex-row h-[400px] items-center mt-10">
+    <div className="flex flex-col lg:flex-row items-center mt-10">
       {/* Welcome Column */}
       <div className="hidden lg:flex lg:w-1/2 items-center justify-center p-10 border-r">
         <div className="space-y-6">
@@ -92,6 +103,37 @@ export default function Login() {
           </CardHeader>
           <CardContent>
             <fetcher.Form method="post" className="space-y-4" onSubmit={() => setSubmitted(true)}>
+              {/* admin credentials */}
+              <div className="text-center border rounded p-2 relative">
+                <h3 className="text-lg font-semibold">Admin Credentials</h3>
+                <div className="flex items-center justify-center space-x-2">
+                  <span>
+                    Email: <span className="text-primary">admin@gmail.com</span>
+                  </span>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => copyToClipboard('admin@gmail.com')}
+                  >
+                    <Copy size={4} />
+                  </Button>
+                </div>
+                <div className="flex items-center justify-center space-x-2">
+                  <span>
+                    Password: <span className="text-primary">admin</span>
+                  </span>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => copyToClipboard('admin')}
+                  >
+                    <Copy size={4} />
+                  </Button>
+                </div>
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
