@@ -1,160 +1,196 @@
 import React, { useState } from 'react'
-import toast from 'react-hot-toast'
-import Cookies from 'js-cookie'
+import { toast } from 'sonner'
 import { useAuth } from '~/context/AuthContext'
-import type { TUser } from '~/types/user'
+import { Card, CardHeader, CardTitle, CardContent } from '~/components/ui/card'
+import { Label } from '~/components/ui/label'
+import { Input } from '~/components/ui/input'
+import { Button } from '~/components/ui/button'
+import Loading from '~/components/shared/Loading'
+import { getCookie } from '~/services/auth.services'
+import { useLoaderData, type LoaderFunction } from 'react-router'
+import type { TCookie } from '~/types/user'
+
+export const loader: LoaderFunction = async ({ request }) => {
+  const cookie = await getCookie(request)
+
+  return { cookie }
+}
 
 export default function CustomerProfile() {
-  const { user } = useAuth()
-  const cookieUser = Cookies.get('user')
-  const parsedUser: TUser = JSON.parse(cookieUser || '{}')
+  const { cookie } = useLoaderData<{ cookie: TCookie }>()
+  console.log('cookie', cookie)
 
-  const [name, setName] = useState(user?.name || parsedUser.name || '')
-  const [email, setEmail] = useState(user?.email || parsedUser.email || '')
+  const name = cookie?.name || ''
+  const email = cookie?.email || ''
 
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [loading1, setLoading1] = useState(false)
+  const [loadingProfile, setLoadingProfile] = useState(false)
+  const [loadingPassword, setLoadingPassword] = useState(false)
 
   const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
+    setLoadingProfile(true)
     try {
-      // Call backend to update profile info
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/update-profile`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/update-profile`, {
         method: 'PATCH',
         headers: {
-          Authorization: `Bearer ${user?.token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ name, email }),
       })
-      const responseData = await response.json()
-      console.log('responseData', responseData)
-
-      toast.success('Profile updated successfully!')
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      console.error('Error updating profile:', error)
-      toast.error(error.response?.data?.error || 'Failed to update profile')
+      const data = await res.json()
+      if (res.ok) {
+        toast.success('Profile updated successfully!')
+      } else {
+        throw new Error(data.message)
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to update profile')
     }
-    setLoading(false)
+    setLoadingProfile(false)
   }
 
   const handlePasswordUpdate = async (e: React.FormEvent) => {
     e.preventDefault()
     if (newPassword !== confirmPassword) {
-      toast.error('New passwords do not match')
+      toast.error('Passwords do not match', {
+        duration: 3000,
+        position: 'top-center',
+      })
       return
     }
-    setLoading1(true)
+    if (newPassword.length < 6) {
+      toast.error('Password must be at least 6 characters long', {
+        duration: 3000,
+        position: 'top-center',
+      })
+      return
+    }
+    setLoadingPassword(true)
     try {
-      // Call backend to update password (currentPassword is required for security)
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/update-password`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/update-password`, {
         method: 'PATCH',
         headers: {
-          Authorization: `Bearer ${user?.token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ currentPassword, newPassword }),
       })
-      const responseData = await response.json()
-      console.log('responseData', responseData)
-
-      toast.success('Password updated successfully!')
-      // Clear password fields after successful update
-      setCurrentPassword('')
-      setNewPassword('')
-      setConfirmPassword('')
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Failed to update password')
+      const data = await res.json()
+      if (res.ok) {
+        toast.success('Password updated successfully!')
+        setCurrentPassword('')
+        setNewPassword('')
+        setConfirmPassword('')
+      } else {
+        throw new Error(data.message)
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to update password')
     }
-    setLoading1(false)
+    setLoadingPassword(false)
   }
 
+  if (!email || !name) return <Loading />
+
   return (
-    <div className="container mx-auto p-4 max-w-xl">
-      <h1 className="text-3xl font-bold mb-6">My Profile</h1>
+    <div className="min-h-screen">
+      <div className="max-w-7xl mx-auto lg:flex lg:space-x-8">
+        {/* Left Text Column */}
+        <Card className="hidden lg:block lg:w-1/3">
+          <CardHeader className="px-6 pt-6">
+            <CardTitle className="text-xl font-bold">Your Account</CardTitle>
+          </CardHeader>
+          <CardContent className="px-6 pb-6 space-y-4 text-sm">
+            <p>
+              Welcome to your profile dashboard. Here you can update your personal information,
+              change your password, and manage your account settings.
+            </p>
+            <p>
+              Keeping your profile up to date ensures you receive all order notifications and
+              special offers tailored to you.
+            </p>
+            <ul className="list-disc list-inside space-y-2">
+              <li>Update your display name and contact info</li>
+              <li>Secure your account with a strong password</li>
+              <li>Review your recent orders and preferences</li>
+            </ul>
+          </CardContent>
+        </Card>
 
-      {/* Profile Information */}
-      <form onSubmit={handleProfileUpdate} className="mb-8 space-y-3">
-        <div>
-          <label htmlFor="name" className="label">
-            Name
-          </label>
-          <input
-            type="text"
-            value={name}
-            onChange={e => setName(e.target.value)}
-            className="input input-bordered w-full"
-            required
-          />
-        </div>
-        <div>
-          <label htmlFor="email" className="label">
-            Email (Cannot be changed)
-          </label>
-          <input
-            type="email"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            className="input input-bordered w-full"
-            required
-            disabled
-          />
-        </div>
-        <button type="submit" disabled={loading} className="btn btn-primary">
-          {loading ? 'Updating...' : 'Update Profile'}
-        </button>
-      </form>
+        {/* Right Form Column */}
+        <div className="lg:flex-1 space-y-8">
+          {/* Profile Form */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Profile Information</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleProfileUpdate} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Name</Label>
+                  <Input id="name" value={name} onChange={e => setName(e.target.value)} required />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email (read-only)</Label>
+                  <Input id="email" value={email} disabled />
+                </div>
+                <Button type="submit" disabled={loadingProfile} className="mt-2">
+                  {loadingProfile ? 'Saving...' : 'Save Changes'}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
 
-      {/* Password Update Section */}
-      <div className="border-t pt-6">
-        <h2 className="text-2xl font-bold mb-4">Change Password</h2>
-        <form onSubmit={handlePasswordUpdate} className="space-y-3">
-          <div>
-            <label htmlFor="currentPassword" className="label">
-              Current Password
-            </label>
-            <input
-              type="password"
-              value={currentPassword}
-              onChange={e => setCurrentPassword(e.target.value)}
-              className="input input-bordered w-full"
-              required
-            />
-          </div>
-          <div>
-            <label htmlFor="newPassword" className="label">
-              New Password
-            </label>
-            <input
-              type="password"
-              value={newPassword}
-              onChange={e => setNewPassword(e.target.value)}
-              className="input input-bordered w-full"
-              required
-            />
-          </div>
-          <div>
-            <label htmlFor="confirmPassword" className="label">
-              Confirm New Password
-            </label>
-            <input
-              type="password"
-              value={confirmPassword}
-              onChange={e => setConfirmPassword(e.target.value)}
-              className="input input-bordered w-full"
-              required
-            />
-          </div>
-          <button type="submit" disabled={loading1} className="btn btn-secondary">
-            {loading1 ? 'Updating...' : 'Update Password'}
-          </button>
-        </form>
+          {/* Password Form */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Change Password</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handlePasswordUpdate} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="currentPassword">Current Password</Label>
+                  <Input
+                    id="currentPassword"
+                    type="password"
+                    value={currentPassword}
+                    onChange={e => setCurrentPassword(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="newPassword">New Password</Label>
+                  <Input
+                    id="newPassword"
+                    type="password"
+                    value={newPassword}
+                    onChange={e => setNewPassword(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    value={confirmPassword}
+                    onChange={e => setConfirmPassword(e.target.value)}
+                    required
+                  />
+                </div>
+                <Button type="submit" variant="secondary" disabled={loadingPassword}>
+                  {loadingPassword ? 'Updating...' : 'Update Password'}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   )
