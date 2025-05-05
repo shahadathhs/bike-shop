@@ -5,16 +5,23 @@ export default [
   layout('routes/publicLayout.tsx', [
     // * Public routes
     index('routes/public/home.tsx'),
-    route('/about', 'routes/public/about.tsx'),
+
+    // * products routes
     route('/product', 'routes/public/product.tsx'),
+    route('/product/:id', 'routes/public/productDetails.tsx'),
+
+    // * about routes
+    route('/about', 'routes/public/about.tsx'),
+    route('/contact', 'routes/public/contact.tsx'),
+
+    // * blogs routes
+    route('/blogs', 'routes/public/blogs.tsx'),
+    route('/blogs/:id', 'routes/public/blogDetails.tsx'),
 
     // * Legal routes
     route('/terms-of-service', 'routes/public/termsOfService.tsx'),
     route('/privacy-policy', 'routes/public/privacyPolicy.tsx'),
     route('/return-policy', 'routes/public/returnPolicy.tsx'),
-
-    // * Product details routes
-    route('/product/:id', 'routes/public/productDetails.tsx'),
 
     // * Protected routes
     route('/product/:id/checkout', 'routes/public/checkout.tsx'),

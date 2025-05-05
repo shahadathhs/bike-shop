@@ -5,6 +5,7 @@ import Testimonials from '~/components/home/Testimonials'
 import WhyChooseUs from '~/components/home/WhyChooseUs'
 import PaymentProcess from '~/components/home/PaymentProcess'
 import FAQ from '~/components/home/FAQ'
+import FeaturedBlogs from '~/components/home/FeaturedBlogs'
 
 export function meta() {
   return [{ title: 'Bike Store - Home' }, { name: 'description', content: 'Welcome to Bike Store' }]
@@ -40,6 +41,7 @@ export default function Home() {
       <WhyChooseUs />
       <Testimonials />
       <FAQ />
+      <FeaturedBlogs />
     </div>
   )
 }

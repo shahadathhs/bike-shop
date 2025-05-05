@@ -8,7 +8,7 @@ export const navLinks = [
 
 export const quickLinks = [
   { to: '/', label: 'Home' },
-  { to: '/products', label: 'Products' },
+  { to: '/product', label: 'Products' },
   { to: '/contact', label: 'Contact' },
   { to: '/about', label: 'About' },
   { to: '/blogs', label: 'Blogs' },
