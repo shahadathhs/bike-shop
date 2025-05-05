@@ -26,6 +26,7 @@ export default [
 
     // * Protected routes
     route('/cart/checkout', 'routes/public/checkout.tsx'),
+    route('/order-success', 'routes/public/orderSuccess.tsx'),
     route('/checkout/success', 'routes/public/checkoutSuccess.tsx'),
     route('/checkout/cancel', 'routes/public/checkoutCancel.tsx'),
 
