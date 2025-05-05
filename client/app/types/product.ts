@@ -16,3 +16,16 @@ export type Product = {
   reviews: number
   stock: number
 }
+
+export type TBike = {
+  _id: string
+  name: string
+  brand: string
+  modelName: string
+  price: number
+  category: string
+  description: string
+  image: string
+  quantity: number 
+  inStock?: boolean 
+}

@@ -2,6 +2,7 @@ import { redirect, useLoaderData, type LoaderFunction, type MetaFunction } from 
 import { useEffect, useState } from 'react'
 import { Card, CardContent, CardTitle, CardDescription } from '~/components/ui/card'
 import { Button } from '~/components/ui/button'
+import type { TBike } from '~/types/product'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const meta: MetaFunction = ({ data }: { data: any }) => {
@@ -40,24 +41,35 @@ export const loader: LoaderFunction = async ({ request }) => {
 }
 
 export default function ProductDetailsPage() {
-  const loaderData = useLoaderData()
+  const loaderData = useLoaderData<{ data: TBike; error?: string }>()
   const product = loaderData.data
-  const [added, setAdded] = useState(false)
+  const [inCart, setInCart] = useState(false)
 
   useEffect(() => {
-    // Reset added state when product changes
-    setAdded(false)
-  }, [product?.id])
+    if (!product?._id) return
+    const cart =
+      typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('cart') || '[]') : []
+    const exists = cart.some((item: TBike) => item._id === product._id)
+    setInCart(exists)
+  }, [product?._id])
 
-  const handleAddToCart = () => {
+  const handleCartToggle = () => {
     if (!product) return
 
-    const current =
+    const cart =
       typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('cart') || '[]') : []
 
-    const updated = [...current, product]
-    localStorage.setItem('cart', JSON.stringify(updated))
-    setAdded(true)
+    let updatedCart
+    if (inCart) {
+      // remove
+      updatedCart = cart.filter((item: TBike) => item._id !== product._id)
+    } else {
+      // add
+      updatedCart = [...cart, product]
+    }
+
+    localStorage.setItem('cart', JSON.stringify(updatedCart))
+    setInCart(!inCart)
   }
 
   if (!product) {
@@ -75,7 +87,7 @@ export default function ProductDetailsPage() {
       <header className="mb-8 text-center">
         <h1 className="text-4xl font-extrabold">Bike Store - Product Details</h1>
         <p className="mt-2 text-lg text-gray-600">
-          Discover more about this bike and add it to your cart.
+          Discover more about this bike and manage it in your cart.
         </p>
       </header>
 
@@ -108,8 +120,12 @@ export default function ProductDetailsPage() {
           </div>
           <p className="mb-6 text-gray-700">{product.description}</p>
 
-          <Button onClick={handleAddToCart} disabled={added}>
-            {added ? 'Added to Cart' : 'Add to Cart'}
+          <Button
+            className="hover:shadow hover:cursor-pointer"
+            onClick={handleCartToggle}
+            variant={inCart ? 'destructive' : 'default'}
+          >
+            {inCart ? 'Remove from Cart' : 'Add to Cart'}
           </Button>
         </CardContent>
       </Card>
