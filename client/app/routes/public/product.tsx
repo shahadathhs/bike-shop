@@ -1,50 +1,52 @@
-import { useEffect, useState } from 'react'
-import toast from 'react-hot-toast'
-import { Link } from 'react-router'
-import { getToken } from '~/utils/getToken'
-import { useDebounce } from '~/utils/debounce'
 import { brands, categories, models } from '~/utils/bikeUtils'
+import { Input } from '~/components/ui/input'
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from '~/components/ui/select'
+import { Card, CardContent, CardFooter } from '~/components/ui/card'
+import { Button } from '~/components/ui/button'
+import {
+  Link,
+  useLoaderData,
+  useNavigation,
+  useSearchParams,
+  type LoaderFunction,
+} from 'react-router'
 
-export function meta() {
-  return [{ title: 'Bike Store - Products' }, { name: 'description', content: 'See & buy bikes' }]
+export const meta = () => [
+  { title: 'Bike Store - Products' },
+  { name: 'description', content: 'See & buy bikes' },
+]
+
+export type LoaderData = {
+  bikes: Array<{ _id: string; image: string; name: string; description: string; price: number }>
+  metadata: { total: number; page: number; limit: number }
+  filters: {
+    searchTerm: string
+    priceRange: string
+    model: string
+    category: string
+    brand: string
+    page: number
+    limit: number
+  }
 }
 
-export default function ALLProductPage() {
-  // Local state for products and pagination metadata.
-  const [products, setProducts] = useState<
-    Array<{
-      _id: string
-      image: string
-      name: string
-      description: string
-      price: number
-    }>
-  >([])
-  const [metadata, setMetadata] = useState({ total: 0, page: 1, limit: 10 })
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+export const loader: LoaderFunction = async ({ request }) => {
+  const url = new URL(request.url)
+  const searchTerm = url.searchParams.get('searchTerm') || ''
+  const priceRange = url.searchParams.get('priceRange') || 'all'
+  const model = url.searchParams.get('model') || 'all'
+  const category = url.searchParams.get('category') || 'all'
+  const brand = url.searchParams.get('brand') || 'all'
+  const page = parseInt(url.searchParams.get('page') || '1', 10)
+  const limit = parseInt(url.searchParams.get('limit') || '10', 10)
 
-  // State for search and filters.
-  const [inputValue, setInputValue] = useState('')
-  const [searchTerm, setSearchTerm] = useState('')
-  const debouncedInput = useDebounce(inputValue, 100)
-  const [priceRange, setPriceRange] = useState('all') // Options: "all", "under300", "300to500", "500to800", "above800"
-  const [model, setModel] = useState('all') // "all" or specific values like "Sport", etc.
-  const [category, setCategory] = useState('all') // "all", "Mountain", "Road", etc.
-  const [brand, setBrand] = useState('all') // "all", "Trek", "Cannondale", etc.
-  const [page, setPage] = useState(1)
-  const [limit, setLimit] = useState(10)
-
-  const token = getToken() // For public pages this might be optional
-
-  // Update the actual search term from the debounced input.
-  useEffect(() => {
-    setSearchTerm(debouncedInput)
-    setPage(1) // Reset to first page on search change.
-  }, [debouncedInput])
-
-  // Helper function to map price range options to numeric values.
-  const getPriceRangeValues = (range: string) => {
+  const getPriceValues = (range: string) => {
     switch (range) {
       case 'under300':
         return { minPrice: undefined, maxPrice: 300 }
@@ -59,226 +61,184 @@ export default function ALLProductPage() {
     }
   }
 
-  // Fetch products from the backend based on search, filters, and pagination.
-  const fetchProducts = async () => {
-    setLoading(true)
-    setError('')
-    try {
-      const { minPrice, maxPrice } = getPriceRangeValues(priceRange)
-      const params = new URLSearchParams()
-      if (searchTerm) params.append('searchTerm', searchTerm)
-      if (minPrice !== undefined) params.append('minPrice', String(minPrice))
-      if (maxPrice !== undefined) params.append('maxPrice', String(maxPrice))
-      if (model !== 'all') params.append('model', model)
-      if (category !== 'all') params.append('category', category)
-      if (brand !== 'all') params.append('brand', brand)
-      params.append('page', String(page))
-      params.append('limit', String(limit))
+  const { minPrice, maxPrice } = getPriceValues(priceRange)
+  const params = new URLSearchParams()
+  if (searchTerm) params.append('searchTerm', searchTerm)
+  if (minPrice !== undefined) params.append('minPrice', String(minPrice))
+  if (maxPrice !== undefined) params.append('maxPrice', String(maxPrice))
+  if (model !== 'all') params.append('model', model)
+  if (category !== 'all') params.append('category', category)
+  if (brand !== 'all') params.append('brand', brand)
+  params.append('page', String(page))
+  params.append('limit', String(limit))
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/bikes?${params.toString()}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
+  const res = await fetch(`${import.meta.env.VITE_API_URL}/bikes?${params.toString()}`)
 
-      if (response.ok) {
-        const data = await response.json()
-        setProducts(data.data.bikes)
-        setMetadata(data.data.metadata)
-      } else {
-        const errorData = await response.json()
-        setError(errorData.data.error || 'Failed to fetch products')
-        toast.error(errorData.data.error || 'Failed to fetch products')
-      }
-    } catch (err) {
-      console.error('Error fetching products:', err)
-      setError('Error fetching products')
-      toast.error('Error fetching products')
-    }
-    setLoading(false)
+  if (!res.ok) {
+    throw new Response('Failed to fetch products', { status: res.status })
   }
 
-  // Refetch products when any of the filter or pagination states change.
-  useEffect(() => {
-    fetchProducts()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchTerm, priceRange, model, category, brand, page, limit])
+  const data = await res.json()
 
-  // Pagination controls
-  const handlePrevPage = () => {
-    if (page > 1) setPage(prev => prev - 1)
+  return {
+    bikes: data.data.bikes,
+    metadata: data.data.metadata,
+    filters: { searchTerm, priceRange, model, category, brand, page, limit },
   }
+}
 
-  const handleNextPage = () => {
-    if (metadata.total > page * limit) setPage(prev => prev + 1)
-  }
+export default function ALLProductPage() {
+  const { bikes, metadata, filters } = useLoaderData<LoaderData>()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const navigation = useNavigation()
+  const isLoading = navigation.state === 'loading'
 
-  const renderContent = () => {
-    if (loading) {
-      return (
-        <div className="flex justify-center items-center">
-          <span className="loading loading-spinner loading-lg"></span>
-        </div>
-      )
+  // Helper to update a single param (resets page to 1 unless updating page)
+  const updateParam = (key: string, value: string, resetPage = true) => {
+    const params = new URLSearchParams(searchParams)
+    params.set(key, value)
+    if (resetPage && key !== 'page') {
+      params.set('page', '1')
     }
-
-    if (error) {
-      return <p className="text-red-500">{error}</p>
-    }
-
-    return (
-      <>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {products.length > 0 ? (
-            products.map(product => (
-              <div key={product._id} className="card bg-base-100 shadow-lg">
-                <figure>
-                  <img
-                    src={product.image}
-                    alt={product.name}
-                    className="object-cover h-48 w-full"
-                  />
-                </figure>
-                <div className="card-body">
-                  <h2 className="card-title">{product.name}</h2>
-                  <p>{product.description.substring(0, 100)}...</p>
-                  <p className="text-lg font-semibold">
-                    {' '}
-                    <strong>Price:</strong> ${product.price}
-                  </p>
-                  <div className="card-actions justify-end">
-                    <Link to={`/product/${product._id}`} className="btn btn-primary btn-sm">
-                      View Details
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            ))
-          ) : (
-            <p className="text-center col-span-full">No products found.</p>
-          )}
-        </div>
-
-        <div className="flex justify-end items-center space-x-4 mt-4">
-          <button onClick={handlePrevPage} className="btn btn-outline btn-sm" disabled={page === 1}>
-            Previous
-          </button>
-          <span className="text-primary font-medium">
-            Page {page} of {Math.ceil(metadata.total / metadata.limit)}
-          </span>
-          <button
-            onClick={handleNextPage}
-            disabled={page === Math.ceil(metadata.total / metadata.limit)}
-            className="btn btn-outline btn-sm"
-          >
-            Next
-          </button>
-          <div>
-            <select
-              value={limit}
-              onChange={e => {
-                setLimit(parseInt(e.target.value))
-                setPage(1)
-              }}
-              className="select select-bordered btn-sm"
-            >
-              <option value="10">10 per page</option>
-              <option value="20">20 per page</option>
-              <option value="50">50 per page</option>
-            </select>
-          </div>
-        </div>
-      </>
-    )
+    setSearchParams(params)
   }
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">All Products</h1>
+    <div className="py-4">
+      <h1 className="text-3xl font-bold mb-6">All Products</h1>
+      <p className="mb-6 text-xl max-w-lg">
+        Explore our extensive selection of bikes, from classic to modern, and find the perfect fit
+        for your needs.
+      </p>
 
-      {/* Filter Section */}
-      <div className="mb-6 flex flex-col lg:flex-row lg:justify-between gap-4">
-        {/* Search Input */}
-        <input
-          type="text"
+      <div className="flex flex-col lg:flex-row lg:justify-between gap-4 mb-6">
+        <Input
           placeholder="Search by name, brand, or category..."
-          value={inputValue}
-          onChange={e => setInputValue(e.target.value)}
-          className="input input-bordered w-full lg:max-w-lg lg:flex-1"
+          value={filters.searchTerm}
+          onChange={e => updateParam('searchTerm', e.target.value)}
+          className="flex-1"
         />
 
-        {/* Filter Dropdowns */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {/* Price Range Filter */}
-          <select
-            value={priceRange}
-            onChange={e => {
-              setPriceRange(e.target.value)
-              setPage(1)
-            }}
-            className="select select-bordered w-full"
-          >
-            <option value="all">All Prices</option>
-            <option value="under300">Under $300</option>
-            <option value="300to500">$300 - $500</option>
-            <option value="500to800">$500 - $800</option>
-            <option value="above800">Above $800</option>
-          </select>
+          <Select value={filters.priceRange} onValueChange={v => updateParam('priceRange', v)}>
+            <SelectTrigger>
+              <SelectValue placeholder="All Prices" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Prices</SelectItem>
+              <SelectItem value="under300">Under $300</SelectItem>
+              <SelectItem value="300to500">$300 - $500</SelectItem>
+              <SelectItem value="500to800">$500 - $800</SelectItem>
+              <SelectItem value="above800">Above $800</SelectItem>
+            </SelectContent>
+          </Select>
 
-          {/* Model Filter */}
-          <select
-            value={model}
-            onChange={e => {
-              setModel(e.target.value)
-              setPage(1)
-            }}
-            className="select select-bordered w-full"
-          >
-            <option value="all">All Models</option>
-            {models.map(m => (
-              <option key={m.value} value={m.value}>
-                {m.label}
-              </option>
-            ))}
-          </select>
+          <Select value={filters.model} onValueChange={v => updateParam('model', v)}>
+            <SelectTrigger>
+              <SelectValue placeholder="All Models" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Models</SelectItem>
+              {models.map(m => (
+                <SelectItem key={m.value} value={m.value}>
+                  {m.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-          {/* Category Filter */}
-          <select
-            value={category}
-            onChange={e => {
-              setCategory(e.target.value)
-              setPage(1)
-            }}
-            className="select select-bordered w-full"
-          >
-            <option value="all">All Categories</option>
-            {categories.map(c => (
-              <option key={c.value} value={c.value}>
-                {c.label}
-              </option>
-            ))}
-          </select>
+          <Select value={filters.category} onValueChange={v => updateParam('category', v)}>
+            <SelectTrigger>
+              <SelectValue placeholder="All Categories" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Categories</SelectItem>
+              {categories.map(c => (
+                <SelectItem key={c.value} value={c.value}>
+                  {c.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-          {/* Brand Filter */}
-          <select
-            value={brand}
-            onChange={e => {
-              setBrand(e.target.value)
-              setPage(1)
-            }}
-            className="select select-bordered w-full"
-          >
-            <option value="all">All Brands</option>
-            {brands.map(b => (
-              <option key={b.value} value={b.value}>
-                {b.label}
-              </option>
-            ))}
-          </select>
+          <Select value={filters.brand} onValueChange={v => updateParam('brand', v)}>
+            <SelectTrigger>
+              <SelectValue placeholder="All Brands" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Brands</SelectItem>
+              {brands.map(b => (
+                <SelectItem key={b.value} value={b.value}>
+                  {b.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
-      {renderContent()}
+      {isLoading ? (
+        <div className="flex justify-center items-center">
+          <span className="loading loading-spinner loading-lg"></span>
+        </div>
+      ) : bikes.length === 0 ? (
+        <p className="text-center">No products found.</p>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {bikes.map(product => (
+            <Card key={product._id} className="shadow-md">
+              <CardContent className="h-full">
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  className="object-cover h-48 w-full rounded"
+                />
+                <h3 className="text-lg font-semibold pt-2">{product.name}</h3>
+                <p className="mt-2">{product.description.substring(0, 100)}...</p>
+                <p className="mt-2 font-semibold text-lg">${product.price}</p>
+              </CardContent>
+              <CardFooter className="justify-end">
+                <Link to={`/product/${product._id}`}>
+                  <Button size="sm">View Details</Button>
+                </Link>
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      <div className="flex justify-end items-center space-x-4 mt-6">
+        <Button
+          variant="outline"
+          disabled={filters.page <= 1}
+          onClick={() => updateParam('page', String(filters.page - 1), false)}
+        >
+          Previous
+        </Button>
+
+        <span>
+          Page {filters.page} of {Math.ceil(metadata.total / metadata.limit)}
+        </span>
+
+        <Button
+          variant="outline"
+          disabled={filters.page >= Math.ceil(metadata.total / metadata.limit)}
+          onClick={() => updateParam('page', String(filters.page + 1), false)}
+        >
+          Next
+        </Button>
+
+        <Select value={String(filters.limit)} onValueChange={v => updateParam('limit', v)}>
+          <SelectTrigger>
+            <SelectValue placeholder="10 per page" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="10">10 per page</SelectItem>
+            <SelectItem value="20">20 per page</SelectItem>
+            <SelectItem value="50">50 per page</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
     </div>
   )
 }
