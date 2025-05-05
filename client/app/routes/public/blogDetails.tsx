@@ -30,7 +30,7 @@ export default function BlogDetails() {
 
         <div className="relative h-[400px] w-full mb-8 rounded-lg overflow-hidden">
           <img
-            src={post.coverImage || '/placeholder.svg'}
+            src={post.coverImage || '/assets/placeholder.png'}
             alt={post.title}
             className="object-cover h-[400px] w-full"
           />
@@ -56,7 +56,7 @@ export default function BlogDetails() {
               <div key={relatedPost.slug} className=" rounded-lg overflow-hidden shadow-md border">
                 <div className="relative h-48 w-full">
                   <img
-                    src={relatedPost.coverImage || '/placeholder.svg'}
+                    src={relatedPost.coverImage || '/assets/placeholder.png'}
                     alt={relatedPost.title}
                     className="object-cover h-[200px] w-full"
                   />

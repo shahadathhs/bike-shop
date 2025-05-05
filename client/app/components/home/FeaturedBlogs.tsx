@@ -27,7 +27,7 @@ export default function FeaturedBlogs() {
             >
               <div className="relative h-48 w-full">
                 <img
-                  src={post.coverImage || '/placeholder.svg'}
+                  src={post.coverImage || '/assets/placeholder.png'}
                   alt={post.title}
                   className="object-cover h-[200px] w-full"
                 />

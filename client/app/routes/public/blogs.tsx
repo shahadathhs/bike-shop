@@ -26,7 +26,7 @@ export default function BlogsPage() {
           >
             <div className="relative h-56 w-full">
               <img
-                src={post.coverImage || '/placeholder.svg'}
+                src={post.coverImage || '/assets/placeholder.png'}
                 alt={post.title}
                 className="object-cover h-[200px] w-full"
               />

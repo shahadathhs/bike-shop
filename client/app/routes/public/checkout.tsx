@@ -78,7 +78,7 @@ export default function CheckoutPage() {
                 <div key={item._id} className="flex gap-4">
                   <div className="h-16 w-16 rounded-md overflow-hidden border bg-muted/20 flex-shrink-0">
                     <img
-                      src={item.image || '/placeholder.svg'}
+                      src={item.image || '/assets/placeholder.png'}
                       alt={item.name}
                       className="h-full w-full object-cover"
                     />
