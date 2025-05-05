@@ -1,3 +1,5 @@
+import Settings from '~/components/setting/Settings'
+
 export default function setting() {
-  return <div>setting</div>
+  return <Settings />
 }
