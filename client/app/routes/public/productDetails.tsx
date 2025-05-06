@@ -6,14 +6,13 @@ import type { TBike } from '~/types/product'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const meta: MetaFunction = ({ data }: { data: any }) => {
-  if (!data?.data) {
+  if (!data?.product) {
     return [
       { title: 'Bike Store - Product Not Found' },
       { name: 'description', content: 'Product not found in Bike Store' },
     ]
   }
-
-  const product = data.data
+  const { product } = data
   return [
     { title: `Bike Store - ${product.name}` },
     { name: 'description', content: product.description },
@@ -22,27 +21,35 @@ export const meta: MetaFunction = ({ data }: { data: any }) => {
 
 export const loader: LoaderFunction = async ({ request }) => {
   const url = new URL(request.url)
-  const segments = url.pathname.split('/')
-  const productId = segments[2] // /product/:id
-
-  if (!productId) return redirect('/product')
+  const productId = url.pathname.split('/')[2]
+  if (!productId) return redirect('/products')
 
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/bikes/${productId}`)
+    // Fetch main product
+    const prodRes = await fetch(`${import.meta.env.VITE_API_URL}/bikes/${productId}`)
+    if (!prodRes.ok) return redirect('/products')
+    const prodData = await prodRes.json()
+    const product: TBike = prodData.data
 
-    if (!response.ok) return redirect('/product')
+    // Fetch related products by same category (limit 4)
+    const relatedRes = await fetch(
+      `${import.meta.env.VITE_API_URL}/bikes?category=${product.category}&limit=5`,
+    )
+    const relatedData = await relatedRes.json()
+    // exclude current product and take 4
+    const related: TBike[] = relatedData.data.bikes
+      .filter((b: TBike) => b._id !== product._id)
+      .slice(0, 4)
 
-    const productData = await response.json()
-    return productData
+    return { product, related }
   } catch (error) {
-    console.error('Error fetching product:', error)
-    return { data: null, error: 'Failed to fetch product' }
+    console.error('Error in loader:', error)
+    return { product: null, related: [] }
   }
 }
 
 export default function ProductDetailsPage() {
-  const loaderData = useLoaderData<{ data: TBike; error?: string }>()
-  const product = loaderData.data
+  const { product, related } = useLoaderData<{ product: TBike | null; related: TBike[] }>()
   const [inCart, setInCart] = useState(false)
 
   useEffect(() => {
@@ -76,22 +83,28 @@ export default function ProductDetailsPage() {
     return (
       <div className="p-10 text-center">
         <h1 className="text-2xl font-bold">Product not found</h1>
-        <p className="mt-2 text-gray-600">Please go back to the products page.</p>
+        <p className="mt-2 text-gray-600">
+          Please go back to the{' '}
+          <Link to="/products" className="text-blue-600 underline">
+            products page
+          </Link>
+          .
+        </p>
       </div>
     )
   }
 
   return (
-    <div className="container mx-auto my-10">
-      {/* Page Heading */}
-      <header className="mb-8 text-center">
-        <h1 className="text-4xl font-extrabold">Bike Store - Product Details</h1>
-        <p className="mt-2 text-lg text-gray-600">
-          Discover more about this bike and manage it in your cart.
+    <div className="container mx-auto my-10 space-y-12">
+      {/* Header */}
+      <header className="text-center space-y-2">
+        <h1 className="text-4xl font-extrabold">{product.name}</h1>
+        <p className="text-gray-600">
+          {product.category} • {product.brand}
         </p>
       </header>
 
-      <Card className="flex flex-col md:flex-row gap-4 items-center">
+      <Card className="flex flex-col md:flex-row gap-4 items-center border rounded shadow dark:bg-black/5">
         {/* Image Section */}
         <CardContent className="md:w-1/2">
           <img
@@ -138,6 +151,32 @@ export default function ProductDetailsPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Related Products */}
+      {related?.length > 0 && (
+        <section>
+          <h2 className="text-2xl font-bold mb-6">Related Products</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+            {related.map(r => (
+              <div
+                key={r._id}
+                className=" rounded border flex flex-col overflow-hidden hover:shadow transition-shadow"
+              >
+                <div className="h-40 overflow-hidden">
+                  <img src={r.image} alt={r.name} className="w-full h-full object-cover" />
+                </div>
+                <div className="p-4 flex-1 flex flex-col">
+                  <h3 className="font-semibold mb-2">{r.name}</h3>
+                  <p className="text-sm flex-1 text-gray-600">${r.price}</p>
+                  <Link to={`/product/${r._id}`} className="mt-4 inline-block">
+                    <Button size="sm">View</Button>
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   )
 }

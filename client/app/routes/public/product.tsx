@@ -7,7 +7,6 @@ import {
   SelectContent,
   SelectItem,
 } from '~/components/ui/select'
-import { Card, CardContent, CardFooter } from '~/components/ui/card'
 import { Button } from '~/components/ui/button'
 import {
   Link,
@@ -203,23 +202,24 @@ export default function ALLProductPage() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {bikes.map(product => (
-            <Card key={product._id} className="shadow-md">
-              <CardContent className="h-full">
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  className="object-cover h-48 w-full rounded border"
-                />
-                <h3 className="text-lg font-semibold pt-2">{product.name}</h3>
-                <p className="mt-2">{product.description.substring(0, 100)}...</p>
-                <p className="mt-2 font-semibold text-lg">${product.price}</p>
-              </CardContent>
-              <CardFooter className="justify-end">
-                <Link to={`/product/${product._id}`}>
-                  <Button size="sm">View Details</Button>
-                </Link>
-              </CardFooter>
-            </Card>
+            <div
+              key={product._id}
+              className=" rounded-2xl shadow-md flex flex-col overflow-hidden hover:shadow-lg transition-shadow"
+            >
+              <div className="overflow-hidden rounded-t-2xl">
+                <img src={product.image} alt={product.name} className="object-cover h-48 w-full" />
+              </div>
+              <div className="p-4 flex-1 flex flex-col">
+                <h3 className="text-lg font-semibold mb-2">{product.name}</h3>
+                <p className="text-sm flex-1">{product.description.substring(0, 100)}...</p>
+                <div className="mt-4 flex items-center justify-between">
+                  <span className="font-semibold text-lg">${product.price}</span>
+                  <Link to={`/product/${product._id}`}>
+                    <Button size="sm">Details</Button>
+                  </Link>
+                </div>
+              </div>
+            </div>
           ))}
         </div>
       )}
