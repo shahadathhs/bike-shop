@@ -149,6 +149,7 @@ const cancelOrderService = async (id: string): Promise<IOrder | null> => {
 
 const getAllOrdersService = async ({
   searchTerm = '',
+  status = '',
   page = 1,
   limit = 10
 }): Promise<{ orders: IOrder[]; metadata: { total: number; page: number; limit: number } }> => {
@@ -168,7 +169,8 @@ const getAllOrdersService = async ({
       (searchRegex.test(product.name) ||
         searchRegex.test(product.brand) ||
         searchRegex.test(product.modelName) ||
-        searchRegex.test(product.category))
+        searchRegex.test(product.category)) &&
+      (status ? order.status === status : true)
     )
   })
 

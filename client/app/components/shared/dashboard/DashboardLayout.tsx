@@ -49,7 +49,7 @@ export function DashboardLayout({ userRole = 'customer' }: { userRole?: 'admin' 
       <div className="min-h-screen bg-background w-full">
         <SidebarInset>
           <DashboardNavbar currentPath={currentPath} userRole={userRole} />
-          <main className="w-full p-3">
+          <main className="w-full p-1 border border-t-0">
             {showSpinner ? <Loading className="h-[calc(100vh-88px)]" /> : <Outlet />}
           </main>
         </SidebarInset>

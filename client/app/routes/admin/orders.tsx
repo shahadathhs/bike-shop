@@ -207,8 +207,8 @@ export default function Orders() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
 
-  const page = metadata.page
-  const limit = metadata.limit
+  const page = Number(metadata.page)
+  const limit = Number(metadata.limit)
   const totalPages = Math.ceil(metadata.total / limit)
   const currentStatus = searchParams.get('status') ?? ''
   const searchTerm = searchParams.get('searchTerm') ?? ''
@@ -283,11 +283,11 @@ export default function Orders() {
                   <TableCell>{order._id}</TableCell>
                   <TableCell>{new Date(order.createdAt).toLocaleDateString('en-US')}</TableCell>
                   <TableCell>
-                    <Badge variant="outline">{order.status}</Badge>
+                    <Badge variant="outline">{order.isDeleted ? 'cancelled' : order.status}</Badge>
                   </TableCell>
                   <TableCell>${order.totalPrice.toFixed(2)}</TableCell>
                   <TableCell>
-                    {/* mark as delivered */}
+                    {/* mark as delivered => soft updating status */}
                     {order?.status !== 'delivered' && !order?.isDeleted && (
                       <fetcher.Form method="patch">
                         <input type="hidden" name="orderId" value={order._id} />
@@ -298,7 +298,7 @@ export default function Orders() {
                       </fetcher.Form>
                     )}
 
-                    {/* delete order */}
+                    {/* delete order => hard delete */}
                     {(order?.status === 'delivered' || order?.isDeleted) && (
                       <fetcher.Form method="delete">
                         <input type="hidden" name="orderId" value={order._id} />
@@ -309,7 +309,7 @@ export default function Orders() {
                       </fetcher.Form>
                     )}
 
-                    {/* cancel order */}
+                    {/* cancel order => soft delete */}
                     {order?.status !== 'delivered' && !order?.isDeleted && (
                       <fetcher.Form method="patch">
                         <input type="hidden" name="orderId" value={order._id} />
