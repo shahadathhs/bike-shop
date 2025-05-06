@@ -1,34 +1,9 @@
-import { ArrowBigLeft, ArrowBigRight } from 'lucide-react'
-import {
-  redirect,
-  useFetcher,
-  useLoaderData,
-  useNavigate,
-  useSearchParams,
-  type ActionFunction,
-  type LoaderFunction,
-} from 'react-router'
-import { Badge } from '~/components/ui/badge'
-import { Button } from '~/components/ui/button'
-import { Input } from '~/components/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '~/components/ui/select'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableFooter,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '~/components/ui/table'
-import { orderStatus } from '~/constant/order'
+import { redirect, useLoaderData, type ActionFunction, type LoaderFunction } from 'react-router'
+import { OrderSearch } from '~/components/admin/OrderSearch'
+import OrderTable from '~/components/admin/OrderTable'
+import { StatusFilter } from '~/components/admin/StatusFilter'
 import { getCookie } from '~/services/auth.services'
+import type { OrderRow } from '~/types/order'
 import type { TCookie } from '~/types/user'
 
 export const loader: LoaderFunction = async ({ request }) => {
@@ -187,15 +162,6 @@ export const action: ActionFunction = async ({ request }) => {
   return null
 }
 
-interface OrderRow {
-  _id: string
-  product: { name: string }
-  createdAt: string
-  status: string
-  totalPrice: number
-  isDeleted: boolean
-}
-
 interface LoaderData {
   orders: OrderRow[]
   metadata: { total: number; page: number; limit: number }
@@ -204,27 +170,6 @@ interface LoaderData {
 
 export default function Orders() {
   const { orders, metadata } = useLoaderData<LoaderData>()
-  const [searchParams] = useSearchParams()
-  const navigate = useNavigate()
-
-  const page = Number(metadata.page)
-  const limit = Number(metadata.limit)
-  const totalPages = Math.ceil(metadata.total / limit)
-  const currentStatus = searchParams.get('status') ?? ''
-  const searchTerm = searchParams.get('searchTerm') ?? ''
-
-  const fetcher = useFetcher()
-
-  // helper to build new URLSearchParams string
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  function go(params: Record<string, any>) {
-    const p = new URLSearchParams(searchParams)
-    Object.entries(params).forEach(([k, v]) => {
-      if (v == null || v === '') p.delete(k)
-      else p.set(k, String(v))
-    })
-    navigate(`?${p.toString()}`)
-  }
 
   return (
     <div className="container mx-auto p-4">
@@ -232,143 +177,14 @@ export default function Orders() {
 
       {/* Search & Status Filter */}
       <div className="flex flex-wrap gap-4 items-center mb-4">
-        {/* Search Input */}
         <div>
-          <Input
-            type="text"
-            value={searchTerm}
-            onChange={e => {
-              go({ searchTerm: e.target.value })
-            }}
-            placeholder="Search orders by name, category, or brand"
-          />
+          <OrderSearch />
         </div>
-        {/* Status Filter */}
-        <Select
-          value={currentStatus}
-          onValueChange={v => go({ status: v === 'all' ? undefined : v, page: 1 })}
-        >
-          <SelectTrigger className="w-48">
-            <SelectValue placeholder="Filter by status" />
-          </SelectTrigger>
-          <SelectContent>
-            {orderStatus.map(s => (
-              <SelectItem key={s.value} value={s.value}>
-                {s.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <StatusFilter />
       </div>
 
       {/* Order Table */}
-      <div className="overflow-x-auto border rounded">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Product Name</TableHead>
-              <TableHead>Order ID</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Price</TableHead>
-              <TableHead>Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-
-          <TableBody>
-            {orders.length > 0 ? (
-              orders.map(order => (
-                <TableRow key={order._id}>
-                  <TableCell>{order.product.name}</TableCell>
-                  <TableCell>{order._id}</TableCell>
-                  <TableCell>{new Date(order.createdAt).toLocaleDateString('en-US')}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{order.isDeleted ? 'cancelled' : order.status}</Badge>
-                  </TableCell>
-                  <TableCell>${order.totalPrice.toFixed(2)}</TableCell>
-                  <TableCell>
-                    {/* mark as delivered => soft updating status */}
-                    {order?.status !== 'delivered' && !order?.isDeleted && (
-                      <fetcher.Form method="patch">
-                        <input type="hidden" name="orderId" value={order._id} />
-                        <input type="hidden" name="action" value="markAsDelivered" />
-                        <Button type="submit" size="sm" variant={'outline'}>
-                          Delivered
-                        </Button>
-                      </fetcher.Form>
-                    )}
-
-                    {/* delete order => hard delete */}
-                    {(order?.status === 'delivered' || order?.isDeleted) && (
-                      <fetcher.Form method="delete">
-                        <input type="hidden" name="orderId" value={order._id} />
-                        <input type="hidden" name="action" value="delete" />
-                        <Button type="submit" size="sm" variant={'destructive'}>
-                          Delete
-                        </Button>
-                      </fetcher.Form>
-                    )}
-
-                    {/* cancel order => soft delete */}
-                    {order?.status !== 'delivered' && !order?.isDeleted && (
-                      <fetcher.Form method="patch">
-                        <input type="hidden" name="orderId" value={order._id} />
-                        <input type="hidden" name="action" value="cancel" />
-                        <Button type="submit" size="sm">
-                          Cancel
-                        </Button>
-                      </fetcher.Form>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={6} className="text-center py-4">
-                  No orders found.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-
-          <TableFooter>
-            {/* pagination */}
-            <TableRow>
-              <TableHead>
-                <div className="flex items-center space-x-2">
-                  <Button size="sm" disabled={page <= 1} onClick={() => go({ page: page - 1 })}>
-                    <ArrowBigLeft />
-                  </Button>
-                  <span>
-                    Page <strong>{page}</strong> of <strong>{totalPages}</strong>
-                  </span>
-                  <Button
-                    size="sm"
-                    disabled={page >= totalPages}
-                    onClick={() => go({ page: page + 1 })}
-                  >
-                    <ArrowBigRight />
-                  </Button>
-                </div>
-              </TableHead>
-              <TableHead colSpan={4}>
-                <Select value={String(limit)} onValueChange={v => go({ limit: v, page: 1 })}>
-                  <SelectTrigger className="w-[80px]">
-                    <SelectValue placeholder="Limit" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {[6, 12, 18].map(n => (
-                      <SelectItem key={n} value={String(n)}>
-                        {n}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </TableHead>
-            </TableRow>
-          </TableFooter>
-        </Table>
-      </div>
+      <OrderTable orders={orders} metadata={metadata} />
     </div>
   )
 }
