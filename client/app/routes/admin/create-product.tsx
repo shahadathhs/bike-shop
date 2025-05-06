@@ -5,6 +5,18 @@ import { parseFormData, type FileUpload } from '@mjackson/form-data-parser'
 import { v2 as cloudinary } from 'cloudinary'
 import { getCookie } from '~/services/auth.services'
 import { toast } from 'sonner'
+import { Button } from '~/components/ui/button'
+import { Loader2, Upload } from 'lucide-react'
+import { Label } from '~/components/ui/label'
+import { Input } from '~/components/ui/input'
+import { Textarea } from '~/components/ui/textarea'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '~/components/ui/select'
 
 export const action: ActionFunction = async ({ request }) => {
   const cookie = await getCookie(request)
@@ -91,6 +103,7 @@ export const action: ActionFunction = async ({ request }) => {
       return { success: true, data }
     } else {
       const errorData = await response.json()
+      console.log("errorData", errorData);
       return {
         success: false,
         error: errorData.message,
@@ -115,7 +128,6 @@ export default function CreateProduct() {
 
   useEffect(() => {
     if (fetcher.data?.success) {
-      toast.dismiss()
       toast.success('Product created successfully')
 
       // * wait for 1 second before navigating
@@ -125,7 +137,6 @@ export default function CreateProduct() {
 
       return () => clearTimeout(timer)
     } else if (fetcher.data?.error) {
-      toast.dismiss()
       toast.error(fetcher.data.error)
     }
   }, [fetcher.data, navigate])
@@ -152,130 +163,123 @@ export default function CreateProduct() {
   }
 
   return (
-    <div className="p-4">
-      <h1 className="text-3xl font-bold my-4 text-center">Store New Bike data</h1>
-      <fetcher.Form
-        method="post"
-        encType="multipart/form-data"
-        className="max-w-lg mx-auto space-y-4"
-      >
-        <div>
-          <label htmlFor="name" className="block mb-1">
-            Name
-          </label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            className="input input-bordered w-full"
-            required
-          />
+    <div className="py-10 px-2">
+      <div className="pb-4">
+        <h3 className="text-3xl">Store New Bike Data</h3>
+        <p>Enter the details of the new bike product</p>
+      </div>
+      <fetcher.Form method="post" encType="multipart/form-data" className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* name */}
+          <div className="space-y-2 max-w-md">
+            <Label htmlFor="name">Name</Label>
+            <Input type="text" id="name" name="name" required />
+          </div>
+
+          {/* brand, category & model */}
+          <div className="flex flex-wrap gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="brand">Brand</Label>
+              <Select name="brand" required defaultValue={brands[0].value}>
+                <SelectTrigger id="brand">
+                  <SelectValue placeholder="Select brand" />
+                </SelectTrigger>
+                <SelectContent>
+                  {brands.map(brand => (
+                    <SelectItem key={brand.value} value={brand.value}>
+                      {brand.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="model">Model</Label>
+              <Select name="model" required defaultValue={models[0].value}>
+                <SelectTrigger id="model">
+                  <SelectValue placeholder="Select model" />
+                </SelectTrigger>
+                <SelectContent>
+                  {models.map(model => (
+                    <SelectItem key={model.value} value={model.value}>
+                      {model.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="category">Category</Label>
+              <Select name="category" required defaultValue={categories[0].value}>
+                <SelectTrigger id="category">
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map(category => (
+                    <SelectItem key={category.value} value={category.value}>
+                      {category.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </div>
+        {/* price & quantity */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Price */}
+          <div className="space-y-2 max-w-md">
+            <Label htmlFor="price">Price</Label>
+            <Input type="number" id="price" name="price" min="0" step="0.01" required />
+          </div>
+
+          {/* Quantity */}
+          <div className="space-y-2 max-w-md">
+            <Label htmlFor="quantity">Quantity</Label>
+            <Input type="number" id="quantity" name="quantity" min="10" required />
+          </div>
         </div>
 
-        <div>
-          <label htmlFor="brand" className="block mb-1">
-            Brand
-          </label>
-          <select id="brand" name="brand" className="select select-bordered w-full" required>
-            {brands.map(brand => (
-              <option key={brand.value} value={brand.value}>
-                {brand.label}
-              </option>
-            ))}
-          </select>
+        {/* description & image */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* description */}
+          <div className="space-y-2 max-w-md">
+            <Label htmlFor="description">Description</Label>
+            <Textarea id="description" name="description" required rows={5} />
+          </div>
+          {/* Image */}
+          <div className="space-y-2 max-w-md">
+            <Label htmlFor="image">Product Image</Label>
+            <div className="flex items-start gap-2">
+              <Input
+                type="file"
+                id="image"
+                name="image"
+                onChange={handleImageChange}
+                accept="image/*"
+              />
+              {image && (
+                <img src={image} alt="Product Preview" className="w-24 h-16 rounded object-cover" />
+              )}
+            </div>
+          </div>
         </div>
-
-        <div>
-          <label htmlFor="model" className="block mb-1">
-            Model
-          </label>
-          <select id="model" name="model" className="select select-bordered w-full" required>
-            {models.map(model => (
-              <option key={model.value} value={model.value}>
-                {model.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label htmlFor="price" className="block mb-1">
-            Price
-          </label>
-          <input
-            type="number"
-            id="price"
-            name="price"
-            className="input input-bordered w-full"
-            min="0"
-            step="0.01"
-            required
-          />
-        </div>
-
-        <div>
-          <label htmlFor="category" className="block mb-1">
-            Category
-          </label>
-          <select id="category" name="category" className="select select-bordered w-full" required>
-            {categories.map(category => (
-              <option key={category.value} value={category.value}>
-                {category.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label htmlFor="description" className="block mb-1">
-            Description
-          </label>
-          <textarea
-            id="description"
-            name="description"
-            className="textarea textarea-bordered w-full"
-            required
-          />
-        </div>
-
-        <div>
-          <label htmlFor="quantity" className="block mb-1">
-            Quantity
-          </label>
-          <input
-            type="number"
-            id="quantity"
-            name="quantity"
-            className="input input-bordered w-full"
-            min="10"
-            required
-          />
-        </div>
-
-        <div>
-          <label htmlFor="image" className="block mb-1">
-            Product Image
-          </label>
-          <input
-            type="file"
-            id="image"
-            name="image"
-            onChange={handleImageChange}
-            className="file-input file-input-bordered w-full"
-            accept="image/*"
-          />
-          {image && (
-            <img src={image} alt="Product Preview" className="mt-2 w-32 h-32 object-contain" />
+        {/* Submit button */}
+        <Button type="submit" disabled={isSubmitting} className="w-full sm:w-auto">
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Creating...
+            </>
+          ) : (
+            <>
+              <Upload className="mr-2 h-4 w-4" />
+              Create Product
+            </>
           )}
-        </div>
-
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition-colors"
-        >
-          {isSubmitting ? 'Creating...' : 'Create Product'}
-        </button>
+        </Button>
       </fetcher.Form>
     </div>
   )
