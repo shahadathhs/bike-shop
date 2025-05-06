@@ -1,452 +1,425 @@
-import { ArrowBigRight } from 'lucide-react'
+import { getCookie } from '~/services/auth.services'
+import type { TCookie } from '~/types/user'
+
+import {
+  useLoaderData,
+  useNavigate,
+  useSearchParams,
+  useFetcher,
+  redirect,
+  type LoaderFunction,
+  type ActionFunction,
+  Link,
+} from 'react-router'
 import { useEffect, useState } from 'react'
-import { Link, useFetcher, useLoaderData, type ActionFunctionArgs } from 'react-router'
 import { Button } from '~/components/ui/button'
+import { Input } from '~/components/ui/input'
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from '~/components/ui/select'
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+  DialogDescription,
+} from '~/components/ui/dialog'
+import {
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+} from '~/components/ui/table'
+import { Label } from '~/components/ui/label'
 import { brands, categories, models } from '~/utils/bikeUtils'
 import { useDebounce } from '~/utils/debounce'
-import { getToken } from '~/utils/getToken'
+import { getPriceRangeValues } from '~/utils/getPriceRangeValues'
+import { ArrowBigLeft, ArrowBigRight, ArrowRight } from 'lucide-react'
 
-export const loader = async () => {
+// Types
+interface Product {
+  _id: string
+  name: string
+  brand: string
+  modelName: string
+  category: string
+  price: number
+  quantity: number
+}
+
+interface ProductsResponse {
+  data: {
+    bikes: Product[]
+    metadata: { total: number; page: number; limit: number }
+  }
+}
+
+interface LoaderData {
+  products: Product[]
+  metadata: { total: number; page: number; limit: number }
+  cookie: TCookie
+}
+
+// Loader: fetch bikes based on query params
+export const loader: LoaderFunction = async ({ request }) => {
+  const cookie = await getCookie(request)
+  if (!cookie.token) return redirect('/login')
+
+  const url = new URL(request.url)
+  const page = Number(url.searchParams.get('page') ?? '1')
+  const limit = Number(url.searchParams.get('limit') ?? '7')
+  const searchTerm = url.searchParams.get('searchTerm') ?? ''
+  const modelFilter = url.searchParams.get('model') ?? ''
+  const categoryFilter = url.searchParams.get('category') ?? ''
+  const brandFilter = url.searchParams.get('brand') ?? ''
+  const priceRange = url.searchParams.get('priceRange') ?? ''
+
+  const params = new URLSearchParams()
+  params.set('page', String(page))
+  params.set('limit', String(limit))
+  if (searchTerm) params.set('searchTerm', searchTerm)
+  if (modelFilter) params.set('model', modelFilter)
+  if (categoryFilter) params.set('category', categoryFilter)
+  if (brandFilter) params.set('brand', brandFilter)
+  const { minPrice, maxPrice } = getPriceRangeValues(priceRange)
+  if (minPrice != null) params.set('minPrice', String(minPrice))
+  if (maxPrice != null) params.set('maxPrice', String(maxPrice))
+
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/bikes`)
-
-    if (response.ok) {
-      const data = await response.json()
-      return {
-        success: true,
-        products: data,
-      }
-    } else {
-      throw new Error('Failed to fetch products')
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/bikes?${params.toString()}`, {
+      headers: { Authorization: `Bearer ${cookie.token}` },
+    })
+    if (!res.ok) throw new Error('Failed to fetch products')
+    const json: ProductsResponse = await res.json()
+    return {
+      products: json.data.bikes,
+      metadata: json.data.metadata,
+      cookie,
     }
-  } catch (err) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (err: any) {
     console.error('Error fetching products:', err)
     return {
-      error: 'Failed to fetch products',
       products: [],
-      errorDetails: err,
+      metadata: { total: 0, page, limit },
+      cookie,
     }
   }
 }
 
-export const action = async ({ request }: ActionFunctionArgs) => {
+// Action: delete or restock
+export const action: ActionFunction = async ({ request }) => {
+  const cookie = await getCookie(request)
+  if (!cookie.token) return redirect('/login')
+
   const formData = await request.formData()
-  const action = formData.get('action')
+  const actionType = formData.get('action')
+  const id = formData.get('id')
 
-  const token = getToken()
-
-  if (action === 'delete') {
-    const productId = formData.get('id')
-    try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/bikes/${productId}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-      })
-
-      if (response.ok) {
-        return {
-          success: true,
-          message: 'Product deleted successfully',
-        }
-      } else {
-        const errorData = await response.json()
-        return {
-          error: errorData.message || 'Failed to delete product',
-          errorDetails: errorData,
-        }
-      }
-    } catch (err: any) {
-      console.error('Error deleting product:', err)
-      return {
-        error: err.message || 'Failed to delete product',
-        errorDetails: err,
-      }
+  if (actionType === 'delete') {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/bikes/${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${cookie.token}` },
+    })
+    if (!res.ok) {
+      const err = await res.json()
+      throw new Error(err.message || 'Failed to delete product')
     }
   }
 
-  if (action === 'restock') {
-    const productId = formData.get('id')
-    const newQuantity = formData.get('quantity')
-
-    try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/bikes/${productId}/restock`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ quantity: newQuantity }),
-      })
-
-      if (response.ok) {
-        return {
-          success: true,
-          message: 'Product restocked successfully',
-        }
-      } else {
-        const errorData = await response.json()
-        return {
-          error: errorData.message || 'Failed to restock product',
-          errorDetails: errorData,
-        }
-      }
-    } catch (err: any) {
-      console.error('Error restocking product:', err)
-      return {
-        error: err.message || 'Failed to restock product',
-        errorDetails: err,
-      }
+  if (actionType === 'restock') {
+    const quantity = formData.get('quantity')
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/bikes/${id}/restock`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${cookie.token}`,
+      },
+      body: JSON.stringify({ quantity }),
+    })
+    if (!res.ok) {
+      const err = await res.json()
+      throw new Error(err.message || 'Failed to restock product')
     }
   }
+
+  return null
 }
 
 export default function Products() {
-  const loaderData = useLoaderData()
-  const [products, setProducts] = useState(loaderData.products.data.bikes)
-
+  const { products, metadata } = useLoaderData<LoaderData>()
+  const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
   const fetcher = useFetcher()
+
+  const page = metadata.page
+  const limit = metadata.limit
+  const total = metadata.total
+  const totalPages = Math.ceil(total / limit)
+
+  // Extract current filters from URL
+  const currentModel = searchParams.get('model') ?? ''
+  const currentCategory = searchParams.get('category') ?? ''
+  const currentBrand = searchParams.get('brand') ?? ''
+  const currentPriceRange = searchParams.get('priceRange') ?? ''
+
   const isSubmitting = fetcher.state === 'submitting'
 
-  // State for products and metadata (for pagination)
-  const [metadata, setMetadata] = useState({ total: 0, page: 1, limit: 10 })
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+  // Helper to update URL params
+  function go(params: {
+    page?: number
+    limit?: number
+    searchTerm?: string
+    model?: string
+    category?: string
+    brand?: string
+    priceRange?: string
+  }) {
+    const p = new URLSearchParams(searchParams)
+    Object.entries(params).forEach(([key, value]) => {
+      if (value == null || value === '' || value === 'all') p.delete(key)
+      else p.set(key, String(value))
+    })
+    navigate(`?${p.toString()}`)
+  }
 
-  // Local state for the input value
-  const [inputValue, setInputValue] = useState('')
-  // Actual search term that drives data fetching
-  const [searchTerm, setSearchTerm] = useState('')
+  const [term, setTerm] = useState(searchParams.get('searchTerm') ?? '')
+  const debouncedTerm = useDebounce(term, 500)
 
-  // Debounce the input value with a delay of 100ms
-  const debouncedInput = useDebounce(inputValue, 100)
-
-  // Update the actual search term whenever the debounced value changes
+  // effect to navigate on debounce
   useEffect(() => {
-    setSearchTerm(debouncedInput)
-    setPage(1) // Reset to first page whenever search changes
-  }, [debouncedInput])
-
-  // Query/filter state variables
-  const [priceRange, setPriceRange] = useState('all') // Options: "all", "under300", "300to500", "500to800", "above800"
-  const [model, setModel] = useState('all') // "all" or specific values like "Sport", etc.
-  const [category, setCategory] = useState('all') // "all", "Mountain", "Road", etc.
-  const [brand, setBrand] = useState('all') // "all", "Trek", "Cannondale", etc.
-  const [page, setPage] = useState(1)
-  const [limit, setLimit] = useState(10)
-
-  const token = getToken()
-
-  // Helper to convert priceRange value to min and max values.
-  const getPriceRangeValues = (range: string) => {
-    switch (range) {
-      case 'under300':
-        return { minPrice: undefined, maxPrice: 300 }
-      case '300to500':
-        return { minPrice: 300, maxPrice: 500 }
-      case '500to800':
-        return { minPrice: 500, maxPrice: 800 }
-      case 'above800':
-        return { minPrice: 800, maxPrice: undefined }
-      default:
-        return { minPrice: undefined, maxPrice: undefined }
-    }
-  }
-
-  // Fetch products function: constructs query parameters from state.
-  const fetchProducts = async () => {
-    setLoading(true)
-    setError('')
-    try {
-      const { minPrice, maxPrice } = getPriceRangeValues(priceRange)
-      const params = new URLSearchParams()
-
-      if (searchTerm) params.append('searchTerm', searchTerm)
-      if (minPrice !== undefined) params.append('minPrice', String(minPrice))
-      if (maxPrice !== undefined) params.append('maxPrice', String(maxPrice))
-      if (model !== 'all') params.append('model', model)
-      if (category !== 'all') params.append('category', category)
-      if (brand !== 'all') params.append('brand', brand)
-      params.append('page', String(page))
-      params.append('limit', String(limit))
-
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/bikes?${params.toString()}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        setProducts(data.data.bikes)
-        setMetadata(data.data.metadata)
-      } else {
-        const errorData = await response.json()
-        setError(errorData.data.error || 'Failed to fetch products')
-      }
-    } catch (err) {
-      console.error('Error fetching products:', err)
-      setError('Error fetching products')
-    }
-    setLoading(false)
-  }
-
-  // Fetch products when any filter or pagination state changes
-  useEffect(() => {
-    fetchProducts()
-  }, [searchTerm, priceRange, model, category, brand, page, limit])
-
-  // Pagination controls
-  const handlePrevPage = () => {
-    if (page > 1) setPage((prev: any) => prev - 1)
-  }
-
-  const handleNextPage = () => {
-    if (metadata.total > page * limit) setPage((prev: any) => prev + 1)
-  }
+    const p = new URLSearchParams(searchParams)
+    if (debouncedTerm) p.set('searchTerm', debouncedTerm)
+    else p.delete('searchTerm')
+    p.set('page', '1')
+    navigate(`?${p}`)
+  }, [debouncedTerm])
 
   return (
-    <div className="p-2">
-      <div className="flex flex-col md:flex-row justify-between items-center">
-        <h1 className="text-2xl font-bold mb-4">All Products</h1>
-        <div className="mb-4">
+    <div className="space-y-6 p-4">
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-semibold">All Products</h1>
+        <Button asChild variant="outline">
           <Link to="/admin/create-product">
-            <Button variant="outline">
-              Create New Product <ArrowBigRight />{' '}
-            </Button>
+            Create Product <ArrowRight className="ml-2 h-4 w-4" />
           </Link>
-        </div>
+        </Button>
       </div>
 
-      {/* Filter Form */}
-      <div className="mb-6 flex flex-col lg:flex-row lg:justify-between gap-4">
-        <input
-          type="text"
-          placeholder="Search by name, brand, or category..."
-          value={searchTerm}
-          onChange={e => setInputValue(e.target.value)}
-          className="input input-bordered w-full md:max-w-lg lg:flex-1"
+      {/* Filters */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <Input
+          placeholder="Search by name..."
+          value={term}
+          onChange={e => setTerm(e.target.value)}
         />
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {/* Price Range filter */}
-          <select
-            value={priceRange}
-            onChange={e => {
-              setPriceRange(e.target.value)
-              setPage(1)
-            }}
-            className="select select-bordered w-full"
-          >
-            <option value="all">All Prices</option>
-            <option value="under300">Under $300</option>
-            <option value="300to500">$300 - $500</option>
-            <option value="500to800">$500 - $800</option>
-            <option value="above800">Above $800</option>
-          </select>
 
-          {/* Model Filter */}
-          <select
-            value={model}
-            onChange={e => {
-              setModel(e.target.value)
-              setPage(1)
-            }}
-            className="select select-bordered w-full"
-          >
-            <option value="all">All Models</option>
-            {models.map(model => (
-              <option key={model.value} value={model.value}>
-                {model.label}
-              </option>
-            ))}
-          </select>
+        <div className="flex justify-between">
+          {/* price range */}
+          <Select value={currentPriceRange} onValueChange={v => go({ priceRange: v, page: 1 })}>
+            <SelectTrigger>
+              <SelectValue placeholder="Price Range" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Prices</SelectItem>
+              <SelectItem value="under300">Under $300</SelectItem>
+              <SelectItem value="300to500">$300 - $500</SelectItem>
+              <SelectItem value="500to800">$500 - $800</SelectItem>
+              <SelectItem value="above800">Above $800</SelectItem>
+            </SelectContent>
+          </Select>
 
-          {/* Category Filter */}
-          <select
-            value={category}
-            onChange={e => {
-              setCategory(e.target.value)
-              setPage(1)
-            }}
-            className="select select-bordered w-full"
-          >
-            <option value="all">All Categories</option>
-            {categories.map(category => (
-              <option key={category.value} value={category.value}>
-                {category.label}
-              </option>
-            ))}
-          </select>
+          {/* model */}
+          <Select value={currentModel} onValueChange={v => go({ model: v, page: 1 })}>
+            <SelectTrigger>
+              <SelectValue placeholder="Model" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Models</SelectItem>
+              {models.map(m => (
+                <SelectItem key={m.value} value={m.value}>
+                  {m.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-          {/* Brand Filter */}
-          <select
-            value={brand}
-            onChange={e => {
-              setBrand(e.target.value)
-              setPage(1)
-            }}
-            className="select select-bordered w-full"
-          >
-            <option value="all">All Brands</option>
-            {brands.map(brand => (
-              <option key={brand.value} value={brand.value}>
-                {brand.label}
-              </option>
-            ))}
-          </select>
+          {/* category */}
+          <Select value={currentCategory} onValueChange={v => go({ category: v, page: 1 })}>
+            <SelectTrigger>
+              <SelectValue placeholder="Category" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Categories</SelectItem>
+              {categories.map(c => (
+                <SelectItem key={c.value} value={c.value}>
+                  {c.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {/* brand */}
+          <Select value={currentBrand} onValueChange={v => go({ brand: v, page: 1 })}>
+            <SelectTrigger>
+              <SelectValue placeholder="Brand" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Brands</SelectItem>
+              {brands.map(b => (
+                <SelectItem key={b.value} value={b.value}>
+                  {b.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
-
-      {/* loading state */}
-      {fetcher.state === 'submitting' ||
-        (loading && (
-          <div className="flex justify-center items-center">
-            <span className="loading loading-spinner loading-lg"></span>
-          </div>
-        ))}
 
       {/* Table */}
-      {fetcher.state !== 'submitting' && !loading && error === '' && (
-        <div className="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
-          <table className=" w-full table table-zebra">
-            {products?.length > 0 ? (
-              <>
-                <thead className="text-center">
-                  <tr>
-                    <th>Name</th>
-                    <th>Brand</th>
-                    <th>Model</th>
-                    <th>Category</th>
-                    <th>Price</th>
-                    <th>Quantity</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="text-center">
-                  {products?.map((product: any) => (
-                    <tr key={product._id}>
-                      <td>{product.name}</td>
-                      <td>{product.brand}</td>
-                      <td>{product.modelName}</td>
-                      <td>{product.category}</td>
-                      <td>${product.price}</td>
-                      <td>{product.quantity}</td>
-                      <td className="space-x-2 flex items-center gap-2 justify-center">
-                        {/* Edit button */}
-                        <Link
-                          to={`/dashboard/admin/update-product/${product._id}`}
-                          className="btn btn-warning btn-sm"
-                        >
-                          Edit
-                        </Link>
-                        {/* restock form */}
-                        {/* Open the modal using document.getElementById('ID').showModal() method */}
-                        <button
-                          className="btn btn-info btn-sm"
-                          onClick={() =>
-                            (
-                              document.getElementById('restock-modal') as HTMLDialogElement
-                            )?.showModal()
-                          }
-                        >
-                          Restock
-                        </button>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Name</TableHead>
+            <TableHead>Brand</TableHead>
+            <TableHead>Model</TableHead>
+            <TableHead>Category</TableHead>
+            <TableHead>Price</TableHead>
+            <TableHead>Quantity</TableHead>
+            <TableHead>Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {products.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={7} className="text-center py-4">
+                No products found.
+              </TableCell>
+            </TableRow>
+          ) : (
+            products.map(product => (
+              <TableRow key={product._id}>
+                <TableCell>{product.name}</TableCell>
+                <TableCell>{product.brand}</TableCell>
+                <TableCell>{product.modelName}</TableCell>
+                <TableCell>{product.category}</TableCell>
+                <TableCell>${product.price}</TableCell>
+                <TableCell>{product.quantity}</TableCell>
+                <TableCell className="flex items-center gap-2">
+                  {/* update */}
+                  <Button
+                    size="sm"
+                    className="px-2 py-1 h-[24px] rounded"
+                    variant="outline"
+                    asChild
+                  >
+                    <Link to={`/admin/update-product/${product._id}`}>Edit</Link>
+                  </Button>
 
-                        {/* Restock Modal */}
-                        <dialog id="restock-modal" className="modal">
-                          <div className="modal-box">
-                            <fetcher.Form method="post" className="flex flex-col gap-4">
-                              <input type="hidden" name="action" value="restock" />
-                              <input type="hidden" name="id" value={product._id} />
-                              <div className="text-left">
-                                <label className="label mb-2">Quantity to restock:</label>
-                                <input
-                                  type="number"
-                                  id="quantity"
-                                  name="quantity"
-                                  defaultValue={product.quantity}
-                                  className="input input-bordered w-full"
-                                  required
-                                />
-                              </div>
-                              <div>
-                                <button
-                                  type="submit"
-                                  disabled={isSubmitting}
-                                  className="btn btn-info btn-sm"
-                                >
-                                  {isSubmitting ? 'Restocking...' : 'Restock'}
-                                </button>
-                              </div>
-                            </fetcher.Form>
-                            <div className="modal-action">
-                              <form method="dialog">
-                                {/* if there is a button in form, it will close the modal */}
-                                <button className="btn">Close</button>
-                              </form>
-                            </div>
-                          </div>
-                        </dialog>
+                  {/* restock */}
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button size="sm" className="px-2 py-1 h-[24px] rounded">
+                        Restock
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Restock Product</DialogTitle>
+                        <DialogDescription>Enter new quantity</DialogDescription>
+                      </DialogHeader>
+                      <fetcher.Form method="post" className="space-y-4">
+                        <input type="hidden" name="action" value="restock" />
+                        <input type="hidden" name="id" value={product._id} />
+                        <div className="space-y-2">
+                          <Label htmlFor="name">Name</Label>
+                          <Input
+                            id="name"
+                            name="name"
+                            type="text"
+                            disabled
+                            defaultValue={product.name}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="quantity">Quantity</Label>
+                          <Input
+                            id="quantity"
+                            name="quantity"
+                            type="number"
+                            defaultValue={product.quantity}
+                          />
+                        </div>
+                        <DialogFooter>
+                          <Button type="submit" disabled={isSubmitting}>
+                            Restock
+                          </Button>
+                        </DialogFooter>
+                      </fetcher.Form>
+                    </DialogContent>
+                  </Dialog>
 
-                        {/* Delete from */}
-                        <fetcher.Form method="delete">
-                          <input type="hidden" name="action" value="delete" />
-                          <input type="hidden" name="id" value={product._id} />
-                          <button type="submit" className="btn btn-error btn-sm">
-                            {isSubmitting ? 'Deleting...' : 'Delete'}
-                          </button>
-                        </fetcher.Form>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </>
-            ) : (
-              <tbody>
-                <tr>
-                  <td colSpan={5} className="text-center py-4">
-                    No products found.
-                  </td>
-                </tr>
-              </tbody>
-            )}
-          </table>
-        </div>
-      )}
+                  {/* delete */}
+                  <fetcher.Form method="post">
+                    <input type="hidden" name="action" value="delete" />
+                    <input type="hidden" name="id" value={product._id} />
+                    <Button
+                      size="sm"
+                      className="px-2 py-1 h-[24px] rounded"
+                      variant="destructive"
+                      disabled={isSubmitting}
+                    >
+                      Delete
+                    </Button>
+                  </fetcher.Form>
+                </TableCell>
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+      </Table>
 
-      {/* Pagination Controls */}
-      <div className="flex justify-end items-center space-x-4 mt-4">
-        <button onClick={handlePrevPage} className="btn btn-outline btn-sm" disabled={page === 1}>
-          Previous
-        </button>
-        <span className="text-secondary">
-          Page {page} of {Math.ceil(metadata.total / metadata.limit)}
-        </span>
-        <button
-          onClick={handleNextPage}
-          disabled={page === Math.ceil(metadata.total / metadata.limit)}
-          className="btn btn-outline btn-sm"
+      {/* Pagination */}
+      <div className="flex justify-end items-center space-x-2 mt-4">
+        <Button
+          size="sm"
+          variant="ghost"
+          disabled={page <= 1}
+          onClick={() => go({ page: page - 1 })}
         >
-          Next
-        </button>
-
-        {/* limit dropdown */}
-        <div>
-          <select
-            value={limit}
-            onChange={e => {
-              setLimit(parseInt(e.target.value))
-              setPage(1)
-            }}
-            className="select select-bordered"
-          >
-            <option value="10">10 per page</option>
-            <option value="20">20 per page</option>
-            <option value="50">50 per page</option>
-          </select>
-        </div>
+          <ArrowBigLeft />
+        </Button>
+        <span>
+          {page} of {totalPages}
+        </span>
+        <Button
+          size="sm"
+          variant="ghost"
+          disabled={page >= totalPages}
+          onClick={() => go({ page: page + 1 })}
+        >
+          <ArrowBigRight />
+        </Button>
+        <Select value={String(limit)} onValueChange={v => go({ limit: Number(v), page: 1 })}>
+          <SelectTrigger>
+            <SelectValue placeholder="Limit" />
+          </SelectTrigger>
+          <SelectContent align="end">
+            {[7, 14, 21].map(n => (
+              <SelectItem key={n} value={String(n)}>
+                {n}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
     </div>
   )
