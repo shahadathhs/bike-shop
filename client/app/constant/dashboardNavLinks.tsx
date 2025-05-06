@@ -61,6 +61,11 @@ export const customerNavItems: NavigationItem[] = [
     icon: Home,
   },
   {
+    title: 'My Cart',
+    to: '/cart',
+    icon: ShoppingCart,
+  },
+  {
     title: 'Profile',
     to: '/customer/profile',
     icon: PersonStanding,

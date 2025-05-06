@@ -1,5 +1,13 @@
 import { redirect, useLoaderData, type LoaderFunction } from 'react-router'
 import { getCookie } from '~/services/auth.services'
+import {
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+} from '~/components/ui/table'
 
 interface IRevenueSummary {
   totalRevenue: number
@@ -59,83 +67,88 @@ export default function Analytics() {
   const { analytics } = useLoaderData<{ analytics: IAnalytics }>()
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-6 text-center">Analytics Dashboard</h1>
+    <div>
+      <h1 className="text-3xl text-center font-bold mb-6">Analytics Dashboard</h1>
 
       {analytics && (
         <div className="space-y-8">
-          {/* Revenue Summary Card */}
-          <div className="shadow rounded-lg p-6">
-            <h2 className="text-2xl font-bold mb-4">Revenue Summary</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="p-4 rounded-box border border-base-content/5 bg-base-100">
-                <p className="text-gray-400">Total Revenue</p>
-                <p className="text-2xl font-semibold">
+          {/* Revenue Summary */}
+          <div>
+            <h2 className="text-xl font-semibold mb-4">Revenue Summary</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="border rounded p-2">
+                <p className="text-sm text-gray-500">Total Revenue</p>
+                <p className="text-2xl font-bold">
                   ${analytics.revenueSummary.totalRevenue.toFixed(2)}
                 </p>
               </div>
-              <div className="p-4 rounded-box border border-base-content/5 bg-base-100">
-                <p className="text-gray-400">Total Orders</p>
-                <p className="text-2xl font-semibold">{analytics.revenueSummary.totalOrders}</p>
+              <div className="border rounded p-2">
+                <p className="text-sm text-gray-500">Total Orders</p>
+                <p className="text-2xl font-bold">{analytics.revenueSummary.totalOrders}</p>
               </div>
-              <div className="p-4 rounded-box border border-base-content/5 bg-base-100">
-                <p className="text-gray-400">Avg Order Value</p>
-                <p className="text-2xl font-semibold">
+              <div className="border rounded p-2">
+                <p className="text-sm text-gray-500">Avg Order Value</p>
+                <p className="text-2xl font-bold">
                   ${analytics.revenueSummary.averageOrderValue.toFixed(2)}
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Orders by Status */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="shadow-lg rounded-lg p-6">
-              <h2 className="text-2xl font-bold mb-4">Orders by Status</h2>
-              <div className="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
-                <table className="w-full table table-zebra">
-                  <thead>
-                    <tr>
-                      <th>Status</th>
-                      <th>Count</th>
-                    </tr>
-                  </thead>
-                  <tbody>
+          {/* Orders by Status and Date */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <h2 className="text-xl font-semibold mb-3">Orders by Status</h2>
+              <div className="rounded border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Count</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
                     {Object.entries(analytics.orderAnalytics.ordersByStatus).map(
                       ([status, count]) => (
-                        <tr key={status}>
-                          <td>{status}</td>
-                          <td>{count}</td>
-                        </tr>
+                        <TableRow key={status}>
+                          <TableCell className="capitalize">{status}</TableCell>
+                          <TableCell>{count}</TableCell>
+                        </TableRow>
                       ),
                     )}
-                  </tbody>
-                </table>
+                  </TableBody>
+                </Table>
               </div>
             </div>
 
-            {/* Orders by Date */}
-            <div className="shadow-lg rounded-lg p-6">
-              <h2 className="text-2xl font-bold mb-4">Orders by Date</h2>
-              <div className="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
-                <table className="w-full table table-zebra">
-                  <thead>
-                    <tr>
-                      <th>Date</th>
-                      <th>Order Count</th>
-                    </tr>
-                  </thead>
-                  <tbody>
+            <div>
+              <h2 className="text-xl font-semibold mb-3">Orders by Date</h2>
+              <div className="rounded border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Orders</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
                     {Object.entries(analytics.orderAnalytics.ordersByDate).map(([date, count]) => (
-                      <tr key={date}>
-                        <td>{date}</td>
-                        <td>{count}</td>
-                      </tr>
+                      <TableRow key={date}>
+                        <TableCell>{date}</TableCell>
+                        <TableCell>{count}</TableCell>
+                      </TableRow>
                     ))}
-                  </tbody>
-                </table>
+                  </TableBody>
+                </Table>
               </div>
             </div>
           </div>
+
+          {/* Pie Chart for order by status */}
+
+          {/* Line Chart for orders by date */}
+
+          {/* Chart for revenue summary */}
         </div>
       )}
     </div>
