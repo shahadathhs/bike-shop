@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react'
-import { useFetcher, useNavigate, type ActionFunctionArgs } from 'react-router'
+import { useFetcher, useNavigate, type ActionFunction } from 'react-router'
 import { brands, categories, models } from '~/utils/bikeUtils'
-import toast from 'react-hot-toast'
-import { getToken } from '~/utils/getToken'
 import { parseFormData, type FileUpload } from '@mjackson/form-data-parser'
 import { v2 as cloudinary } from 'cloudinary'
+import { getCookie } from '~/services/auth.services'
+import { toast } from 'sonner'
 
-export const action = async ({ request }: ActionFunctionArgs) => {
+export const action: ActionFunction = async ({ request }) => {
+  const cookie = await getCookie(request)
+
   // * step 1:  Configure Cloudinary
   cloudinary.config({
     cloud_name: import.meta.env.VITE_CLOUDINARY_CLOUD_NAME,
@@ -60,7 +62,6 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const description = formData.get('description') as string
   const category = formData.get('category') as string
   const imageUrl = formData.get('image') as string
-  const token = formData.get('csrf_token') as string
 
   // * step 4: Create the form data object
   const formDataObject = {
@@ -80,7 +81,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${cookie.token}`,
       },
       body: JSON.stringify(formDataObject),
     })
@@ -96,7 +97,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         errorDetails: errorData,
       }
     }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error('Error creating product:', error)
     return {
@@ -112,8 +113,6 @@ export default function CreateProduct() {
 
   const navigate = useNavigate()
 
-  const token = getToken() as string
-
   useEffect(() => {
     if (fetcher.data?.success) {
       toast.dismiss()
@@ -121,7 +120,7 @@ export default function CreateProduct() {
 
       // * wait for 1 second before navigating
       const timer = setTimeout(() => {
-        navigate('/dashboard/admin/products')
+        navigate('/admin/products')
       }, 1000)
 
       return () => clearTimeout(timer)
@@ -144,22 +143,22 @@ export default function CreateProduct() {
           setImage(reader.result as string)
         }
       } else {
-        toast.dismiss()
-        toast.error('Please select a valid image file (JPEG or PNG)')
+        toast.error('Invalid File', {
+          description: 'Please select a valid image file (JPEG or PNG)',
+        })
       }
       reader.readAsDataURL(file)
     }
   }
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="p-4">
       <h1 className="text-3xl font-bold my-4 text-center">Store New Bike data</h1>
       <fetcher.Form
         method="post"
         encType="multipart/form-data"
         className="max-w-lg mx-auto space-y-4"
       >
-        <input type="hidden" name="csrf_token" value={token} />
         <div>
           <label htmlFor="name" className="block mb-1">
             Name
