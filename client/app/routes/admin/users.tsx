@@ -1,130 +1,168 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import { getCookie } from '~/services/auth.services'
+import type { TCookie } from '~/types/user'
+
+import {
+  useLoaderData,
+  useNavigate,
+  useSearchParams,
+  useNavigation,
+  redirect,
+  type LoaderFunction,
+  type ActionFunction,
+  useFetcher,
+} from 'react-router'
+import { Input } from '~/components/ui/input'
 import { useEffect, useState } from 'react'
-import toast from 'react-hot-toast'
-import { useFetcher, type ActionFunction } from 'react-router'
-import { getToken } from '~/utils/getToken'
+import { useDebounce } from '~/utils/debounce'
 
-export const action: ActionFunction = async ({ request }) => {
-  const formData = await request.formData()
+// Types for loader data
+interface User {
+  _id: string
+  name: string
+  email: string
+  role: string
+  isActive: boolean
+}
 
-  const action = formData.get('action')
-  const token = formData.get('token')
+interface LoaderData {
+  users: User[]
+  metadata: { total: number; page: number; limit: number }
+  cookie: TCookie
+}
 
-  // * action the toggle user active status
-  if (action === 'toggleActive') {
-    const userId = formData.get('userId')
+// Loader to fetch users with pagination and optional email filter
+export const loader: LoaderFunction = async ({ request }) => {
+  const cookie = await getCookie(request)
+  if (!cookie.token) return redirect('/login')
 
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/${userId}/active`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
+  const url = new URL(request.url)
+  const page = Number(url.searchParams.get('page') ?? '1')
+  const limit = Number(url.searchParams.get('limit') ?? '10')
+  const email = url.searchParams.get('email') ?? ''
+
+  try {
+    const params = new URLSearchParams()
+    params.set('page', String(page))
+    params.set('limit', String(limit))
+    if (email) params.set('email', email)
+
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/getAll?${params.toString()}`, {
+      headers: { Authorization: `Bearer ${cookie.token}` },
     })
-    if (!response.ok) {
-      const errData = await response.json()
-      throw new Error(errData.error || 'Failed to update user status')
+
+    const responseData = await res.json()
+
+    return {
+      users: responseData.data.users,
+      metadata: responseData.data.metadata,
+      cookie,
     }
-  }
-  // * action the toggle user role
-  if (action === 'toggleRole') {
-    const id = formData.get('userId')
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/${id}/role`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-    })
-    if (!response.ok) {
-      const errData = await response.json()
-      throw new Error(errData.error || 'Failed to update user role')
-    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (err: any) {
+    console.error('Error fetching users:', err)
+    return { users: [], metadata: { total: 0, page, limit }, cookie }
   }
 }
 
-export default function Users() {
-  const [users, setUsers] = useState([])
-  const [page, setPage] = useState(1)
-  const [limit, setLimit] = useState(10)
-  const [total, setTotal] = useState(0)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
-  const [emailFilter, setEmailFilter] = useState('')
+// Action to toggle user active status or role
+export const action: ActionFunction = async ({ request }) => {
+  const cookie = await getCookie(request)
+  if (!cookie.token) return redirect('/login')
 
-  const fetcher = useFetcher()
-  const isSubmitting = fetcher.state === 'submitting'
+  const formData = await request.formData()
+  const actionType = formData.get('action')
+  const userId = formData.get('userId')
 
-  const token = getToken()
-
-  // Fetch users with pagination and optional email filtering.
-  const fetchUsers = async (page = 1, limit = 10, email = '') => {
-    setLoading(true)
-    try {
-      const queryParams = new URLSearchParams({
-        page: page.toString(),
-        limit: limit.toString(),
-      })
-      // Append the email query parameter if provided.
-      if (email) {
-        queryParams.append('email', email)
-      }
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/auth/getAll?${queryParams.toString()}`,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      )
-      if (!response.ok) {
-        const errData = await response.json()
-        throw new Error(errData.error || 'Failed to fetch users')
-      }
-      const responseData = await response.json()
-      setUsers(responseData.data.users)
-      setTotal(responseData.data.metadata.total)
-     
-    } catch (err: any) {
-      console.error(err)
-      setError(err.message || 'Failed to fetch users')
-      toast.error(err.message || 'Failed to fetch users')
+  if (actionType === 'toggleActive') {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/${userId}/active`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${cookie.token}`,
+      },
+    })
+    if (!res.ok) {
+      const errData = await res.json()
+      throw new Error(errData.error || 'Failed to update user status')
     }
-    setLoading(false)
   }
 
-  // Fetch users on state changes.
-  useEffect(() => {
-    if (token) {
-      fetchUsers(page, limit, emailFilter)
+  if (actionType === 'toggleRole') {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/${userId}/role`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${cookie.token}`,
+      },
+    })
+    if (!res.ok) {
+      const errData = await res.json()
+      throw new Error(errData.error || 'Failed to update user role')
     }
-  }, [token, page, limit, emailFilter, isSubmitting])
+  }
 
+  return null
+}
+
+// Component to render users table with filters and pagination
+export default function Users() {
+  const { users, metadata } = useLoaderData<LoaderData>()
+
+  const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
+  const navigation = useNavigation()
+  const fetcher = useFetcher()
+
+  const page = Number(metadata.page)
+  const limit = Number(metadata.limit)
+  const total = Number(metadata.total)
   const totalPages = Math.ceil(total / limit)
+  const isLoading = navigation.state !== 'idle'
+  const isSubmitting = fetcher.state === 'submitting'
+
+  function go(params: { page?: number; limit?: number; email?: string }) {
+    const p = new URLSearchParams(searchParams)
+    Object.entries(params).forEach(([key, value]) => {
+      if (value == null || value === '') p.delete(key)
+      else p.set(key, String(value))
+    })
+    navigate(`?${p.toString()}`)
+  }
+
+  const [term, setTerm] = useState(searchParams.get('email') ?? '')
+  const debouncedTerm = useDebounce(term, 500)
+
+  // effect to navigate on debounce
+  useEffect(() => {
+    const p = new URLSearchParams(searchParams)
+    if (debouncedTerm) p.set('searchTerm', debouncedTerm)
+    else p.delete('searchTerm')
+    p.set('page', '1')
+    navigate(`?${p}`)
+  }, [debouncedTerm])
 
   return (
-    <div className="container mx-auto p-4">
+    <div className='p-2'>
       <h1 className="text-3xl font-bold mb-4">Users</h1>
 
       {/* Email Filter Input */}
-      <div className="mb-4">
-        <input
+      <div className="mb-4 max-w-md">
+        <Input
           type="email"
-          value={emailFilter}
-          onChange={e => {
-            setPage(1) // Reset to first page on filter change.
-            setEmailFilter(e.target.value)
-          }}
+          value={term}
+          onChange={e => setTerm(e.target.value)}
           placeholder="Filter by email"
-          className="input input-bordered"
         />
       </div>
 
-      {loading && <p>Loading users...</p>}
-      {error && <p className="text-red-500">{error}</p>}
-      {!loading && users.length === 0 && <p>No users found.</p>}
-      {!loading && users.length > 0 && (
+      {/* Loading State */}
+      {(isLoading || isSubmitting) && <p>Loading users...</p>}
+
+      {/* No Users */}
+      {!isLoading && users.length === 0 && <p>No users found.</p>}
+
+      {/* Users Table */}
+      {users.length > 0 && (
         <div className="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
           <table className="w-full table table-zebra">
             <thead className="bg-gray-200">
@@ -137,29 +175,24 @@ export default function Users() {
               </tr>
             </thead>
             <tbody>
-              {users.map((user: any) => (
+              {users?.map(user => (
                 <tr key={user._id}>
                   <td>{user.name}</td>
                   <td>{user.email}</td>
                   <td>{user.role}</td>
                   <td>{user.isActive ? 'Active' : 'Inactive'}</td>
                   <td className="flex gap-2">
-                    {/* toggle user active status */}
                     <fetcher.Form method="post">
-                      <input type="hidden" name="token" value={token as string} />
                       <input type="hidden" name="action" value="toggleActive" />
                       <input type="hidden" name="userId" value={user._id} />
-                      <button className="btn btn-info btn-sm">
+                      <button className="btn btn-info btn-sm" disabled={isSubmitting}>
                         {user.isActive ? 'Deactivate' : 'Activate'}
                       </button>
                     </fetcher.Form>
-
-                    {/* toggle user role */}
                     <fetcher.Form method="post">
-                      <input type="hidden" name="token" value={token as string} />
                       <input type="hidden" name="action" value="toggleRole" />
                       <input type="hidden" name="userId" value={user._id} />
-                      <button className="btn btn-error btn-sm">
+                      <button className="btn btn-error btn-sm" disabled={isSubmitting}>
                         Make {user.role === 'customer' ? 'Admin' : 'Customer'}
                       </button>
                     </fetcher.Form>
@@ -174,9 +207,9 @@ export default function Users() {
       {/* Pagination Controls */}
       <div className="flex justify-end gap-4 items-center mt-4">
         <button
-          onClick={() => setPage(prev => Math.max(prev - 1, 1))}
-          className="btn btn-outline btn-sm"
+          onClick={() => go({ page: page - 1 })}
           disabled={page === 1}
+          className="btn btn-outline btn-sm"
         >
           Previous
         </button>
@@ -184,26 +217,21 @@ export default function Users() {
           Page {page} of {totalPages}
         </span>
         <button
-          onClick={() => setPage(prev => (prev < totalPages ? prev + 1 : prev))}
-          className="btn btn-outline btn-sm"
+          onClick={() => go({ page: page + 1 })}
           disabled={page >= totalPages}
+          className="btn btn-outline btn-sm"
         >
           Next
         </button>
-        <div>
-          <select
-            value={limit}
-            onChange={e => {
-              setPage(1) // Reset page when limit changes.
-              setLimit(parseInt(e.target.value))
-            }}
-            className="select select-bordered btn-sm"
-          >
-            <option value="10">10 per page</option>
-            <option value="20">20 per page</option>
-            <option value="50">50 per page</option>
-          </select>
-        </div>
+        <select
+          value={limit}
+          onChange={e => go({ limit: Number(e.target.value), page: 1 })}
+          className="select select-bordered btn-sm"
+        >
+          <option value="10">10 per page</option>
+          <option value="20">20 per page</option>
+          <option value="50">50 per page</option>
+        </select>
       </div>
     </div>
   )

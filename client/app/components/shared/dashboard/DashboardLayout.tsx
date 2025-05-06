@@ -9,7 +9,7 @@ import Loading from '../Loading'
 export function DashboardLayout({ userRole = 'customer' }: { userRole?: 'admin' | 'customer' }) {
   const location = useLocation()
   const pathname = location.pathname
-  
+
   const navigation = useNavigation()
 
   const [currentPath, setCurrentPath] = useState<string>('')
@@ -26,10 +26,8 @@ export function DashboardLayout({ userRole = 'customer' }: { userRole?: 'admin' 
     }
   }, [pathname])
 
-
   // * Check if we are doing an "internal" transition (only search changes) or moving to a new route.
-  const isInternalTransition =
-    navigation.location?.pathname === location.pathname
+  const isInternalTransition = navigation.location?.pathname === location.pathname
 
   // * Show spinner only if we’re navigating (state === 'loading') and moving to a different route.
   const showSpinner = navigation.state === 'loading' && !isInternalTransition
@@ -49,7 +47,7 @@ export function DashboardLayout({ userRole = 'customer' }: { userRole?: 'admin' 
       <div className="min-h-screen bg-background w-full">
         <SidebarInset>
           <DashboardNavbar currentPath={currentPath} userRole={userRole} />
-          <main className="w-full p-1 border border-t-0">
+          <main className="w-full p-2">
             {showSpinner ? <Loading className="h-[calc(100vh-88px)]" /> : <Outlet />}
           </main>
         </SidebarInset>
