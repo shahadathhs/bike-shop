@@ -1,6 +1,5 @@
 import { getCookie } from '~/services/auth.services'
 import type { TCookie } from '~/types/user'
-
 import {
   useLoaderData,
   useNavigate,
@@ -11,9 +10,27 @@ import {
   type ActionFunction,
   useFetcher,
 } from 'react-router'
-import { Input } from '~/components/ui/input'
 import { useEffect, useState } from 'react'
 import { useDebounce } from '~/utils/debounce'
+import { Input } from '~/components/ui/input'
+import { Button } from '~/components/ui/button'
+import {
+  Table,
+  TableHeader,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+} from '~/components/ui/table'
+import { Badge } from '~/components/ui/badge'
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from '~/components/ui/select'
+import { Loader2 } from 'lucide-react'
 
 // Types for loader data
 interface User {
@@ -49,16 +66,10 @@ export const loader: LoaderFunction = async ({ request }) => {
     const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/getAll?${params.toString()}`, {
       headers: { Authorization: `Bearer ${cookie.token}` },
     })
+    const data = await res.json()
 
-    const responseData = await res.json()
-
-    return {
-      users: responseData.data.users,
-      metadata: responseData.data.metadata,
-      cookie,
-    }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (err: any) {
+    return { users: data.data.users, metadata: data.data.metadata, cookie }
+  } catch (err) {
     console.error('Error fetching users:', err)
     return { users: [], metadata: { total: 0, page, limit }, cookie }
   }
@@ -73,165 +84,192 @@ export const action: ActionFunction = async ({ request }) => {
   const actionType = formData.get('action')
   const userId = formData.get('userId')
 
-  if (actionType === 'toggleActive') {
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/${userId}/active`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${cookie.token}`,
-      },
-    })
-    if (!res.ok) {
-      const errData = await res.json()
-      throw new Error(errData.error || 'Failed to update user status')
-    }
-  }
+  const url = `${import.meta.env.VITE_API_URL}/auth/${userId}/${
+    actionType === 'toggleActive' ? 'active' : 'role'
+  }`
 
-  if (actionType === 'toggleRole') {
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/${userId}/role`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${cookie.token}`,
-      },
-    })
-    if (!res.ok) {
-      const errData = await res.json()
-      throw new Error(errData.error || 'Failed to update user role')
-    }
+  const res = await fetch(url, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${cookie.token}` },
+  })
+
+  if (!res.ok) {
+    const errData = await res.json()
+    throw new Error(errData.error || 'Failed to update user')
   }
 
   return null
 }
 
-// Component to render users table with filters and pagination
+function LoadingState({ label = 'Fetching Data' }: { label?: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center py-10">
+      <Loader2 className="animate-spin h-8 w-8 text-primary mb-2" />
+      <p className="text-lg font-medium">{label}</p>
+    </div>
+  )
+}
+
+function EmptyState({ label = 'No users found.' }: { label?: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center py-10">
+      <p className="text-lg font-medium text-muted-foreground">{label}</p>
+    </div>
+  )
+}
+
 export default function Users() {
   const { users, metadata } = useLoaderData<LoaderData>()
-
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const navigation = useNavigation()
   const fetcher = useFetcher()
 
-  const page = Number(metadata.page)
-  const limit = Number(metadata.limit)
-  const total = Number(metadata.total)
+  const page = metadata.page
+  const limit = metadata.limit
+  const total = metadata.total
   const totalPages = Math.ceil(total / limit)
+
   const isLoading = navigation.state !== 'idle'
   const isSubmitting = fetcher.state === 'submitting'
 
-  function go(params: { page?: number; limit?: number; email?: string }) {
+  const [term, setTerm] = useState(searchParams.get('email') ?? '')
+  const debouncedTerm = useDebounce(term, 500)
+
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams)
+    if (debouncedTerm) params.set('email', debouncedTerm)
+    else params.delete('email')
+    params.set('page', '1')
+    navigate(`?${params.toString()}`)
+  }, [debouncedTerm])
+
+  function go(params: { page?: number; limit?: number }) {
     const p = new URLSearchParams(searchParams)
     Object.entries(params).forEach(([key, value]) => {
-      if (value == null || value === '') p.delete(key)
+      if (value == null) p.delete(key)
       else p.set(key, String(value))
     })
     navigate(`?${p.toString()}`)
   }
 
-  const [term, setTerm] = useState(searchParams.get('email') ?? '')
-  const debouncedTerm = useDebounce(term, 500)
-
-  // effect to navigate on debounce
-  useEffect(() => {
-    const p = new URLSearchParams(searchParams)
-    if (debouncedTerm) p.set('searchTerm', debouncedTerm)
-    else p.delete('searchTerm')
-    p.set('page', '1')
-    navigate(`?${p}`)
-  }, [debouncedTerm])
-
   return (
-    <div className='p-2'>
-      <h1 className="text-3xl font-bold mb-4">Users</h1>
-
-      {/* Email Filter Input */}
-      <div className="mb-4 max-w-md">
+    <div className="p-2">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+        <h1 className="text-2xl font-semibold">Users</h1>
         <Input
           type="email"
+          placeholder="Filter by email"
           value={term}
           onChange={e => setTerm(e.target.value)}
-          placeholder="Filter by email"
+          className="max-w-sm"
         />
       </div>
 
-      {/* Loading State */}
-      {(isLoading || isSubmitting) && <p>Loading users...</p>}
+      <div>
+        {(isLoading || isSubmitting) && <LoadingState />}
 
-      {/* No Users */}
-      {!isLoading && users.length === 0 && <p>No users found.</p>}
-
-      {/* Users Table */}
-      {users.length > 0 && (
-        <div className="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
-          <table className="w-full table table-zebra">
-            <thead className="bg-gray-200">
-              <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users?.map(user => (
-                <tr key={user._id}>
-                  <td>{user.name}</td>
-                  <td>{user.email}</td>
-                  <td>{user.role}</td>
-                  <td>{user.isActive ? 'Active' : 'Inactive'}</td>
-                  <td className="flex gap-2">
-                    <fetcher.Form method="post">
-                      <input type="hidden" name="action" value="toggleActive" />
-                      <input type="hidden" name="userId" value={user._id} />
-                      <button className="btn btn-info btn-sm" disabled={isSubmitting}>
-                        {user.isActive ? 'Deactivate' : 'Activate'}
-                      </button>
-                    </fetcher.Form>
-                    <fetcher.Form method="post">
-                      <input type="hidden" name="action" value="toggleRole" />
-                      <input type="hidden" name="userId" value={user._id} />
-                      <button className="btn btn-error btn-sm" disabled={isSubmitting}>
-                        Make {user.role === 'customer' ? 'Admin' : 'Customer'}
-                      </button>
-                    </fetcher.Form>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="overflow-auto border rounded mt-4">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Role</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {users.length > 0 ? (
+                users.map(user => (
+                  <TableRow key={user._id}>
+                    <TableCell>{user.name}</TableCell>
+                    <TableCell>{user.email}</TableCell>
+                    <TableCell className="capitalize">{user.role}</TableCell>
+                    <TableCell>
+                      <Badge variant={user.isActive ? 'default' : 'outline'}>
+                        {user.isActive ? 'Active' : 'Inactive'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="flex items-center space-x-2">
+                      <fetcher.Form method="post">
+                        <input type="hidden" name="action" value="toggleActive" />
+                        <input type="hidden" name="userId" value={user._id} />
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-xs py-1 px-2 h-[24px]"
+                          disabled={isSubmitting}
+                        >
+                          {user.isActive ? 'Deactivate' : 'Activate'}
+                        </Button>
+                      </fetcher.Form>
+                      <fetcher.Form method="post">
+                        <input type="hidden" name="action" value="toggleRole" />
+                        <input type="hidden" name="userId" value={user._id} />
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          className="text-xs py-1 px-2 h-[24px]"
+                          disabled={isSubmitting}
+                        >
+                          Make {user.role === 'customer' ? 'Admin' : 'Customer'}
+                        </Button>
+                      </fetcher.Form>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={5}>
+                    {' '}
+                    <EmptyState />
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
         </div>
-      )}
 
-      {/* Pagination Controls */}
-      <div className="flex justify-end gap-4 items-center mt-4">
-        <button
-          onClick={() => go({ page: page - 1 })}
-          disabled={page === 1}
-          className="btn btn-outline btn-sm"
-        >
-          Previous
-        </button>
-        <span className="text-secondary">
-          Page {page} of {totalPages}
-        </span>
-        <button
-          onClick={() => go({ page: page + 1 })}
-          disabled={page >= totalPages}
-          className="btn btn-outline btn-sm"
-        >
-          Next
-        </button>
-        <select
-          value={limit}
-          onChange={e => go({ limit: Number(e.target.value), page: 1 })}
-          className="select select-bordered btn-sm"
-        >
-          <option value="10">10 per page</option>
-          <option value="20">20 per page</option>
-          <option value="50">50 per page</option>
-        </select>
+        {/* Pagination Controls */}
+        <div className="flex gap-4 mt-4">
+          <div className="flex space-x-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => go({ page: page - 1 })}
+              disabled={page <= 1}
+            >
+              Previous
+            </Button>
+            <Button size="sm" variant={'ghost'} className="text-muted-foreground">
+              {page} of {totalPages}
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => go({ page: page + 1 })}
+              disabled={page >= totalPages}
+            >
+              Next
+            </Button>
+          </div>
+
+          <Select
+            defaultValue={String(limit)}
+            onValueChange={value => go({ limit: Number(value), page: 1 })}
+          >
+            <SelectTrigger className="w-[80px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="6">6</SelectItem>
+              <SelectItem value="12">12</SelectItem>
+              <SelectItem value="18">18</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
     </div>
   )
