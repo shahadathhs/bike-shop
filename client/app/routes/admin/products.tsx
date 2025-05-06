@@ -222,7 +222,7 @@ export default function Products() {
           onChange={e => setTerm(e.target.value)}
         />
 
-        <div className="flex justify-between">
+        <div className="flex flex-wrap gap-2 lg:justify-between">
           {/* price range */}
           <Select value={currentPriceRange} onValueChange={v => go({ priceRange: v, page: 1 })}>
             <SelectTrigger>
@@ -285,108 +285,110 @@ export default function Products() {
       </div>
 
       {/* Table */}
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Brand</TableHead>
-            <TableHead>Model</TableHead>
-            <TableHead>Category</TableHead>
-            <TableHead>Price</TableHead>
-            <TableHead>Quantity</TableHead>
-            <TableHead>Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {products.length === 0 ? (
+      <div className="overflow-auto border rounded">
+        <Table>
+          <TableHeader>
             <TableRow>
-              <TableCell colSpan={7} className="text-center py-4">
-                No products found.
-              </TableCell>
+              <TableHead>Name</TableHead>
+              <TableHead>Brand</TableHead>
+              <TableHead>Model</TableHead>
+              <TableHead>Category</TableHead>
+              <TableHead>Price</TableHead>
+              <TableHead>Quantity</TableHead>
+              <TableHead>Actions</TableHead>
             </TableRow>
-          ) : (
-            products.map(product => (
-              <TableRow key={product._id}>
-                <TableCell>{product.name}</TableCell>
-                <TableCell>{product.brand}</TableCell>
-                <TableCell>{product.modelName}</TableCell>
-                <TableCell>{product.category}</TableCell>
-                <TableCell>${product.price}</TableCell>
-                <TableCell>{product.quantity}</TableCell>
-                <TableCell className="flex items-center gap-2">
-                  {/* update */}
-                  <Button
-                    size="sm"
-                    className="px-2 py-1 h-[24px] rounded"
-                    variant="outline"
-                    asChild
-                  >
-                    <Link to={`/admin/update-product/${product._id}`}>Edit</Link>
-                  </Button>
-
-                  {/* restock */}
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button size="sm" className="px-2 py-1 h-[24px] rounded">
-                        Restock
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Restock Product</DialogTitle>
-                        <DialogDescription>Enter new quantity</DialogDescription>
-                      </DialogHeader>
-                      <fetcher.Form method="post" className="space-y-4">
-                        <input type="hidden" name="action" value="restock" />
-                        <input type="hidden" name="id" value={product._id} />
-                        <div className="space-y-2">
-                          <Label htmlFor="name">Name</Label>
-                          <Input
-                            id="name"
-                            name="name"
-                            type="text"
-                            disabled
-                            defaultValue={product.name}
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="quantity">Quantity</Label>
-                          <Input
-                            id="quantity"
-                            name="quantity"
-                            type="number"
-                            defaultValue={product.quantity}
-                          />
-                        </div>
-                        <DialogFooter>
-                          <Button type="submit" disabled={isSubmitting}>
-                            Restock
-                          </Button>
-                        </DialogFooter>
-                      </fetcher.Form>
-                    </DialogContent>
-                  </Dialog>
-
-                  {/* delete */}
-                  <fetcher.Form method="post">
-                    <input type="hidden" name="action" value="delete" />
-                    <input type="hidden" name="id" value={product._id} />
+          </TableHeader>
+          <TableBody>
+            {products.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={7} className="text-center py-4">
+                  No products found.
+                </TableCell>
+              </TableRow>
+            ) : (
+              products.map(product => (
+                <TableRow key={product._id}>
+                  <TableCell>{product.name}</TableCell>
+                  <TableCell>{product.brand}</TableCell>
+                  <TableCell>{product.modelName}</TableCell>
+                  <TableCell>{product.category}</TableCell>
+                  <TableCell>${product.price}</TableCell>
+                  <TableCell>{product.quantity}</TableCell>
+                  <TableCell className="flex items-center gap-2">
+                    {/* update */}
                     <Button
                       size="sm"
                       className="px-2 py-1 h-[24px] rounded"
-                      variant="destructive"
-                      disabled={isSubmitting}
+                      variant="outline"
+                      asChild
                     >
-                      Delete
+                      <Link to={`/admin/update-product/${product._id}`}>Edit</Link>
                     </Button>
-                  </fetcher.Form>
-                </TableCell>
-              </TableRow>
-            ))
-          )}
-        </TableBody>
-      </Table>
 
+                    {/* restock */}
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button size="sm" className="px-2 py-1 h-[24px] rounded">
+                          Restock
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Restock Product</DialogTitle>
+                          <DialogDescription>Enter new quantity</DialogDescription>
+                        </DialogHeader>
+                        <fetcher.Form method="post" className="space-y-4">
+                          <input type="hidden" name="action" value="restock" />
+                          <input type="hidden" name="id" value={product._id} />
+                          <div className="space-y-2">
+                            <Label htmlFor="name">Name</Label>
+                            <Input
+                              id="name"
+                              name="name"
+                              type="text"
+                              disabled
+                              defaultValue={product.name}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="quantity">Quantity</Label>
+                            <Input
+                              id="quantity"
+                              name="quantity"
+                              type="number"
+                              defaultValue={product.quantity}
+                            />
+                          </div>
+                          <DialogFooter>
+                            <Button type="submit" disabled={isSubmitting}>
+                              Restock
+                            </Button>
+                          </DialogFooter>
+                        </fetcher.Form>
+                      </DialogContent>
+                    </Dialog>
+
+                    {/* delete */}
+                    <fetcher.Form method="post" key={product._id}>
+                      <input type="hidden" name="action" value="delete" />
+                      <input type="hidden" name="id" value={product._id} />
+                      <Button
+                        size="sm"
+                        key={product._id}
+                        className="px-2 py-1 h-[24px] rounded"
+                        variant="destructive"
+                        disabled={isSubmitting}
+                      >
+                        Delete
+                      </Button>
+                    </fetcher.Form>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
       {/* Pagination */}
       <div className="flex justify-end items-center space-x-2 mt-4">
         <Button
