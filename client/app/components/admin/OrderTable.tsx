@@ -18,7 +18,13 @@ import {
   TableRow,
 } from '~/components/ui/table'
 import { useFetcher, useNavigate, useSearchParams } from 'react-router'
-import { ArrowBigLeft, ArrowBigRight } from 'lucide-react'
+import { ArrowBigLeft, ArrowBigRight, MenuIcon } from 'lucide-react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '../ui/dropdown-menu'
 
 export default function OrderTable({
   orders,
@@ -47,6 +53,15 @@ export default function OrderTable({
     })
     navigate(`?${p.toString()}`)
   }
+
+  const statusColorMap: Record<string, string> = {
+    pending: 'bg-yellow-100 text-yellow-800',
+    delivered: 'bg-green-100 text-green-800',
+    cancelled: 'bg-red-100 text-red-800',
+    processing: 'bg-blue-100 text-blue-800',
+    shipped: 'bg-indigo-100 text-indigo-800',
+  }
+
   return (
     <div className="overflow-x-auto border rounded">
       <Table>
@@ -69,42 +84,63 @@ export default function OrderTable({
                 <TableCell>{order._id}</TableCell>
                 <TableCell>{new Date(order.createdAt).toLocaleDateString('en-US')}</TableCell>
                 <TableCell>
-                  <Badge variant="outline">{order.isDeleted ? 'cancelled' : order.status}</Badge>
+                  <Badge
+                    className={statusColorMap[order.isDeleted ? 'cancelled' : order.status]}
+                    variant="outline"
+                  >
+                    {order.isDeleted ? 'cancelled' : order.status}
+                  </Badge>
                 </TableCell>
                 <TableCell>${order.totalPrice.toFixed(2)}</TableCell>
                 <TableCell>
-                  {/* mark as delivered => soft updating status */}
-                  {order?.status !== 'delivered' && !order?.isDeleted && (
-                    <fetcher.Form method="patch">
-                      <input type="hidden" name="orderId" value={order._id} />
-                      <input type="hidden" name="action" value="markAsDelivered" />
-                      <Button type="submit" size="sm" variant={'outline'}>
-                        Delivered
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm">
+                        <MenuIcon />
                       </Button>
-                    </fetcher.Form>
-                  )}
+                    </DropdownMenuTrigger>
 
-                  {/* delete order => hard delete */}
-                  {(order?.status === 'delivered' || order?.isDeleted) && (
-                    <fetcher.Form method="delete">
-                      <input type="hidden" name="orderId" value={order._id} />
-                      <input type="hidden" name="action" value="delete" />
-                      <Button type="submit" size="sm" variant={'destructive'}>
-                        Delete
-                      </Button>
-                    </fetcher.Form>
-                  )}
+                    <DropdownMenuContent align="end">
+                      {/* mark as delivered => soft updating status */}
+                      {order?.status !== 'delivered' && !order?.isDeleted && (
+                        <DropdownMenuItem>
+                          <fetcher.Form method="patch">
+                            <input type="hidden" name="orderId" value={order._id} />
+                            <input type="hidden" name="action" value="markAsDelivered" />
+                            <button type="submit" className="text-green-600 text-sm">
+                              Mark As Delivered
+                            </button>
+                          </fetcher.Form>
+                        </DropdownMenuItem>
+                      )}
 
-                  {/* cancel order => soft delete */}
-                  {order?.status !== 'delivered' && !order?.isDeleted && (
-                    <fetcher.Form method="patch">
-                      <input type="hidden" name="orderId" value={order._id} />
-                      <input type="hidden" name="action" value="cancel" />
-                      <Button type="submit" size="sm">
-                        Cancel
-                      </Button>
-                    </fetcher.Form>
-                  )}
+                      {/* delete order => hard delete */}
+                      {(order?.status === 'delivered' || order?.isDeleted) && (
+                        <DropdownMenuItem>
+                          <fetcher.Form method="delete">
+                            <input type="hidden" name="orderId" value={order._id} />
+                            <input type="hidden" name="action" value="delete" />
+                            <button type="submit" className="text-red-600 text-sm">
+                              Delete Order
+                            </button>
+                          </fetcher.Form>
+                        </DropdownMenuItem>
+                      )}
+
+                      {/* cancel order => soft delete */}
+                      {order?.status !== 'delivered' && !order?.isDeleted && (
+                        <DropdownMenuItem>
+                          <fetcher.Form method="patch">
+                            <input type="hidden" name="orderId" value={order._id} />
+                            <input type="hidden" name="action" value="cancel" />
+                            <button type="submit" className="text-indigo-600 text-sm">
+                              Cancel Order
+                            </button>
+                          </fetcher.Form>
+                        </DropdownMenuItem>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </TableCell>
               </TableRow>
             ))
@@ -117,8 +153,8 @@ export default function OrderTable({
           )}
         </TableBody>
 
+        {/* pagination */}
         <TableFooter>
-          {/* pagination */}
           <TableRow>
             <TableHead>
               <div className="flex items-center space-x-2">
