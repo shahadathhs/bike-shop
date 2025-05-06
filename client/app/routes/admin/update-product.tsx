@@ -1,37 +1,51 @@
 import { useEffect, useState } from 'react'
-import toast from 'react-hot-toast'
 import {
   useFetcher,
   useLoaderData,
   useNavigate,
-  type ActionFunctionArgs,
-  type ClientLoaderFunctionArgs,
+  type ActionFunction,
+  type LoaderFunction,
 } from 'react-router'
 import { brands, categories, models } from '~/utils/bikeUtils'
-import { getToken } from '~/utils/getToken'
+import { getCookie } from '~/services/auth.services'
+import { toast } from 'sonner'
+import { Button } from '~/components/ui/button'
+import { Loader2, Upload } from 'lucide-react'
+import { Label } from '~/components/ui/label'
+import { Input } from '~/components/ui/input'
+import { Textarea } from '~/components/ui/textarea'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '~/components/ui/select'
 
-export const loader = async ({ params }: ClientLoaderFunctionArgs) => {
-  const id = params.id
-  const token = getToken()
+export const loader: LoaderFunction = async ({ request }) => {
+  const url = new URL(request.url)
+  const segments = url.pathname.split('/')
+  const productId = segments[3] // /update-product/:id
+console.log("productId", productId);
+  const cookie = await getCookie(request)
 
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/bikes/${id}`, {
-      headers: { Authorization: `Bearer ${token}` },
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/bikes/${productId}`, {
+      headers: { Authorization: `Bearer ${cookie.token}` },
     })
 
-    if (response.ok) {
-      const data = await response.json()
-      return { success: true, product: data }
-    } else {
-      throw new Error('Failed to fetch product')
-    }
+    const data = await response.json()
+    console.log('data', data.data)
+    return { success: true, product: data.data }
   } catch (err) {
     console.error('Error fetching product:', err)
-    return { error: 'Failed to fetch product', errorDetails: err }
+    return { success: false, product: {} }
   }
 }
 
-export const action = async ({ request }: ActionFunctionArgs) => {
+export const action: ActionFunction = async ({ request }) => {
+  const cookie = await getCookie(request)
+
   // Instead of using a custom upload handler for Cloudinary, we simply read the base64 string
   const formData = await request.formData()
   const id = formData.get('id') as string
@@ -45,7 +59,6 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const previousImage = formData.get('prev_image') as string
   // "image" here is expected to be a base64 string (if provided) via our hidden input.
   const image = formData.get('image') as string
-  const token = formData.get('csrf_token') as string
 
   const formDataObject = {
     name,
@@ -63,48 +76,38 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     const response = await fetch(`${import.meta.env.VITE_API_URL}/bikes/${id}`, {
       method: 'PUT',
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${cookie.token}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(formDataObject),
     })
 
-    if (response.ok) {
-      const data = await response.json()
-      return { success: true, data }
-    } else {
-      const errorData = await response.json()
-      return {
-        success: false,
-        error: errorData.message,
-        errorDetails: errorData,
-      }
-    }
+    const data = await response.json()
+
+    return { success: true, data, message: 'Product Updated Successfully' }
   } catch (err) {
     console.error('Error updating product:', err)
-    return { error: 'Failed to update product', errorDetails: err }
+    return { success: false, data: {}, message: 'Failed to update the product.' }
   }
 }
 
 export default function UpdateProduct() {
   const loaderData = useLoaderData()
-  const product = loaderData.product.data
+  const product = loaderData.product
 
   const fetcher = useFetcher()
   const isSubmitting = fetcher.state === 'submitting'
-  const token = getToken() as string
+
   const navigate = useNavigate()
 
   useEffect(() => {
     if (fetcher.data?.success) {
-      toast.dismiss()
       toast.success('Product Updated successfully')
       const timer = setTimeout(() => {
         navigate('/dashboard/admin/products')
       }, 1000)
       return () => clearTimeout(timer)
     } else if (fetcher.data?.error) {
-      toast.dismiss()
       toast.error(fetcher.data.error)
     }
   }, [fetcher.data, navigate])
@@ -124,7 +127,6 @@ export default function UpdateProduct() {
         }
         reader.readAsDataURL(file)
       } else {
-        toast.dismiss()
         toast.error('Please select a valid image file (JPEG or PNG)')
       }
     }
@@ -138,7 +140,6 @@ export default function UpdateProduct() {
         encType="multipart/form-data"
         className="max-w-lg mx-auto space-y-4"
       >
-        <input type="hidden" name="csrf_token" value={token} />
         <input type="hidden" name="id" value={product._id} />
         {/* Always send the previous image */}
         <input type="hidden" name="prev_image" value={product.image} />
