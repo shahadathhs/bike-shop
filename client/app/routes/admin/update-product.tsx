@@ -25,17 +25,14 @@ import {
 export const loader: LoaderFunction = async ({ request }) => {
   const url = new URL(request.url)
   const segments = url.pathname.split('/')
-  const productId = segments[3] // /update-product/:id
-console.log("productId", productId);
+  const productId = segments[3] // /dashboard/update-product/:id
   const cookie = await getCookie(request)
 
   try {
     const response = await fetch(`${import.meta.env.VITE_API_URL}/bikes/${productId}`, {
       headers: { Authorization: `Bearer ${cookie.token}` },
     })
-
     const data = await response.json()
-    console.log('data', data.data)
     return { success: true, product: data.data }
   } catch (err) {
     console.error('Error fetching product:', err)
@@ -45,8 +42,6 @@ console.log("productId", productId);
 
 export const action: ActionFunction = async ({ request }) => {
   const cookie = await getCookie(request)
-
-  // Instead of using a custom upload handler for Cloudinary, we simply read the base64 string
   const formData = await request.formData()
   const id = formData.get('id') as string
   const name = formData.get('name') as string
@@ -57,7 +52,6 @@ export const action: ActionFunction = async ({ request }) => {
   const description = formData.get('description') as string
   const category = formData.get('category') as string
   const previousImage = formData.get('prev_image') as string
-  // "image" here is expected to be a base64 string (if provided) via our hidden input.
   const image = formData.get('image') as string
 
   const formDataObject = {
@@ -81,9 +75,7 @@ export const action: ActionFunction = async ({ request }) => {
       },
       body: JSON.stringify(formDataObject),
     })
-
     const data = await response.json()
-
     return { success: true, data, message: 'Product Updated Successfully' }
   } catch (err) {
     console.error('Error updating product:', err)
@@ -92,9 +84,8 @@ export const action: ActionFunction = async ({ request }) => {
 }
 
 export default function UpdateProduct() {
-  const loaderData = useLoaderData()
-  const product = loaderData.product
-
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { product } = useLoaderData<{ success: boolean; product: any }>()
   const fetcher = useFetcher()
   const isSubmitting = fetcher.state === 'submitting'
 
@@ -102,190 +93,160 @@ export default function UpdateProduct() {
 
   useEffect(() => {
     if (fetcher.data?.success) {
-      toast.success('Product Updated successfully')
-      const timer = setTimeout(() => {
-        navigate('/dashboard/admin/products')
-      }, 1000)
+      toast.success('Product updated successfully')
+      const timer = setTimeout(() => navigate('/admin/products'), 1000)
       return () => clearTimeout(timer)
-    } else if (fetcher.data?.error) {
-      toast.error(fetcher.data.error)
+    } else if (fetcher.data?.message) {
+      toast.error(fetcher.data.message)
     }
   }, [fetcher.data, navigate])
 
-  // "image" holds the base64 string if a new image is selected, or defaults to the existing image URL.
-  const [image, setImage] = useState(product.image)
+  const [image, setImage] = useState<string>(product.image || '')
 
-  // When a file is selected, convert it to a base64 string.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleImageChange = (e: any) => {
-    const file = e.target.files[0]
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
     if (file) {
-      if (file.type === 'image/jpeg' || file.type === 'image/png') {
+      if (['image/jpeg', 'image/png'].includes(file.type)) {
         const reader = new FileReader()
-        reader.onload = () => {
-          setImage(reader.result as string)
-        }
+        reader.onload = () => setImage(reader.result as string)
         reader.readAsDataURL(file)
       } else {
-        toast.error('Please select a valid image file (JPEG or PNG)')
+        toast.error('Invalid file. Please select a JPEG or PNG image.')
       }
     }
   }
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold my-4 text-center">Update Product</h1>
-      <fetcher.Form
-        method="post"
-        encType="multipart/form-data"
-        className="max-w-lg mx-auto space-y-4"
-      >
+    <div className="py-10">
+      <div className="pb-4">
+        <h3 className="text-3xl">Update Bike Data</h3>
+        <p>Modify the details of the existing bike product</p>
+      </div>
+      <fetcher.Form method="post" encType="multipart/form-data" className="space-y-4">
         <input type="hidden" name="id" value={product._id} />
-        {/* Always send the previous image */}
         <input type="hidden" name="prev_image" value={product.image} />
-        {/* Hidden input to send the base64 image data */}
         <input type="hidden" name="image" value={image} />
 
-        <div>
-          <label htmlFor="name" className="block mb-1">
-            Name
-          </label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            defaultValue={product.name}
-            className="input input-bordered w-full"
-            required
-          />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2 max-w-md">
+            <Label htmlFor="name">Name</Label>
+            <Input type="text" id="name" name="name" defaultValue={product.name} required />
+          </div>
+
+          <div className="flex flex-wrap gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="brand">Brand</Label>
+              <Select name="brand" required defaultValue={product.brand}>
+                <SelectTrigger id="brand">
+                  <SelectValue placeholder="Select brand" />
+                </SelectTrigger>
+                <SelectContent>
+                  {brands.map(b => (
+                    <SelectItem key={b.value} value={b.value}>
+                      {b.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="modelName">Model</Label>
+              <Select name="modelName" required defaultValue={product.modelName}>
+                <SelectTrigger id="modelName">
+                  <SelectValue placeholder="Select model" />
+                </SelectTrigger>
+                <SelectContent>
+                  {models.map(m => (
+                    <SelectItem key={m.value} value={m.value}>
+                      {m.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="category">Category</Label>
+              <Select name="category" required defaultValue={product.category}>
+                <SelectTrigger id="category">
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map(c => (
+                    <SelectItem key={c.value} value={c.value}>
+                      {c.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
         </div>
 
-        <div>
-          <label htmlFor="brand" className="block mb-1">
-            Brand
-          </label>
-          <select
-            id="brand"
-            name="brand"
-            defaultValue={product.brand}
-            className="select select-bordered w-full"
-            required
-          >
-            {brands.map(brand => (
-              <option key={brand.value} value={brand.value}>
-                {brand.label}
-              </option>
-            ))}
-          </select>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2 max-w-md">
+            <Label htmlFor="price">Price</Label>
+            <Input
+              type="number"
+              id="price"
+              name="price"
+              defaultValue={product.price}
+              min="0"
+              step="0.01"
+              required
+            />
+          </div>
+
+          <div className="space-y-2 max-w-md">
+            <Label htmlFor="quantity">Quantity</Label>
+            <Input
+              type="number"
+              id="quantity"
+              name="quantity"
+              defaultValue={product.quantity}
+              min="10"
+              required
+            />
+          </div>
         </div>
 
-        <div>
-          <label htmlFor="modelName" className="block mb-1">
-            Model
-          </label>
-          <select
-            id="modelName"
-            name="modelName"
-            defaultValue={product.modelName}
-            className="select select-bordered w-full"
-            required
-          >
-            {models.map(model => (
-              <option key={model.value} value={model.value}>
-                {model.label}
-              </option>
-            ))}
-          </select>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2 max-w-md">
+            <Label htmlFor="description">Description</Label>
+            <Textarea
+              id="description"
+              name="description"
+              defaultValue={product.description}
+              rows={5}
+              required
+            />
+          </div>
+
+          <div className="space-y-2 max-w-md">
+            <Label htmlFor="imageInput">Product Image</Label>
+            <div className="flex items-start gap-2">
+              <Input type="file" id="imageInput" onChange={handleImageChange} accept="image/*" />
+              {image && (
+                <img src={image} alt="Product Preview" className="w-24 h-16 rounded object-cover" />
+              )}
+            </div>
+          </div>
         </div>
 
-        <div>
-          <label htmlFor="price" className="block mb-1">
-            Price
-          </label>
-          <input
-            type="number"
-            id="price"
-            name="price"
-            defaultValue={product.price}
-            className="input input-bordered w-full"
-            min="0"
-            step="0.01"
-            required
-          />
-        </div>
-
-        <div>
-          <label htmlFor="category" className="block mb-1">
-            Category
-          </label>
-          <select
-            id="category"
-            name="category"
-            defaultValue={product.category}
-            className="select select-bordered w-full"
-            required
-          >
-            {categories.map(category => (
-              <option key={category.value} value={category.value}>
-                {category.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label htmlFor="description" className="block mb-1">
-            Description
-          </label>
-          <textarea
-            id="description"
-            name="description"
-            defaultValue={product.description}
-            className="textarea textarea-bordered w-full"
-            required
-          />
-        </div>
-
-        <div>
-          <label htmlFor="quantity" className="block mb-1">
-            Quantity
-          </label>
-          <input
-            type="number"
-            id="quantity"
-            name="quantity"
-            defaultValue={product.quantity}
-            className="input input-bordered w-full"
-            min="10"
-            required
-          />
-        </div>
-
-        <div>
-          <label htmlFor="imageInput" className="block mb-1">
-            Product Image
-          </label>
-          {/* The file input does not have a "name" attribute so it won’t be submitted directly.
-              Instead, handleImageChange updates our base64 image state */}
-          <input
-            type="file"
-            id="imageInput"
-            onChange={handleImageChange}
-            className="file-input file-input-bordered w-full"
-            accept="image/*"
-          />
-          {image && (
-            <img src={image} alt="Product Preview" className="mt-2 w-32 h-32 object-contain" />
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Updating...
+            </>
+          ) : (
+            <>
+              <Upload className="mr-2 h-4 w-4" />
+              Update Product
+            </>
           )}
-        </div>
-
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition-colors"
-        >
-          {isSubmitting ? 'Updating...' : 'Update Product'}
-        </button>
+        </Button>
       </fetcher.Form>
     </div>
   )

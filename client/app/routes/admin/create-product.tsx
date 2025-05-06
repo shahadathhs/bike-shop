@@ -163,7 +163,7 @@ export default function CreateProduct() {
   }
 
   return (
-    <div className="py-10 px-2">
+    <div className="py-10">
       <div className="pb-4">
         <h3 className="text-3xl">Store New Bike Data</h3>
         <p>Enter the details of the new bike product</p>
