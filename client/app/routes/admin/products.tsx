@@ -1,7 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import { ArrowBigRight } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import toast from 'react-hot-toast'
 import { Link, useFetcher, useLoaderData, type ActionFunctionArgs } from 'react-router'
+import { Button } from '~/components/ui/button'
 import { brands, categories, models } from '~/utils/bikeUtils'
 import { useDebounce } from '~/utils/debounce'
 import { getToken } from '~/utils/getToken'
@@ -185,12 +185,10 @@ export default function Products() {
       } else {
         const errorData = await response.json()
         setError(errorData.data.error || 'Failed to fetch products')
-        toast.error(errorData.data.error || 'Failed to fetch products')
       }
     } catch (err) {
       console.error('Error fetching products:', err)
       setError('Error fetching products')
-      toast.error('Error fetching products')
     }
     setLoading(false)
   }
@@ -210,12 +208,16 @@ export default function Products() {
   }
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">All Products</h1>
-      <div className="mb-4">
-        <Link to="/dashboard/admin/create-product" className="btn btn-primary">
-          Create New Product
-        </Link>
+    <div className="p-2">
+      <div className="flex flex-col md:flex-row justify-between items-center">
+        <h1 className="text-2xl font-bold mb-4">All Products</h1>
+        <div className="mb-4">
+          <Link to="/admin/create-product">
+            <Button variant="outline">
+              Create New Product <ArrowBigRight />{' '}
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Filter Form */}
