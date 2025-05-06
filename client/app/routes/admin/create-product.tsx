@@ -103,7 +103,7 @@ export const action: ActionFunction = async ({ request }) => {
       return { success: true, data }
     } else {
       const errorData = await response.json()
-      console.log("errorData", errorData);
+      console.log('errorData', errorData)
       return {
         success: false,
         error: errorData.message,
@@ -267,7 +267,7 @@ export default function CreateProduct() {
           </div>
         </div>
         {/* Submit button */}
-        <Button type="submit" disabled={isSubmitting} className="w-full sm:w-auto">
+        <Button type="submit" disabled={isSubmitting}>
           {isSubmitting ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />

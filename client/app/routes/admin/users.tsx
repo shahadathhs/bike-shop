@@ -154,7 +154,7 @@ export default function Users() {
   }
 
   return (
-    <div className="p-2">
+    <div>
       <div className="flex flex-col md:flex-row md:items-center md:justify-between">
         <h1 className="text-2xl font-semibold">Users</h1>
         <Input

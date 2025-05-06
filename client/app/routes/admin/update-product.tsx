@@ -10,7 +10,7 @@ import {
 import { brands, categories, models } from '~/utils/bikeUtils'
 import { getToken } from '~/utils/getToken'
 
-export const clientLoader = async ({ params }: ClientLoaderFunctionArgs) => {
+export const loader = async ({ params }: ClientLoaderFunctionArgs) => {
   const id = params.id
   const token = getToken()
 
