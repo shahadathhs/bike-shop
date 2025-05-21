@@ -52,7 +52,6 @@ A full-stack Bike Shop application that enables users to browse and purchase bic
 
 - **Frontend:** React · TypeScript · React Router (v7) · Tailwind CSS · daisyUI · react-icons · react-hot-toast
 - **Backend:** Node.js · Express · MongoDB · Mongoose · Zod · JSON Web Tokens (JWT) · Stripe
-- **Testing & Quality:** Jest · Vitest · MSW · Supertest · (explored K6 for load testing)
 
 ---
 
